@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class OutboxEventModel {
 
@@ -10,6 +10,6 @@ public class OutboxEventModel {
     private String eventType;
     private String payload;
     private String status;
-    private Instant processedAt;
-    private Instant createdAt;
+    private LocalDateTime processedAt;
+    private LocalDateTime createdAt;
 }

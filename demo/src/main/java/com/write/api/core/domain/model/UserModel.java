@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class UserModel {
 
@@ -12,9 +12,9 @@ public class UserModel {
     private String passwordHash;
     private boolean active;
     private boolean emailVerified;
-    private Instant lastLoginAt;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime lastLoginAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Long getId() {
         return id;
@@ -80,27 +80,27 @@ public class UserModel {
         this.emailVerified = emailVerified;
     }
 
-    public Instant getLastLoginAt() {
+    public LocalDateTime getLastLoginAt() {
         return lastLoginAt;
     }
 
-    public void setLastLoginAt(Instant lastLoginAt) {
+    public void setLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
     }
 
-    public Instant getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Instant getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Instant updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

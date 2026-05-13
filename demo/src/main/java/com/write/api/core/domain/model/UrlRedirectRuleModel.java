@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class UrlRedirectRuleModel {
 
@@ -11,8 +11,8 @@ public class UrlRedirectRuleModel {
     private String redirectUrl;
     private Integer priority;
     private boolean active;
-    private Instant startAt;
-    private Instant endAt;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

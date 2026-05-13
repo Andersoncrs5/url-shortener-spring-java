@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class UrlModel {
 
@@ -13,9 +13,9 @@ public class UrlModel {
     private boolean active;
     private boolean customAlias;
     private boolean publicUrl;
-    private Instant expiresAt;
-    private Instant lastAccessAt;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime expiresAt;
+    private LocalDateTime lastAccessAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 }

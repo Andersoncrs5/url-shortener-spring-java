@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class UrlTagModel {
 
@@ -9,6 +9,6 @@ public class UrlTagModel {
     private String name;
     private String slug;
     private boolean active;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

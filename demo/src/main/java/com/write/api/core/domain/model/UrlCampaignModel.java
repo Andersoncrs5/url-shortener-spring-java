@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class UrlCampaignModel {
 
@@ -11,6 +11,6 @@ public class UrlCampaignModel {
     private String medium;
     private String campaign;
     private boolean active;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

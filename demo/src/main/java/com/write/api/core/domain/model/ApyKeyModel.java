@@ -1,6 +1,6 @@
 package com.write.api.core.domain.model;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class ApyKeyModel {
     private Long id;
@@ -9,8 +9,8 @@ public class ApyKeyModel {
     private String keyHash;
     private String name;
     private boolean active;
-    private Instant lastUsedAt;
-    private Instant expiresAt;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private LocalDateTime lastUsedAt;
+    private LocalDateTime expiresAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
