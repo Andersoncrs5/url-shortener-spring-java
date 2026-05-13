@@ -1,5 +1,6 @@
 package com.write.api;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -28,5 +29,9 @@ class TestcontainersConfiguration {
 	RabbitMQContainer rabbitContainer() {
 		return new RabbitMQContainer(DockerImageName.parse("rabbitmq:latest"));
 	}
+
+	@Bean
+	@ServiceConnection
+	RedisContainer redisContainer() { return new RedisContainer(DockerImageName.parse("redis:latest")); }
 
 }
