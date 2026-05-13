@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY,
     version BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(120) NOT NULL,
@@ -9,6 +9,11 @@ CREATE TABLE users (
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     last_login_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    UNIQUE (email)
+    updated_at TIMESTAMP NOT NULL
 );
+
+ALTER TABLE users
+ADD CONSTRAINT uk_users_email UNIQUE (email);
+
+ALTER TABLE users
+ADD CONSTRAINT uk_users_name UNIQUE (name);
