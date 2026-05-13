@@ -1,4 +1,4 @@
-package com.write.api.adapters.out.persistence.mapper.config;
+package com.write.api.shared.mapper.config;
 
 import org.springframework.stereotype.Component;
 
