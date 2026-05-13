@@ -1,6 +1,6 @@
-package com.write.api.adapters.out.persistence.mapper.classes;
+package com.write.api.adapters.out.persistence.mapper;
 
-import com.write.api.adapters.out.persistence.mapper.config.CentralMapperConfig;
+import com.write.api.shared.mapper.config.CentralMapperConfig;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.generated.jooq.tables.records.UsersRecord;
 import org.mapstruct.Mapper;
