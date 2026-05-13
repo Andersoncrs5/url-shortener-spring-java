@@ -16,12 +16,20 @@ public class Result<T> {
         this.isSuccess = isSuccess;
     }
 
+    public String getMessage() {
+        return this.errors.getFirst();
+    }
+
     public static <T> Result<T> success(T value) {
         return new Result<>(value, null, 200, true);
     }
 
     public static <T> Result<T> success(T value, int statusCode) {
         return new Result<>(value, null, statusCode, true);
+    }
+
+    public static <T> Result<T> success(int statusCode) {
+        return new Result<>(null, null, statusCode, true);
     }
 
     public static <T> Result<T> failure(String error, int statusCode) {
