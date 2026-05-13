@@ -1,6 +1,6 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.mapper.classes.UserRepositoryMapper;
+import com.write.api.adapters.out.persistence.mapper.UserRepositoryMapper;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.ports.out.repository.IUserRepository;
