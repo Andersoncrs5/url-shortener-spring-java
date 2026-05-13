@@ -7,6 +7,7 @@ import com.write.api.ports.in.user.CreateUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,10 +15,13 @@ import org.springframework.stereotype.Service;
 public class CreateUserService implements CreateUserUseCase {
 
     private final IUserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Result<UserModel> create(UserModel user) {
         try {
+            user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+
             var created = repository.insert(user);
 
             return Result.success(created, 201);
