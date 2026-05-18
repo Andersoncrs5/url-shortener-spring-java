@@ -9,9 +9,7 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-
-import static com.write.api.generated.jooq.tables.Users.USERS;
-
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -73,6 +71,20 @@ public class JooqUserRepository implements IUserRepository {
         return dsl.delete(USERS)
                 .where(USERS.ID.eq(id))
                 .execute();
+    }
+
+    @Override
+    public boolean existsByEmailIgnoreCase(String email) {
+        var check = dsl.selectCount().from(USERS).where(USERS.EMAIL.equalIgnoreCase(email)).execute();
+        return check > 0;
+    }
+
+    @Override
+    public Optional<UserModel> findByEmailIgnoreCase(String email) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.EMAIL.equalIgnoreCase(email))
+                .fetchOptional()
+                .map(mapper::toDomain);
     }
 
 }
