@@ -1,6 +1,7 @@
 package com.write.api.core.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class UserModel {
 
@@ -15,6 +16,25 @@ public class UserModel {
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Set<String> roles;
+
+    public boolean addRole(String role) {
+        boolean contains = this.roles.contains(role);
+
+        if (contains)
+            return true;
+
+        return this.roles.add(role);
+    }
+
+    public boolean removeRole(String role) {
+        boolean contains = this.roles.contains(role);
+
+        if (!contains)
+            return true;
+
+        return this.roles.remove(role);
+    }
 
     public Long getId() {
         return id;
@@ -103,4 +123,13 @@ public class UserModel {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
 }
