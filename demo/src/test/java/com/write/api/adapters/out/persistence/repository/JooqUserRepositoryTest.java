@@ -48,7 +48,7 @@ public class JooqUserRepositoryTest {
 
     @Test
     void shouldDeleteUserById() {
-        UserModel userModel = this.help.create();
+        UserModel userModel = this.help.createUser();
         int deleted = this.repository.deleteById(userModel.getId());
 
         assertThat(deleted).isEqualTo(1);
@@ -83,6 +83,22 @@ public class JooqUserRepositoryTest {
         assertThrows(IllegalStateException.class, () -> {
             repository.save(user);
         });
+    }
+
+    @Test
+    void shouldReturnTrueWhenGetByEmail() {
+        UserModel user = this.help.createUser();
+
+        boolean exists = repository.existsByEmailIgnoreCase(user.getEmail());
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenGetByEmail() {
+        boolean exists = repository.existsByEmailIgnoreCase("user543534534543@gmail.com");
+
+        assertThat(exists).isFalse();
     }
 
 }

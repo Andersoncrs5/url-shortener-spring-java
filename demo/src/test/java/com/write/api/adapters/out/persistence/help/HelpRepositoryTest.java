@@ -17,7 +17,7 @@ public class HelpRepositoryTest {
         this.repository = repository;
     }
 
-    public UserModel create() {
+    public UserModel createUser() {
         UserModel user = new UserModel();
         user.setName("John Doe" + generator.nextId());
         user.setEmail("john" + generator.nextId() + "@example.com");
