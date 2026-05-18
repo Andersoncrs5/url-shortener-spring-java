@@ -8,8 +8,6 @@ plugins {
 group = "com.write"
 version = "0.0.1-SNAPSHOT"
 
-
-
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(25)
@@ -47,6 +45,8 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("com.fasterxml.jackson.module:jackson-module-afterburner")
+	implementation("com.nimbusds:nimbus-jose-jwt:10.9")
+
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.mysql:mysql-connector-j")
@@ -81,7 +81,6 @@ dependencyManagement {
 	imports {
 		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
 		mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.6")
-
 	}
 }
 
@@ -107,16 +106,24 @@ jooq {
 
 			target {
 				packageName = "com.write.api.generated.jooq"
-				directory = "build/generated-src/jooq"
+				directory = "build/generated/sources/jooq/main"
 			}
 		}
 	}
 }
 
+//sourceSets {
+//	main {
+//		java {
+//			srcDirs("src/main/java", "build/generated-src/jooq")
+//		}
+//	}
+//}
+
 sourceSets {
 	main {
 		java {
-			srcDirs("src/main/java", "build/generated-src/jooq")
+			srcDirs("src/main/java", "src/generated/jooq") // Mudamos para src/generated/jooq para sumir do build/ clean
 		}
 	}
 }
