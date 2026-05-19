@@ -16,7 +16,29 @@ public class UserModel {
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime blockedAt;
+    private int attemptsLoginFailed = 0;
     private Set<String> roles;
+
+    public LocalDateTime getBlockedAt() {
+        return blockedAt;
+    }
+
+    public void setBlockedAt(LocalDateTime blockedAt) {
+        this.blockedAt = blockedAt;
+    }
+
+    public int getAttemptsLoginFailed() {
+        return attemptsLoginFailed;
+    }
+
+    public void setAttemptsLoginFailed(int attemptsLoginFailed) {
+        this.attemptsLoginFailed = attemptsLoginFailed;
+    }
+
+    public void sumAttemptLogin() {
+        attemptsLoginFailed++;
+    }
 
     public boolean addRole(String role) {
         boolean contains = this.roles.contains(role);
