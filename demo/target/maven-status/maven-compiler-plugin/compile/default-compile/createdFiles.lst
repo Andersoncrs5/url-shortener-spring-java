@@ -1,0 +1,4 @@
+com/write/api/DemoApplication.class
+com/write/api/generated/jooq/tables/records/UsersRecord.class
+com/write/api/adapters/out/persistence/mapper/UserRepositoryMapper.class
+com/write/api/core/domain/model/UserModel.class

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.write.api.generated.jooq.tables.Users.USERS;
+
+
 @Repository
 @RequiredArgsConstructor
 public class JooqUserRepository implements IUserRepository {
@@ -28,8 +31,8 @@ public class JooqUserRepository implements IUserRepository {
                 .set(USERS.EMAIL, user.getEmail())
                 .set(USERS.REFRESH_TOKEN ,user.getRefreshToken())
                 .set(USERS.PASSWORD_HASH , user.getPasswordHash())
-                .set(USERS.ACTIVE, user.isActive() ? (byte) 1 : (byte) 0)
-                .set(USERS.EMAIL_VERIFIED, user.isEmailVerified() ? (byte) 1 : (byte) 0)
+                .set(USERS.ACTIVE, user.isActive())
+                .set(USERS.EMAIL_VERIFIED, user.isEmailVerified())
                 .set(USERS.LAST_LOGIN_AT, user.getLastLoginAt())
                 .set(USERS.UPDATED_AT, user.getUpdatedAt())
                 .where(USERS.ID.eq(user.getId()))
@@ -53,8 +56,8 @@ public class JooqUserRepository implements IUserRepository {
                 .set(USERS.EMAIL, user.getEmail())
                 .set(USERS.REFRESH_TOKEN, user.getRefreshToken())
                 .set(USERS.PASSWORD_HASH, user.getPasswordHash())
-                .set(USERS.ACTIVE, user.isActive() ? (byte) 1 : (byte) 0)
-                .set(USERS.EMAIL_VERIFIED, (byte) 0)
+                .set(USERS.ACTIVE, user.isActive())
+                .set(USERS.EMAIL_VERIFIED, user.isEmailVerified())
                 .set(USERS.CREATED_AT, now)
                 .set(USERS.UPDATED_AT, now)
                 .set(USERS.VERSION, 1L)
