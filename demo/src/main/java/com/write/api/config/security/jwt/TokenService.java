@@ -9,6 +9,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
+import com.write.api.application.shared.Result;
 import com.write.api.config.security.properties.JwtProperties;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
@@ -111,6 +112,27 @@ public class TokenService {
         } catch (ParseException | JOSEException e) {
             log.debug("Erro ao parsear ou verificar o token: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido.");
+        }
+    }
+
+    public Result<String> validateTokenV2(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            MACVerifier verifier = new MACVerifier(properties.getJwt().getSecret().getBytes());
+
+            if (!signedJWT.verify(verifier)) {
+                return Result.failure(401 ,"Assinatura do token inválida.");
+            }
+
+            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+            if (claimsSet.getExpirationTime().before(new Date())) {
+                return Result.failure(401 ,"Token expirado.");
+            }
+
+            return Result.success(claimsSet.getSubject());
+        } catch (ParseException | JOSEException e) {
+            log.debug("Erro ao parsear ou verificar o token: {}", e.getMessage());
+            return Result.failure(401, "Token inválido.");
         }
     }
 
