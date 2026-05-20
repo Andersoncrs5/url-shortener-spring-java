@@ -90,4 +90,13 @@ public class JooqUserRepository implements IUserRepository {
                 .map(mapper::toDomain);
     }
 
+    @Override
+    public Optional<UserModel> findById(Long id) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.ID.eq(id))
+                .fetchOptional()
+                .map(mapper::toDomain);
+    }
+
+
 }

@@ -10,4 +10,5 @@ public interface IUserRepository {
     int deleteById(Long id);
     boolean existsByEmailIgnoreCase(String email);
     Optional<UserModel> findByEmailIgnoreCase(String email);
+    Optional<UserModel> findById(Long id);
 }
