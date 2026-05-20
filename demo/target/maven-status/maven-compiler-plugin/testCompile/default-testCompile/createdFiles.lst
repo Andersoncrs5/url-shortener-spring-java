@@ -1,0 +1,8 @@
+com/write/api/application/service/user/CreateUserServiceTest.class
+com/write/api/application/service/user/DeleteUserServiceTest.class
+com/write/api/TestDemoApplication.class
+com/write/api/adapters/out/persistence/repository/JooqUserRepositoryTest.class
+com/write/api/DemoApplicationTests.class
+com/write/api/application/service/user/UpdateUserServiceTest.class
+com/write/api/adapters/out/persistence/help/HelpRepositoryTest.class
+com/write/api/TestcontainersConfiguration.class
