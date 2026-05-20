@@ -1,8 +1,11 @@
+version: "3.9"
+
 services:
 
   pd:
     image: pingcap/pd:latest
     container_name: pd-url-spring
+    restart: unless-stopped
     command:
       - --name=pd1
       - --client-urls=http://0.0.0.0:2379
@@ -13,12 +16,20 @@ services:
     ports:
       - "2379:2379"
       - "2380:2380"
+    volumes:
+      - pd_data:/data
     networks:
       - url_shot_java
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2379/pd/api/v1/members"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   tikv:
     image: pingcap/tikv:latest
     container_name: tikv-url-spring
+    restart: unless-stopped
     command:
       - --pd=pd:2379
       - --addr=0.0.0.0:20160
@@ -26,23 +37,89 @@ services:
     ports:
       - "20160:20160"
     depends_on:
-      - pd
+      pd:
+        condition: service_healthy
+    volumes:
+      - tikv_data:/data
     networks:
       - url_shot_java
 
   tidb-server:
     image: pingcap/tidb:latest
     container_name: tidb-server-url-spring
+    restart: unless-stopped
     command:
       - --store=tikv
       - --path=pd:2379
     ports:
       - "4000:4000"
     depends_on:
-      - tikv
+      tikv:
+        condition: service_started
     networks:
       - url_shot_java
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-P", "4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v25.1.2
+    container_name: redpanda-url-spring
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=redpanda:8082
+    ports:
+      - "9092:9092"
+      - "8082:8082"
+      - "9644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    networks:
+      - url_shot_java
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9644/v1/status/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    container_name: dragonfly-url-spring
+    restart: unless-stopped
+    command: ["dragonfly", "--logtostderr", "--dir", "/data"]
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    networks:
+      - url_shot_java
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 networks:
   url_shot_java:
     driver: bridge
+
+volumes:
+  pd_data:
+  tikv_data:
+  redpanda_data:
+  dragonfly_data:
