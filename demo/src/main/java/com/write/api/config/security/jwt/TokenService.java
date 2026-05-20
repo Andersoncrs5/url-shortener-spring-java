@@ -8,6 +8,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.config.security.properties.JwtProperties;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
@@ -30,6 +31,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TokenService {
     private final JwtProperties properties;
+
+    public AuthTokenResponseDTO createTokens(UserModel user) {
+        String token = this.generateToken(user);
+        String refreshToken = this.generateRefreshToken(user);
+
+        return new AuthTokenResponseDTO(
+                token,
+                refreshToken,
+                user,
+                user.getRoles()
+        );
+    }
 
     public String generateToken(UserModel user) {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
