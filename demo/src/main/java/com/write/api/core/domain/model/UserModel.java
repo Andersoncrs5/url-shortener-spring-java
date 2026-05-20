@@ -1,6 +1,7 @@
 package com.write.api.core.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 public class UserModel {
@@ -18,7 +19,7 @@ public class UserModel {
     private LocalDateTime updatedAt;
     private LocalDateTime blockedAt;
     private int attemptsLoginFailed = 0;
-    private Set<String> roles;
+    private Set<String> roles = new HashSet<>();
 
     public LocalDateTime getBlockedAt() {
         return blockedAt;
