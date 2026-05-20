@@ -129,7 +129,7 @@ public class TokenService {
                 return Result.failure(401 ,"Token expirado.");
             }
 
-            return Result.success(claimsSet.getSubject());
+            return Result.success(claimsSet.getClaimAsString("userId"));
         } catch (ParseException | JOSEException e) {
             log.debug("Erro ao parsear ou verificar o token: {}", e.getMessage());
             return Result.failure(401, "Token inválido.");
