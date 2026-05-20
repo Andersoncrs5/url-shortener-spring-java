@@ -8,6 +8,7 @@ import com.write.api.config.security.jwt.TokenService;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.RegisterUserUseCase;
 import com.write.api.ports.in.user.CreateUserUseCase;
+import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class RegisterUserService implements RegisterUserUseCase {
 
     private final CreateUserUseCase createUser;
     private final RegisterUserMapper registerUserMapper;
+    private final IUserRepository repository;
     private final TokenService service;
 
     @ResultTransaction
@@ -30,6 +32,9 @@ public class RegisterUserService implements RegisterUserUseCase {
         user = result.getValue();
 
         AuthTokenResponseDTO tokens = this.service.createTokens(user);
+
+        user.setRefreshToken(tokens.refreshToken());
+        repository.save(user);
 
         return Result.success(tokens);
     }

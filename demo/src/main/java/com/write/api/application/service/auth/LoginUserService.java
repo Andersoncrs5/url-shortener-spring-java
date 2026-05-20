@@ -60,9 +60,10 @@ public class LoginUserService implements LoginUserUseCase {
         user.setBlockedAt(null);
         user.setLastLoginAt(LocalDateTime.now());
 
-        repository.save(user);
-
         AuthTokenResponseDTO tokens = this.service.createTokens(user);
+
+        user.setRefreshToken(tokens.refreshToken());
+        repository.save(user);
 
         return Result.success(tokens);
     }
