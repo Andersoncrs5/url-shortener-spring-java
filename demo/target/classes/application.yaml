@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: demo
+
   security:
     exp:
       token: 24
@@ -12,15 +15,29 @@ spring:
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-    flyway:
-      enabled: true
+  flyway:
+    enabled: true
 
   threads:
     virtual:
       enabled: true
 
-  application:
-    name: demo
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: url-shortener-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
 
 app:
   http:
@@ -37,3 +54,6 @@ app:
       allowed-headers:
         - "*"
       allow-credentials: true
+
+
+kind: Application
