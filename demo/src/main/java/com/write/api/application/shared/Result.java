@@ -1,6 +1,7 @@
 package com.write.api.application.shared;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Result<T> {
@@ -38,6 +39,10 @@ public class Result<T> {
 
     public static <T> Result<T> failure(List<String> errors, int statusCode) {
         return new Result<>(null, errors, statusCode, false);
+    }
+
+    public static <T> Result<T> failure(int statusCode, String... errors) {
+        return new Result<>(null, List.of(errors), statusCode, false);
     }
 
     public boolean isSuccess() { return isSuccess; }
