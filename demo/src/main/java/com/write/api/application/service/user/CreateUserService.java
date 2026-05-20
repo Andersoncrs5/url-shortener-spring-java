@@ -29,14 +29,14 @@ public class CreateUserService implements CreateUserUseCase {
 
             String message = e.getMostSpecificCause().getMessage();
 
-            if (message != null && message.contains("uk_user_email")) {
+            if (message != null && message.contains("uk_users_email")) {
                 return  Result.failure(
                         "Email already exists",
                         409
                 );
             }
 
-            if (message != null && message.contains("uk_user_name")) {
+            if (message != null && message.contains("uk_users_name")) {
                 return  Result.failure(
                         "Username already exists",
                         409
