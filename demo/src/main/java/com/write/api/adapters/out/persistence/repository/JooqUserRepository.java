@@ -98,5 +98,13 @@ public class JooqUserRepository implements IUserRepository {
                 .map(mapper::toDomain);
     }
 
+    @Override
+    public Optional<UserModel> findByRefreshToken(String refreshToken) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.REFRESH_TOKEN.equalIgnoreCase(refreshToken))
+                .fetchOptional()
+                .map(mapper::toDomain);
+    }
+
 
 }

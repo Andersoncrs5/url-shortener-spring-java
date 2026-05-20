@@ -11,4 +11,5 @@ public interface IUserRepository {
     boolean existsByEmailIgnoreCase(String email);
     Optional<UserModel> findByEmailIgnoreCase(String email);
     Optional<UserModel> findById(Long id);
+    Optional<UserModel> findByRefreshToken(String refreshToken);
 }
