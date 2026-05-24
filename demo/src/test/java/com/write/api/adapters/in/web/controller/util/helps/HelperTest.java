@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
+import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
+import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -24,6 +26,10 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public UserTest loginMaster() {
+        return this.createNewUser();
+    }
 
     public UserTest createNewUser() {
         try {
@@ -64,6 +70,49 @@ public class HelperTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public UrlTagResponseDTO createUrlTag(UserTest user) throws Exception {
+        var key = UUID.randomUUID().toString();
+        String URL = "/v1/url-tag";
+
+        CreateUrlTagDTO dto = new CreateUrlTagDTO(
+                "tag simple num: " + key,
+                "tag-slug-simple-num: " + key,
+                "#0000000",
+                "any desc",
+                null,
+                true
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", key)
+                        .header("Authorization", "Bearer " + user.tokens().token())
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UrlTagResponseDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<UrlTagResponseDTO> response =
+                objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.message()).isNotBlank().containsIgnoringCase("Tag created");
+        assertThat(response.traceId()).isNotBlank().isEqualTo(key);
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().id()).isNotNull().isNotZero().isNotNegative();
+        assertThat(response.data().name()).isEqualTo(dto.name());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().color()).isEqualTo(dto.color());
+        assertThat(response.data().description()).isEqualTo(dto.description());
+        assertThat(response.data().parentId()).isEqualTo(dto.parentId());
+        assertThat(response.data().active()).isEqualTo(dto.active());
+
+        return response.data();
     }
 
 }
