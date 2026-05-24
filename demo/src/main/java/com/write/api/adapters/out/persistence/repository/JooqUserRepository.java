@@ -78,8 +78,13 @@ public class JooqUserRepository implements IUserRepository {
 
     @Override
     public boolean existsByEmailIgnoreCase(String email) {
-        var check = dsl.selectCount().from(USERS).where(USERS.EMAIL.equalIgnoreCase(email)).execute();
-        return check > 0;
+        Integer count = dsl
+                .selectCount()
+                .from(USERS)
+                .where(USERS.EMAIL.equalIgnoreCase(email))
+                .fetchOne(0, Integer.class);
+
+        return count != null && count > 0;
     }
 
     @Override
@@ -106,5 +111,12 @@ public class JooqUserRepository implements IUserRepository {
                 .map(mapper::toDomain);
     }
 
+    @Override
+    public boolean existsById(Long id) {
+        return dsl.fetchExists(
+                dsl.selectFrom(USERS)
+                        .where(USERS.ID.eq(id))
+        );
+    }
 
 }
