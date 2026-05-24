@@ -25,6 +25,10 @@ public class Result<T> {
         return new Result<>(value, null, 200, true);
     }
 
+    public static <T> Result<T> success() {
+        return new Result<>(null, null, 200, true);
+    }
+
     public static <T> Result<T> success(T value, int statusCode) {
         return new Result<>(value, null, statusCode, true);
     }
