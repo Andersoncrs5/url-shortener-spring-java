@@ -1,5 +1,6 @@
 package com.write.api.application.mapper.user;
 
+import com.write.api.application.dto.user.UserResponseDTO;
 import com.write.api.shared.mapper.config.CentralMapperConfig;
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.core.domain.model.UserModel;
@@ -17,4 +18,9 @@ public interface UserUpdateMapper {
             UpdateUserDTO dto,
             @MappingTarget UserModel user
     );
+
+
+    UserResponseDTO toDTO(UserModel model);
+
+    UserModel toModel(UserResponseDTO dto);
 }
