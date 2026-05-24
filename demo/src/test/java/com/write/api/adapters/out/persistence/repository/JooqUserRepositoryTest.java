@@ -1,6 +1,5 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.TestcontainersConfiguration;
 import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -10,17 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@Import({TestcontainersConfiguration.class})
 @AutoConfigureMockMvc
 public class JooqUserRepositoryTest {
 
-    private HelpRepositoryTest help;
+    @Autowired private HelpRepositoryTest help;
 
     @Autowired private DSLContext dsl;
     @Autowired private SnowflakeIdGenerator generator;
@@ -30,8 +29,6 @@ public class JooqUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        help = new HelpRepositoryTest(generator, repository);
-
         dsl.deleteFrom(org.jooq.impl.DSL.table("users")).execute();
 
         user = new UserModel();
@@ -98,7 +95,7 @@ public class JooqUserRepositoryTest {
 
     @Test
     void shouldReturnFalseWhenGetByEmail() {
-        boolean exists = repository.existsByEmailIgnoreCase("user543534534543@gmail.com");
+        boolean exists = repository.existsByEmailIgnoreCase("user" + UUID.randomUUID() + "@gmail.com");
 
         assertThat(exists).isFalse();
     }
