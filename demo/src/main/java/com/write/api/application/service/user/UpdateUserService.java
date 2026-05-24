@@ -6,6 +6,7 @@ import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.UpdateUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class UpdateUserService implements UpdateUserUseCase {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @ResultTransaction
     public Result<UserModel> update(UserModel user, UpdateUserDTO dto) {
         mapper.updateUserFromDto(dto, user);
 

@@ -5,6 +5,7 @@ import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.CreateUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ public class CreateUserService implements CreateUserUseCase {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @ResultTransaction
     public Result<UserModel> create(UserModel user) {
         try {
             user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
