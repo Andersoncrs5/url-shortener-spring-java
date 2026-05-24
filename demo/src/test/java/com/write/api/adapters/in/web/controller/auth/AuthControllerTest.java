@@ -1,4 +1,4 @@
-package com.write.api.adapters.in.web.controller.user;
+package com.write.api.adapters.in.web.controller.auth;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
