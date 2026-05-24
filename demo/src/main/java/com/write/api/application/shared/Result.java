@@ -18,7 +18,7 @@ public class Result<T> {
     }
 
     public String getMessage() {
-        return this.errors.getFirst();
+        return this.errors.getFirst() != null? this.errors.getFirst() : null;
     }
 
     public static <T> Result<T> success(T value) {
