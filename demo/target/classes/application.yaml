@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: demo
+
+  security:
+    exp:
+      token: 24
+      refresh: 444444
+    jwt:
+      secret: 5438y43v734vb7t40yt7y7rft47r7tv43htf3ht40f7t430ft0ft3t4fh94t3r3653667586578784658467867846786667v
+
+  datasource:
+    url: jdbc:mysql://localhost:4000/url_shortener
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  flyway:
+    enabled: true
+
+  threads:
+    virtual:
+      enabled: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: url-shortener-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+
+app:
+  http:
+    cors:
+      allowed-origins:
+        - "http://localhost:3000"
+        - "https://meuapp.com"
+      allowed-methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "OPTIONS"
+      allowed-headers:
+        - "*"
+      allow-credentials: true
+
+
+kind: Application
