@@ -52,8 +52,7 @@ class UpdateUserServiceTest {
 
         UpdateUserDTO dto = new UpdateUserDTO(
                 "john-updated",
-                "updated@test.com",
-                null
+                "updated@test.com"
         );
 
         UserModel updatedUser = new UserModel();
@@ -93,7 +92,6 @@ class UpdateUserServiceTest {
 
         UpdateUserDTO dto = new UpdateUserDTO(
                 "john-updated",
-                "updated@test.com",
                 "123456"
         );
 
@@ -139,7 +137,6 @@ class UpdateUserServiceTest {
 
         UpdateUserDTO dto = new UpdateUserDTO(
                 "john",
-                "john@test.com",
                 null
         );
 
@@ -170,7 +167,6 @@ class UpdateUserServiceTest {
     void shouldEncodePasswordOnlyOnce() {
 
         UpdateUserDTO dto = new UpdateUserDTO(
-                null,
                 null,
                 "new-password"
         );
