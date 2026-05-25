@@ -25,9 +25,6 @@ public record CreateUrlDTO(
         @Size(max = 255)
         String domain,
 
-        @Size(min = 3, max = 120)
-        String shortCode,
-
         @NotNull
         UrlAccessTypeEnum accessType,
 
