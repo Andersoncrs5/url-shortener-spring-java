@@ -5,15 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
+import com.write.api.application.dto.url.CreateUrlDTO;
+import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
+import com.write.api.core.domain.enums.UrlAccessTypeEnum;
+import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +31,7 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+    private final SnowflakeIdGenerator idGen;
 
     public UserTest loginMaster() {
         return this.createNewUser();
@@ -112,6 +118,47 @@ public class HelperTest {
         assertThat(response.data().parentId()).isEqualTo(dto.parentId());
         assertThat(response.data().active()).isEqualTo(dto.active());
 
+        return response.data();
+    }
+
+    public UrlResponseDTO createUrl(UserTest user, String password) throws Exception {
+        var key = UUID.randomUUID().toString();
+        String URL = "/v1/url";
+
+        CreateUrlDTO dto = new CreateUrlDTO(
+                "https://example.com/article/" + idGen.nextId(),
+                "My title",
+                "Any desc",
+                "https://example.com/favicon.ico",
+                "example.com",
+                UrlAccessTypeEnum.PUBLIC,
+                password,
+                LocalDateTime.now().plusDays(7)
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", key)
+                        .header("Authorization", "Bearer " + user.tokens().token())
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UrlResponseDTO>> typeRef =
+                new TypeReference<>() {};
+
+        var response = objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(key);
+        assertThat(response.data().id()).isNotNegative().isNotZero();
+        assertThat(response.data().originalUrl()).isEqualTo(dto.originalUrl());
+        assertThat(response.data().title()).isEqualTo(dto.title());
+        assertThat(response.data().description()).isEqualTo(dto.description());
+        assertThat(response.data().faviconUrl()).isEqualTo(dto.faviconUrl());
+        assertThat(response.data().domain()).isEqualTo(dto.domain());
         return response.data();
     }
 
