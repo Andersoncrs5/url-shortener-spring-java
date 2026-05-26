@@ -1,7 +1,7 @@
 package com.write.api.application.service.url;
 
 import com.write.api.application.shared.Result;
-import com.write.api.ports.in.url.DeleteUrlByIdUseCase;
+import com.write.api.ports.in.url.DeleteUrlByIdForceUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class DeleteUrlByIdService implements DeleteUrlByIdUseCase {
+public class DeleteUrlByIdForceService implements DeleteUrlByIdForceUseCase {
 
     private final IUrlRepository repository;
 

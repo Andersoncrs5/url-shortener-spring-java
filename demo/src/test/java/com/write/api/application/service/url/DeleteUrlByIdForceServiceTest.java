@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteUrlByIdServiceTest {
+class DeleteUrlByIdForceServiceTest {
 
     @Mock
     private IUrlRepository repository;
 
     @InjectMocks
-    private DeleteUrlByIdService service;
+    private DeleteUrlByIdForceService service;
 
     @Test
     void shouldDeleteUrlSuccessfully() {
