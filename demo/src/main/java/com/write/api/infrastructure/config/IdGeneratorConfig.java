@@ -1,4 +1,4 @@
-package com.write.api.config;
+package com.write.api.infrastructure.config;
 
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import org.springframework.context.annotation.Bean;

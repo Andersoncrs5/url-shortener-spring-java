@@ -1,4 +1,4 @@
-package com.write.api.config.security.properties;
+package com.write.api.infrastructure.config.security.properties;
 
 import lombok.Getter;
 import lombok.Setter;

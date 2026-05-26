@@ -5,7 +5,7 @@ import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.application.mapper.user.UserUpdateMapper;
 import com.write.api.application.shared.Result;
-import com.write.api.config.security.classes.UserPrincipal;
+import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.DeleteByIdUserUseCase;
 import com.write.api.ports.in.user.UpdateUserUseCase;

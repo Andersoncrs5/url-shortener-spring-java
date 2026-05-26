@@ -1,4 +1,4 @@
-package com.write.api.config.cache;
+package com.write.api.infrastructure.config.cache;
 
 
 import org.springframework.cache.CacheManager;

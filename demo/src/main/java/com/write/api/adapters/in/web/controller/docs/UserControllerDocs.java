@@ -2,8 +2,8 @@ package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.user.UpdateUserDTO;
-import com.write.api.config.api.idempotent.Idempotent;
-import com.write.api.config.security.classes.UserPrincipal;
+import com.write.api.infrastructure.config.api.idempotent.Idempotent;
+import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;

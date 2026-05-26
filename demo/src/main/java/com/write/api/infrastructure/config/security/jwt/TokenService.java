@@ -1,4 +1,4 @@
-package com.write.api.config.security.jwt;
+package com.write.api.infrastructure.config.security.jwt;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -10,7 +10,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.shared.Result;
-import com.write.api.config.security.properties.JwtProperties;
+import com.write.api.infrastructure.config.security.properties.JwtProperties;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
 import jakarta.servlet.http.HttpServletRequest;

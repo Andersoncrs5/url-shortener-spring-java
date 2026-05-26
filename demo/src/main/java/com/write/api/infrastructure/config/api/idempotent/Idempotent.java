@@ -1,4 +1,4 @@
-package com.write.api.config.api.idempotent;
+package com.write.api.infrastructure.config.api.idempotent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

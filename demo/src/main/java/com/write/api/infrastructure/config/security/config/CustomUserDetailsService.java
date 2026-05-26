@@ -1,6 +1,6 @@
-package com.write.api.config.security.config;
+package com.write.api.infrastructure.config.security.config;
 
-import com.write.api.config.security.classes.UserPrincipal;
+import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.out.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;

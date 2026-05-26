@@ -1,6 +1,6 @@
-package com.write.api.config.security.config;
+package com.write.api.infrastructure.config.security.config;
 
-import com.write.api.config.security.jwt.TokenService;
+import com.write.api.infrastructure.config.security.jwt.TokenService;
 import com.write.api.ports.out.repository.IUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

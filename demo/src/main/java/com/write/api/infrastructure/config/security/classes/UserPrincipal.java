@@ -1,4 +1,4 @@
-package com.write.api.config.security.classes;
+package com.write.api.infrastructure.config.security.classes;
 
 
 import com.write.api.core.domain.model.UserModel;

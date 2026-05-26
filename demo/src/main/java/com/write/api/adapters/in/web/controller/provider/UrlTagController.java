@@ -7,7 +7,7 @@ import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.application.shared.Result;
-import com.write.api.config.security.classes.UserPrincipal;
+import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.model.UrlTagModel;
 import com.write.api.ports.in.urlTag.CreateUrlTagUseCase;
 import com.write.api.ports.in.urlTag.DeleteByIdUseCase;

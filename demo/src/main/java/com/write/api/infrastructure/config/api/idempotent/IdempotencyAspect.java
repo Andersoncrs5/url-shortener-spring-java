@@ -1,6 +1,6 @@
-package com.write.api.config.api.idempotent;
+package com.write.api.infrastructure.config.api.idempotent;
 
-import com.write.api.config.security.classes.UserPrincipal;
+import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.exception.BusinessRuleException;
 import com.write.api.core.domain.exception.ConflictRuleException;
 import com.write.api.core.domain.exception.InternalServerErrorException;

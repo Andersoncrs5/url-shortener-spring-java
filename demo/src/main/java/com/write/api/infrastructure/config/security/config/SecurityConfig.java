@@ -1,6 +1,6 @@
-package com.write.api.config.security.config;
+package com.write.api.infrastructure.config.security.config;
 
-import com.write.api.config.security.properties.CorsProperties;
+import com.write.api.infrastructure.config.security.properties.CorsProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

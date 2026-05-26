@@ -1,4 +1,4 @@
-package com.write.api.config.kafka;
+package com.write.api.infrastructure.config.kafka;
 
 import org.apache.kafka.common.serialization.StringSerializer;
 import com.fasterxml.jackson.databind.JsonSerializer;

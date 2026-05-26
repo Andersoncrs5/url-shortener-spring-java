@@ -1,4 +1,4 @@
-package com.write.api.config.jackson;
+package com.write.api.infrastructure.config.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

@@ -1,4 +1,4 @@
-package com.write.api.config.security.config;
+package com.write.api.infrastructure.config.security.config;
 
 
 import jakarta.servlet.http.HttpServletRequest;

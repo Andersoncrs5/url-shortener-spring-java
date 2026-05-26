@@ -3,7 +3,7 @@ package com.write.api.application.service.auth;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.user.LoginUserDTO;
 import com.write.api.application.shared.Result;
-import com.write.api.config.security.jwt.TokenService;
+import com.write.api.infrastructure.config.security.jwt.TokenService;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.LoginUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
