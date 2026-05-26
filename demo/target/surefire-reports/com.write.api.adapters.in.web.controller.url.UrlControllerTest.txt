@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.write.api.adapters.in.web.controller.url.UrlControllerTest
+-------------------------------------------------------------------------------
+Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.394 s -- in com.write.api.adapters.in.web.controller.url.UrlControllerTest

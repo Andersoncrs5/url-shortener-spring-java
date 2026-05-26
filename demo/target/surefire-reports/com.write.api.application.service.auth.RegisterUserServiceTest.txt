@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: com.write.api.application.service.auth.RegisterUserServiceTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.114 s <<< FAILURE! -- in com.write.api.application.service.auth.RegisterUserServiceTest
+com.write.api.application.service.auth.RegisterUserServiceTest.shouldRegisterSuccessfully -- Time elapsed: 0.003 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.write.api.ports.out.repository.IUserRepository.save(Object)" because "this.repository" is null
+	at com.write.api.application.service.auth.RegisterUserService.execute(RegisterUserService.java:37)
+	at com.write.api.application.service.auth.RegisterUserServiceTest.shouldRegisterSuccessfully(RegisterUserServiceTest.java:69)
+
+com.write.api.application.service.auth.RegisterUserServiceTest.shouldPassMappedUserToCreateUserUseCase -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.write.api.ports.out.repository.IUserRepository.save(Object)" because "this.repository" is null
+	at com.write.api.application.service.auth.RegisterUserService.execute(RegisterUserService.java:37)
+	at com.write.api.application.service.auth.RegisterUserServiceTest.shouldPassMappedUserToCreateUserUseCase(RegisterUserServiceTest.java:113)
+
