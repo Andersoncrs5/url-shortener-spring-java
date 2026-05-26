@@ -23,9 +23,6 @@ public record UpdateUrlDTO(
         @Size(max = 255)
         String domain,
 
-        @Size(min = 3, max = 120)
-        String shortCode,
-
         UrlStatusEnum status,
 
         UrlAccessTypeEnum accessType,
