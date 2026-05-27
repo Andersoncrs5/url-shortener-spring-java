@@ -4,6 +4,7 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
 
@@ -23,6 +24,9 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index IDX_URL_TAG_LINKS_CREATED_BY = Internal.createIndex(DSL.name("IDX_URL_TAG_LINKS_CREATED_BY"), UrlTagLinks.URL_TAG_LINKS, new OrderField[] { UrlTagLinks.URL_TAG_LINKS.CREATED_BY }, false);
+    public static final Index IDX_URL_TAG_LINKS_TAG_ID = Internal.createIndex(DSL.name("IDX_URL_TAG_LINKS_TAG_ID"), UrlTagLinks.URL_TAG_LINKS, new OrderField[] { UrlTagLinks.URL_TAG_LINKS.TAG_ID }, false);
+    public static final Index IDX_URL_TAG_LINKS_URL_ID = Internal.createIndex(DSL.name("IDX_URL_TAG_LINKS_URL_ID"), UrlTagLinks.URL_TAG_LINKS, new OrderField[] { UrlTagLinks.URL_TAG_LINKS.URL_ID }, false);
     public static final Index IDX_URL_TAGS_NAME = Internal.createIndex(DSL.name("IDX_URL_TAGS_NAME"), UrlTags.URL_TAGS, new OrderField[] { UrlTags.URL_TAGS.NAME }, false);
     public static final Index IDX_URL_TAGS_PARENT_ID = Internal.createIndex(DSL.name("IDX_URL_TAGS_PARENT_ID"), UrlTags.URL_TAGS, new OrderField[] { UrlTags.URL_TAGS.PARENT_ID }, false);
     public static final Index IDX_URL_TAGS_SLUG = Internal.createIndex(DSL.name("IDX_URL_TAGS_SLUG"), UrlTags.URL_TAGS, new OrderField[] { UrlTags.URL_TAGS.SLUG }, false);
