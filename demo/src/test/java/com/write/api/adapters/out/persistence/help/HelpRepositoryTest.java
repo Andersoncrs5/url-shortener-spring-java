@@ -1,15 +1,15 @@
 package com.write.api.adapters.out.persistence.help;
 
-import com.write.api.adapters.out.persistence.repository.JooqUrlRepository;
-import com.write.api.adapters.out.persistence.repository.JooqUrlTagLinkRepository;
-import com.write.api.adapters.out.persistence.repository.JooqUrlTagRepository;
-import com.write.api.adapters.out.persistence.repository.JooqUserRepository;
-import com.write.api.core.domain.model.UrlModel;
-import com.write.api.core.domain.model.UrlTagLinkModel;
-import com.write.api.core.domain.model.UrlTagModel;
-import com.write.api.core.domain.model.UserModel;
+import com.write.api.adapters.out.persistence.repository.*;
+import com.write.api.core.domain.enums.BrowserEnum;
+import com.write.api.core.domain.enums.ContinentEnum;
+import com.write.api.core.domain.enums.MatchTypeEnum;
+import com.write.api.core.domain.enums.OperatingSystemEnum;
+import com.write.api.core.domain.model.*;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,13 +18,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HelpRepositoryTest {
 
-    private final SnowflakeIdGenerator generator;
-    private final JooqUserRepository repository;
-    private final JooqUrlTagRepository tagRepository;
-    private final JooqUrlRepository urlRepository;
-    private final JooqUrlTagLinkRepository urlTagLinkRepository;
+    SnowflakeIdGenerator generator;
+    JooqUserRepository repository;
+    JooqUrlTagRepository tagRepository;
+    JooqUrlRepository urlRepository;
+    JooqUrlTagLinkRepository urlTagLinkRepository;
+    JooqUrlRedirectRuleRepository urlRedirectRuleRepository;
 
     public UserModel createUser() {
         UserModel user = new UserModel();
@@ -128,6 +130,29 @@ public class HelpRepositoryTest {
         assertThat(saved.getCreatedBy()).isEqualTo(user.getId());
         assertThat(saved.getCreatedAt()).isNotNull();
         return saved;
+    }
+
+    public UrlRedirectRuleModel createUrlRedirectRule(
+            UrlModel url
+    ) {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+
+        rule.setUrlId(url.getId());
+        rule.setId(generator.nextId());
+        rule.setCountryCode("BR");
+        rule.setRegion("PI");
+        rule.setContinent(ContinentEnum.SOUTH_AMERICA);
+        rule.setOs(OperatingSystemEnum.ANDROID);
+        rule.setBrowser(BrowserEnum.CHROME);
+        rule.setMatchType(MatchTypeEnum.EXACT);
+        rule.setRedirectUrl("https://example.com/br");
+        rule.setRuleHash("a".repeat(64));
+        rule.setPriority(1);
+        rule.setActive(true);
+        rule.setStartAt(LocalDateTime.now().minusDays(1));
+        rule.setEndAt(LocalDateTime.now().plusDays(1));
+
+        return urlRedirectRuleRepository.insert(rule);
     }
 
 }
