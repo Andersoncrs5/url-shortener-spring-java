@@ -1,9 +1,11 @@
 package com.write.api.adapters.out.persistence.help;
 
 import com.write.api.adapters.out.persistence.repository.JooqUrlRepository;
+import com.write.api.adapters.out.persistence.repository.JooqUrlTagLinkRepository;
 import com.write.api.adapters.out.persistence.repository.JooqUrlTagRepository;
 import com.write.api.adapters.out.persistence.repository.JooqUserRepository;
 import com.write.api.core.domain.model.UrlModel;
+import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.core.domain.model.UrlTagModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -22,6 +24,7 @@ public class HelpRepositoryTest {
     private final JooqUserRepository repository;
     private final JooqUrlTagRepository tagRepository;
     private final JooqUrlRepository urlRepository;
+    private final JooqUrlTagLinkRepository urlTagLinkRepository;
 
     public UserModel createUser() {
         UserModel user = new UserModel();
@@ -96,6 +99,34 @@ public class HelpRepositoryTest {
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(saved.getUpdatedAt()).isNotNull();
 
+        return saved;
+    }
+
+    public UrlTagLinkModel createTagToUrl(
+            UserModel user,
+            UrlModel url,
+            UrlTagModel tag
+    ) {
+        UrlTagLinkModel link = new UrlTagLinkModel();
+
+        link.setUrlId(url.getId());
+        link.setTagId(tag.getId());
+        link.setSortOrder((short) 1);
+        link.setNote("Any note");
+        link.setPrimaryTag(true);
+        link.setCreatedBy(user.getId());
+
+        UrlTagLinkModel saved = urlTagLinkRepository.insert(link);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getUrlId()).isEqualTo(url.getId());
+        assertThat(saved.getTagId()).isEqualTo(tag.getId());
+        assertThat(saved.getSortOrder()).isEqualTo((short) 1);
+        assertThat(saved.getNote()).isEqualTo("Any note");
+        assertThat(saved.isPrimaryTag()).isTrue();
+        assertThat(saved.getCreatedBy()).isEqualTo(user.getId());
+        assertThat(saved.getCreatedAt()).isNotNull();
         return saved;
     }
 
