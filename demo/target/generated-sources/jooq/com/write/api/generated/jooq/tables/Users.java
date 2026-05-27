@@ -6,6 +6,7 @@ package com.write.api.generated.jooq.tables;
 
 import com.write.api.generated.jooq.DefaultSchema;
 import com.write.api.generated.jooq.Keys;
+import com.write.api.generated.jooq.tables.UrlTagLinks.UrlTagLinksPath;
 import com.write.api.generated.jooq.tables.UrlTags.UrlTagsPath;
 import com.write.api.generated.jooq.tables.Urls.UrlsPath;
 import com.write.api.generated.jooq.tables.records.UsersRecord;
@@ -198,6 +199,19 @@ public class Users extends TableImpl<UsersRecord> {
     @Override
     public List<UniqueKey<UsersRecord>> getUniqueKeys() {
         return Arrays.asList(Keys.UK_USERS_EMAIL, Keys.UK_USERS_NAME);
+    }
+
+    private transient UrlTagLinksPath _urlTagLinks;
+
+    /**
+     * Get the implicit to-many join path to the <code>URL_TAG_LINKS</code>
+     * table
+     */
+    public UrlTagLinksPath urlTagLinks() {
+        if (_urlTagLinks == null)
+            _urlTagLinks = new UrlTagLinksPath(this, null, Keys.FK_URL_TAG_LINKS_CREATED_BY.getInverseKey());
+
+        return _urlTagLinks;
     }
 
     private transient UrlTagsPath _urlTags;

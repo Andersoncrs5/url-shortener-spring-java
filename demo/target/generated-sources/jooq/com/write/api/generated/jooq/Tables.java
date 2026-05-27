@@ -4,6 +4,7 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
 import com.write.api.generated.jooq.tables.Users;
@@ -14,6 +15,11 @@ import com.write.api.generated.jooq.tables.Users;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>URL_TAG_LINKS</code>.
+     */
+    public static final UrlTagLinks URL_TAG_LINKS = UrlTagLinks.URL_TAG_LINKS;
 
     /**
      * The table <code>URL_TAGS</code>.
