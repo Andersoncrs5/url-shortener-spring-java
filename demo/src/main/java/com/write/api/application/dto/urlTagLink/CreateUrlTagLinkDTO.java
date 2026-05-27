@@ -22,7 +22,7 @@ public record CreateUrlTagLinkDTO(
         @Size(max = 500, message = "note exceeded 500 characters")
         String note,
 
+        @NotNull
         boolean primaryTag
-
 ) {
 }
