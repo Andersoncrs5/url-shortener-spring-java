@@ -1,5 +1,6 @@
 package com.write.api.adapters.in.web.controller.util.helps;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
@@ -9,6 +10,8 @@ import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
+import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
+import com.write.api.application.dto.urlTagLink.UrlTagLinkDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -159,6 +162,51 @@ public class HelperTest {
         assertThat(response.data().description()).isEqualTo(dto.description());
         assertThat(response.data().faviconUrl()).isEqualTo(dto.faviconUrl());
         assertThat(response.data().domain()).isEqualTo(dto.domain());
+        return response.data();
+    }
+
+    public UrlTagLinkDTO createLinkTagToUrl(
+            UserTest user,
+            UrlResponseDTO url,
+            UrlTagResponseDTO urlTag
+    ) throws Exception {
+        var key = UUID.randomUUID().toString();
+        String URL = "/v1/url-tag-link";
+
+        CreateUrlTagLinkDTO dto = new CreateUrlTagLinkDTO(
+                url.id(),
+                urlTag.id(),
+                (short) 1,
+                "Any notes",
+                true
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", key)
+                        .header("Authorization", "Bearer " + user.tokens().token())
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UrlTagLinkDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<UrlTagLinkDTO> response =
+                objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.message()).isNotBlank().containsIgnoringCase("linked");
+        assertThat(response.traceId()).isNotBlank().isEqualTo(key);
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().id()).isNotNegative().isNotZero();
+        assertThat(response.data().urlId()).isEqualTo(url.id());
+        assertThat(response.data().tagId()).isEqualTo(urlTag.id());
+        assertThat(response.data().sortOrder()).isEqualTo(dto.sortOrder());
+        assertThat(response.data().note()).isEqualTo(dto.note());
+        assertThat(response.data().primaryTag()).isEqualTo(dto.primaryTag());
+
         return response.data();
     }
 
