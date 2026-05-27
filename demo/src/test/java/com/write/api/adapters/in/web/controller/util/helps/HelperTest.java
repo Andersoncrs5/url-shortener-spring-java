@@ -8,12 +8,14 @@ import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.dto.url.UrlResponseDTO;
+import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
+import com.write.api.application.dto.urlRedirectRule.UrlRedirectRuleDTO;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
 import com.write.api.application.dto.urlTagLink.UrlTagLinkDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
-import com.write.api.core.domain.enums.UrlAccessTypeEnum;
+import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -208,6 +210,81 @@ public class HelperTest {
         assertThat(response.data().primaryTag()).isEqualTo(dto.primaryTag());
 
         return response.data();
+    }
+
+    public UrlRedirectRuleDTO createUrlRedirectRule(
+            UserTest user,
+            UrlResponseDTO url
+    ) throws Exception {
+        String URL = "/v1/url-redirect-rule";
+        var key = UUID.randomUUID().toString();
+
+        CreateUrlRedirectRuleDTO dto = new CreateUrlRedirectRuleDTO(
+                url.id(),
+                "BR",
+                "PI",
+                ContinentEnum.SOUTH_AMERICA,
+                OperatingSystemEnum.ANDROID,
+                BrowserEnum.CHROME,
+                MatchTypeEnum.EXACT,
+                "https://m.example.com/mobile",
+                1,
+                true,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(30)
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + user.tokens().token())
+                        .header("X-Idempotency-Key", key)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        TypeReference<ResponseHttp<UrlRedirectRuleDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<UrlRedirectRuleDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response).isNotNull();
+
+        assertThat(response.status()).isTrue();
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isEqualTo(key);
+
+        UrlRedirectRuleDTO data = response.data();
+
+        assertThat(data).isNotNull();
+
+        assertThat(data.id()).isNotNull();
+        assertThat(data.urlId()).isEqualTo(url.id());
+
+        assertThat(data.countryCode()).isEqualTo(dto.countryCode());
+        assertThat(data.region()).isEqualTo(dto.region());
+
+        assertThat(data.continent()).isEqualTo(dto.continent());
+        assertThat(data.os()).isEqualTo(dto.os());
+        assertThat(data.browser()).isEqualTo(dto.browser());
+
+        assertThat(data.matchType()).isEqualTo(dto.matchType());
+
+        assertThat(data.redirectUrl()).isEqualTo(dto.redirectUrl());
+
+        assertThat(data.priority()).isEqualTo(dto.priority());
+
+        assertThat(data.active()).isEqualTo(dto.active());
+
+        assertThat(data.startAt()).isNotNull();
+        assertThat(data.endAt()).isNotNull();
+
+        assertThat(data.createdAt()).isNotNull();
+        assertThat(data.updatedAt()).isNotNull();
+
+        return data;
     }
 
 }
