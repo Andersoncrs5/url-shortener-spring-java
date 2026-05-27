@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValid(
+    public ResponseEntity<ResponseHttp<ValidationErrorResponse>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex
     ) {
 
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
-                .body(response);
+                .body(ResponseHttp.error(response, "Input error", null));
     }
 
 }
