@@ -92,4 +92,15 @@ public record ResponseHttp<T>(
                 OffsetDateTime.now()
         );
     }
+
+    public static <T> ResponseHttp<T> error(T value, String message, String traceId) {
+        return new ResponseHttp<>(
+                value,
+                message,
+                traceId,
+                1,
+                false,
+                OffsetDateTime.now()
+        );
+    }
 }
