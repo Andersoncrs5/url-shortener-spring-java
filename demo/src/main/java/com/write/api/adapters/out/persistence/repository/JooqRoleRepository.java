@@ -38,6 +38,14 @@ public class JooqRoleRepository implements IRoleRepository {
     }
 
     @Override
+    public Optional<RoleModel> findByNameIgnoreCase(String name) {
+        return dsl.selectFrom(ROLES)
+                .where(ROLES.NAME.equalIgnoreCase(name))
+                .fetchOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public RoleModel save(RoleModel entity) {
         LocalDateTime now = LocalDateTime.now();
 
