@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.adapters.out.persistence.repository.JooqUrlTagLinkRepositoryTest
 -------------------------------------------------------------------------------
-Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.162 s -- in com.write.api.adapters.out.persistence.repository.JooqUrlTagLinkRepositoryTest
+Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.372 s -- in com.write.api.adapters.out.persistence.repository.JooqUrlTagLinkRepositoryTest

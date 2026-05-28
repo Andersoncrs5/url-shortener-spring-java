@@ -63,31 +63,45 @@ public class UserRolesRecord extends UpdatableRecordImpl<UserRolesRecord> {
     }
 
     /**
+     * Setter for <code>USER_ROLES.ASSIGNED_BY_USER_ID</code>.
+     */
+    public void setAssignedByUserId(Long value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>USER_ROLES.ASSIGNED_BY_USER_ID</code>.
+     */
+    public Long getAssignedByUserId() {
+        return (Long) get(3);
+    }
+
+    /**
      * Setter for <code>USER_ROLES.CREATED_AT</code>.
      */
     public void setCreatedAt(LocalDateTime value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>USER_ROLES.CREATED_AT</code>.
      */
     public LocalDateTime getCreatedAt() {
-        return (LocalDateTime) get(3);
+        return (LocalDateTime) get(4);
     }
 
     /**
      * Setter for <code>USER_ROLES.UPDATED_AT</code>.
      */
     public void setUpdatedAt(LocalDateTime value) {
-        set(4, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>USER_ROLES.UPDATED_AT</code>.
      */
     public LocalDateTime getUpdatedAt() {
-        return (LocalDateTime) get(4);
+        return (LocalDateTime) get(5);
     }
 
     // -------------------------------------------------------------------------
@@ -113,12 +127,13 @@ public class UserRolesRecord extends UpdatableRecordImpl<UserRolesRecord> {
     /**
      * Create a detached, initialised UserRolesRecord
      */
-    public UserRolesRecord(Long id, Long userId, Long roleId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserRolesRecord(Long id, Long userId, Long roleId, Long assignedByUserId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(UserRoles.USER_ROLES);
 
         setId(id);
         setUserId(userId);
         setRoleId(roleId);
+        setAssignedByUserId(assignedByUserId);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
         resetTouchedOnNotNull();

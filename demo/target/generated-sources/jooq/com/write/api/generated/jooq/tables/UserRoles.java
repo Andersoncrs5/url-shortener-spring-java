@@ -76,6 +76,11 @@ public class UserRoles extends TableImpl<UserRolesRecord> {
     public final TableField<UserRolesRecord, Long> ROLE_ID = createField(DSL.name("ROLE_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
+     * The column <code>USER_ROLES.ASSIGNED_BY_USER_ID</code>.
+     */
+    public final TableField<UserRolesRecord, Long> ASSIGNED_BY_USER_ID = createField(DSL.name("ASSIGNED_BY_USER_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
      * The column <code>USER_ROLES.CREATED_AT</code>.
      */
     public final TableField<UserRolesRecord, LocalDateTime> CREATED_AT = createField(DSL.name("CREATED_AT"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.LOCALDATETIME)), this, "");
@@ -154,7 +159,7 @@ public class UserRoles extends TableImpl<UserRolesRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_USER_ROLES_ROLE, Indexes.IDX_USER_ROLES_USER, Indexes.IDX_USER_ROLES_USER_ROLE, Indexes.UK_USER_ROLES_USER_ROLE);
+        return Arrays.asList(Indexes.IDX_USER_ROLES_ASSIGNED_BY, Indexes.IDX_USER_ROLES_ROLE, Indexes.IDX_USER_ROLES_USER, Indexes.IDX_USER_ROLES_USER_ROLE, Indexes.UK_USER_ROLES_USER_ROLE);
     }
 
     @Override
@@ -164,7 +169,20 @@ public class UserRoles extends TableImpl<UserRolesRecord> {
 
     @Override
     public List<ForeignKey<UserRolesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.FK_USER_ROLES_ROLE_ID, Keys.FK_USER_ROLES_USER_ID);
+        return Arrays.asList(Keys.FK_USER_ROLES_ASSIGNED_BY_USER_ID, Keys.FK_USER_ROLES_ROLE_ID, Keys.FK_USER_ROLES_USER_ID);
+    }
+
+    private transient UsersPath _fkUserRolesAssignedByUserId;
+
+    /**
+     * Get the implicit join path to the <code>USERS</code> table, via the
+     * <code>FK_USER_ROLES_ASSIGNED_BY_USER_ID</code> key.
+     */
+    public UsersPath fkUserRolesAssignedByUserId() {
+        if (_fkUserRolesAssignedByUserId == null)
+            _fkUserRolesAssignedByUserId = new UsersPath(this, Keys.FK_USER_ROLES_ASSIGNED_BY_USER_ID, null);
+
+        return _fkUserRolesAssignedByUserId;
     }
 
     private transient RolesPath _roles;
@@ -179,16 +197,17 @@ public class UserRoles extends TableImpl<UserRolesRecord> {
         return _roles;
     }
 
-    private transient UsersPath _users;
+    private transient UsersPath _fkUserRolesUserId;
 
     /**
-     * Get the implicit join path to the <code>USERS</code> table.
+     * Get the implicit join path to the <code>USERS</code> table, via the
+     * <code>FK_USER_ROLES_USER_ID</code> key.
      */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.FK_USER_ROLES_USER_ID, null);
+    public UsersPath fkUserRolesUserId() {
+        if (_fkUserRolesUserId == null)
+            _fkUserRolesUserId = new UsersPath(this, Keys.FK_USER_ROLES_USER_ID, null);
 
-        return _users;
+        return _fkUserRolesUserId;
     }
 
     @Override

@@ -239,16 +239,30 @@ public class Users extends TableImpl<UsersRecord> {
         return _urls;
     }
 
-    private transient UserRolesPath _userRoles;
+    private transient UserRolesPath _fkUserRolesAssignedByUserId;
 
     /**
-     * Get the implicit to-many join path to the <code>USER_ROLES</code> table
+     * Get the implicit to-many join path to the <code>USER_ROLES</code> table,
+     * via the <code>FK_USER_ROLES_ASSIGNED_BY_USER_ID</code> key
      */
-    public UserRolesPath userRoles() {
-        if (_userRoles == null)
-            _userRoles = new UserRolesPath(this, null, Keys.FK_USER_ROLES_USER_ID.getInverseKey());
+    public UserRolesPath fkUserRolesAssignedByUserId() {
+        if (_fkUserRolesAssignedByUserId == null)
+            _fkUserRolesAssignedByUserId = new UserRolesPath(this, null, Keys.FK_USER_ROLES_ASSIGNED_BY_USER_ID.getInverseKey());
 
-        return _userRoles;
+        return _fkUserRolesAssignedByUserId;
+    }
+
+    private transient UserRolesPath _fkUserRolesUserId;
+
+    /**
+     * Get the implicit to-many join path to the <code>USER_ROLES</code> table,
+     * via the <code>FK_USER_ROLES_USER_ID</code> key
+     */
+    public UserRolesPath fkUserRolesUserId() {
+        if (_fkUserRolesUserId == null)
+            _fkUserRolesUserId = new UserRolesPath(this, null, Keys.FK_USER_ROLES_USER_ID.getInverseKey());
+
+        return _fkUserRolesUserId;
     }
 
     @Override

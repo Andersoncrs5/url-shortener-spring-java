@@ -48,6 +48,7 @@ public class Indexes {
     public static final Index IDX_URLS_USER_CREATED = Internal.createIndex(DSL.name("IDX_URLS_USER_CREATED"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID, Urls.URLS.CREATED_AT }, false);
     public static final Index IDX_URLS_USER_ID = Internal.createIndex(DSL.name("IDX_URLS_USER_ID"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID }, false);
     public static final Index IDX_URLS_USER_STATUS = Internal.createIndex(DSL.name("IDX_URLS_USER_STATUS"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID, Urls.URLS.STATUS }, false);
+    public static final Index IDX_USER_ROLES_ASSIGNED_BY = Internal.createIndex(DSL.name("IDX_USER_ROLES_ASSIGNED_BY"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ASSIGNED_BY_USER_ID }, false);
     public static final Index IDX_USER_ROLES_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID }, false);
     public static final Index IDX_USER_ROLES_USER = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.USER_ID }, false);
     public static final Index IDX_USER_ROLES_USER_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID, UserRoles.USER_ROLES.USER_ID }, false);
