@@ -3,6 +3,7 @@ CREATE TABLE user_roles (
 
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
+    assigned_by_user_id BIGINT NOT NULL,
 
     CONSTRAINT fk_user_roles_user_id
         FOREIGN KEY (user_id)
@@ -13,6 +14,11 @@ CREATE TABLE user_roles (
         FOREIGN KEY (role_id)
         REFERENCES roles(id)
         ON DELETE CASCADE,
+
+    CONSTRAINT fk_user_roles_assigned_by_user_id
+        FOREIGN KEY (assigned_by_user_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -26,6 +32,9 @@ CREATE INDEX idx_user_roles_user
 
 CREATE INDEX idx_user_roles_role
     ON user_roles(role_id);
+
+CREATE INDEX idx_user_roles_assigned_by
+    ON user_roles(assigned_by_user_id);
 
 CREATE UNIQUE INDEX uk_user_roles_user_role
     ON user_roles(user_id, role_id);
