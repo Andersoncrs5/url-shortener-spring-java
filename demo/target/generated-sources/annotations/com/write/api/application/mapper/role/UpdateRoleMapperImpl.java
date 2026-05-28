@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-28T14:34:30-0300",
+    date = "2026-05-28T14:54:21-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -25,6 +25,8 @@ public class UpdateRoleMapperImpl implements UpdateRoleMapper {
         if ( dto.description() != null ) {
             model.setDescription( dto.description() );
         }
-        model.setActive( dto.active() );
+        if ( dto.active() != null ) {
+            model.setActive( dto.active() );
+        }
     }
 }

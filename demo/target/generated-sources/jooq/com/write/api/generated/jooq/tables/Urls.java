@@ -7,6 +7,7 @@ package com.write.api.generated.jooq.tables;
 import com.write.api.generated.jooq.DefaultSchema;
 import com.write.api.generated.jooq.Indexes;
 import com.write.api.generated.jooq.Keys;
+import com.write.api.generated.jooq.tables.UrlRedirectRules.UrlRedirectRulesPath;
 import com.write.api.generated.jooq.tables.UrlTagLinks.UrlTagLinksPath;
 import com.write.api.generated.jooq.tables.UrlTags.UrlTagsPath;
 import com.write.api.generated.jooq.tables.Users.UsersPath;
@@ -248,6 +249,19 @@ public class Urls extends TableImpl<UrlsRecord> {
             _users = new UsersPath(this, Keys.FK_URLS_USER, null);
 
         return _users;
+    }
+
+    private transient UrlRedirectRulesPath _urlRedirectRules;
+
+    /**
+     * Get the implicit to-many join path to the <code>URL_REDIRECT_RULES</code>
+     * table
+     */
+    public UrlRedirectRulesPath urlRedirectRules() {
+        if (_urlRedirectRules == null)
+            _urlRedirectRules = new UrlRedirectRulesPath(this, null, Keys.FK_URL_REDIRECT_RULES_URL.getInverseKey());
+
+        return _urlRedirectRules;
     }
 
     private transient UrlTagLinksPath _urlTagLinks;

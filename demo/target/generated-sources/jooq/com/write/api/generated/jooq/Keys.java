@@ -4,10 +4,14 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.Roles;
+import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
 import com.write.api.generated.jooq.tables.Users;
+import com.write.api.generated.jooq.tables.records.RolesRecord;
+import com.write.api.generated.jooq.tables.records.UrlRedirectRulesRecord;
 import com.write.api.generated.jooq.tables.records.UrlTagLinksRecord;
 import com.write.api.generated.jooq.tables.records.UrlTagsRecord;
 import com.write.api.generated.jooq.tables.records.UrlsRecord;
@@ -32,6 +36,10 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<RolesRecord> CONSTRAINT_4A = Internal.createUniqueKey(Roles.ROLES, DSL.name("CONSTRAINT_4A"), new TableField[] { Roles.ROLES.ID }, true);
+    public static final UniqueKey<RolesRecord> UK_ROLES_NAME = Internal.createUniqueKey(Roles.ROLES, DSL.name("UK_ROLES_NAME"), new TableField[] { Roles.ROLES.NAME }, true);
+    public static final UniqueKey<UrlRedirectRulesRecord> CONSTRAINT_F5 = Internal.createUniqueKey(UrlRedirectRules.URL_REDIRECT_RULES, DSL.name("CONSTRAINT_F5"), new TableField[] { UrlRedirectRules.URL_REDIRECT_RULES.ID }, true);
+    public static final UniqueKey<UrlRedirectRulesRecord> UK_URL_REDIRECT_RULES_HASH = Internal.createUniqueKey(UrlRedirectRules.URL_REDIRECT_RULES, DSL.name("UK_URL_REDIRECT_RULES_HASH"), new TableField[] { UrlRedirectRules.URL_REDIRECT_RULES.URL_ID, UrlRedirectRules.URL_REDIRECT_RULES.RULE_HASH }, true);
     public static final UniqueKey<UrlTagLinksRecord> CONSTRAINT_D = Internal.createUniqueKey(UrlTagLinks.URL_TAG_LINKS, DSL.name("CONSTRAINT_D"), new TableField[] { UrlTagLinks.URL_TAG_LINKS.ID }, true);
     public static final UniqueKey<UrlTagLinksRecord> UK_URL_TAG_LINKS_UNIQUE = Internal.createUniqueKey(UrlTagLinks.URL_TAG_LINKS, DSL.name("UK_URL_TAG_LINKS_UNIQUE"), new TableField[] { UrlTagLinks.URL_TAG_LINKS.URL_ID, UrlTagLinks.URL_TAG_LINKS.TAG_ID }, true);
     public static final UniqueKey<UrlTagsRecord> CONSTRAINT_F = Internal.createUniqueKey(UrlTags.URL_TAGS, DSL.name("CONSTRAINT_F"), new TableField[] { UrlTags.URL_TAGS.ID }, true);
@@ -47,6 +55,7 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<UrlRedirectRulesRecord, UrlsRecord> FK_URL_REDIRECT_RULES_URL = Internal.createForeignKey(UrlRedirectRules.URL_REDIRECT_RULES, DSL.name("FK_URL_REDIRECT_RULES_URL"), new TableField[] { UrlRedirectRules.URL_REDIRECT_RULES.URL_ID }, Keys.CONSTRAINT_2, new TableField[] { Urls.URLS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlTagLinksRecord, UsersRecord> FK_URL_TAG_LINKS_CREATED_BY = Internal.createForeignKey(UrlTagLinks.URL_TAG_LINKS, DSL.name("FK_URL_TAG_LINKS_CREATED_BY"), new TableField[] { UrlTagLinks.URL_TAG_LINKS.CREATED_BY }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.SET_NULL, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlTagLinksRecord, UrlTagsRecord> FK_URL_TAG_LINKS_TAG = Internal.createForeignKey(UrlTagLinks.URL_TAG_LINKS, DSL.name("FK_URL_TAG_LINKS_TAG"), new TableField[] { UrlTagLinks.URL_TAG_LINKS.TAG_ID }, Keys.CONSTRAINT_F, new TableField[] { UrlTags.URL_TAGS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlTagLinksRecord, UrlsRecord> FK_URL_TAG_LINKS_URL = Internal.createForeignKey(UrlTagLinks.URL_TAG_LINKS, DSL.name("FK_URL_TAG_LINKS_URL"), new TableField[] { UrlTagLinks.URL_TAG_LINKS.URL_ID }, Keys.CONSTRAINT_2, new TableField[] { Urls.URLS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);

@@ -4,6 +4,8 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.Roles;
+import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
@@ -15,6 +17,16 @@ import com.write.api.generated.jooq.tables.Users;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>ROLES</code>.
+     */
+    public static final Roles ROLES = Roles.ROLES;
+
+    /**
+     * The table <code>URL_REDIRECT_RULES</code>.
+     */
+    public static final UrlRedirectRules URL_REDIRECT_RULES = UrlRedirectRules.URL_REDIRECT_RULES;
 
     /**
      * The table <code>URL_TAG_LINKS</code>.
