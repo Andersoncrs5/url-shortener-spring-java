@@ -7,6 +7,7 @@ import com.write.api.core.domain.enums.MatchTypeEnum;
 import com.write.api.core.domain.enums.OperatingSystemEnum;
 import com.write.api.core.domain.model.*;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.shared.utils.Base62;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,7 @@ public class HelpRepositoryTest {
     JooqUrlRepository urlRepository;
     JooqUrlTagLinkRepository urlTagLinkRepository;
     JooqUrlRedirectRuleRepository urlRedirectRuleRepository;
+    JooqRoleRepository jooqRoleRepository;
 
     public UserModel createUser() {
         UserModel user = new UserModel();
@@ -155,4 +157,37 @@ public class HelpRepositoryTest {
         return urlRedirectRuleRepository.insert(rule);
     }
 
+    public RoleModel createRole() {
+        long id = generator.nextId();
+        String name = "ROLE_" + Base62.encode(id);
+
+        RoleModel role = new RoleModel();
+        role.setName(name);
+        role.setDescription("System administrator");
+        role.setActive(true);
+
+        RoleModel saved = jooqRoleRepository.insert(role);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getName()).isEqualTo(name);
+        assertThat(saved.getDescription()).isEqualTo("System administrator");
+        assertThat(saved.isActive()).isTrue();
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getUpdatedAt()).isNotNull();
+
+        return saved;
+    }
+
+    public String generateRandomChars(int size) {
+        StringBuilder builder = new StringBuilder();
+
+        while (builder.length() < size) {
+            builder.append(
+                    Base62.encode(generator.nextId())
+            );
+        }
+
+        return builder.substring(0, size);
+    }
 }
