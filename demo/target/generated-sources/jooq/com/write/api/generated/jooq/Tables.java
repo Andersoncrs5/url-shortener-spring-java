@@ -9,6 +9,7 @@ import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
+import com.write.api.generated.jooq.tables.UserRoles;
 import com.write.api.generated.jooq.tables.Users;
 
 
@@ -42,6 +43,11 @@ public class Tables {
      * The table <code>URLS</code>.
      */
     public static final Urls URLS = Urls.URLS;
+
+    /**
+     * The table <code>USER_ROLES</code>.
+     */
+    public static final UserRoles USER_ROLES = UserRoles.USER_ROLES;
 
     /**
      * The table <code>USERS</code>.

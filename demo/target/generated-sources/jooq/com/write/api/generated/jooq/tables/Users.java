@@ -9,6 +9,7 @@ import com.write.api.generated.jooq.Keys;
 import com.write.api.generated.jooq.tables.UrlTagLinks.UrlTagLinksPath;
 import com.write.api.generated.jooq.tables.UrlTags.UrlTagsPath;
 import com.write.api.generated.jooq.tables.Urls.UrlsPath;
+import com.write.api.generated.jooq.tables.UserRoles.UserRolesPath;
 import com.write.api.generated.jooq.tables.records.UsersRecord;
 
 import java.time.LocalDateTime;
@@ -236,6 +237,18 @@ public class Users extends TableImpl<UsersRecord> {
             _urls = new UrlsPath(this, null, Keys.FK_URLS_USER.getInverseKey());
 
         return _urls;
+    }
+
+    private transient UserRolesPath _userRoles;
+
+    /**
+     * Get the implicit to-many join path to the <code>USER_ROLES</code> table
+     */
+    public UserRolesPath userRoles() {
+        if (_userRoles == null)
+            _userRoles = new UserRolesPath(this, null, Keys.FK_USER_ROLES_USER_ID.getInverseKey());
+
+        return _userRoles;
     }
 
     @Override

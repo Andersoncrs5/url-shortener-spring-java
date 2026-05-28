@@ -9,6 +9,7 @@ import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
+import com.write.api.generated.jooq.tables.UserRoles;
 
 import org.jooq.Index;
 import org.jooq.OrderField;
@@ -47,5 +48,9 @@ public class Indexes {
     public static final Index IDX_URLS_USER_CREATED = Internal.createIndex(DSL.name("IDX_URLS_USER_CREATED"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID, Urls.URLS.CREATED_AT }, false);
     public static final Index IDX_URLS_USER_ID = Internal.createIndex(DSL.name("IDX_URLS_USER_ID"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID }, false);
     public static final Index IDX_URLS_USER_STATUS = Internal.createIndex(DSL.name("IDX_URLS_USER_STATUS"), Urls.URLS, new OrderField[] { Urls.URLS.USER_ID, Urls.URLS.STATUS }, false);
+    public static final Index IDX_USER_ROLES_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID }, false);
+    public static final Index IDX_USER_ROLES_USER = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.USER_ID }, false);
+    public static final Index IDX_USER_ROLES_USER_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID, UserRoles.USER_ROLES.USER_ID }, false);
     public static final Index UK_RULE_HASH = Internal.createIndex(DSL.name("UK_RULE_HASH"), UrlRedirectRules.URL_REDIRECT_RULES, new OrderField[] { UrlRedirectRules.URL_REDIRECT_RULES.RULE_HASH }, true);
+    public static final Index UK_USER_ROLES_USER_ROLE = Internal.createIndex(DSL.name("UK_USER_ROLES_USER_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.USER_ID, UserRoles.USER_ROLES.ROLE_ID }, true);
 }

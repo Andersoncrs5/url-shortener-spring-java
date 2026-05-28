@@ -9,12 +9,14 @@ import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
+import com.write.api.generated.jooq.tables.UserRoles;
 import com.write.api.generated.jooq.tables.Users;
 import com.write.api.generated.jooq.tables.records.RolesRecord;
 import com.write.api.generated.jooq.tables.records.UrlRedirectRulesRecord;
 import com.write.api.generated.jooq.tables.records.UrlTagLinksRecord;
 import com.write.api.generated.jooq.tables.records.UrlTagsRecord;
 import com.write.api.generated.jooq.tables.records.UrlsRecord;
+import com.write.api.generated.jooq.tables.records.UserRolesRecord;
 import com.write.api.generated.jooq.tables.records.UsersRecord;
 
 import org.jooq.ForeignKey;
@@ -47,6 +49,7 @@ public class Keys {
     public static final UniqueKey<UrlTagsRecord> UK_URL_TAG_SLUG = Internal.createUniqueKey(UrlTags.URL_TAGS, DSL.name("UK_URL_TAG_SLUG"), new TableField[] { UrlTags.URL_TAGS.USER_ID, UrlTags.URL_TAGS.SLUG }, true);
     public static final UniqueKey<UrlsRecord> CONSTRAINT_2 = Internal.createUniqueKey(Urls.URLS, DSL.name("CONSTRAINT_2"), new TableField[] { Urls.URLS.ID }, true);
     public static final UniqueKey<UrlsRecord> UK_URLS_SHORT_CODE = Internal.createUniqueKey(Urls.URLS, DSL.name("UK_URLS_SHORT_CODE"), new TableField[] { Urls.URLS.SHORT_CODE }, true);
+    public static final UniqueKey<UserRolesRecord> CONSTRAINT_C = Internal.createUniqueKey(UserRoles.USER_ROLES, DSL.name("CONSTRAINT_C"), new TableField[] { UserRoles.USER_ROLES.ID }, true);
     public static final UniqueKey<UsersRecord> CONSTRAINT_4 = Internal.createUniqueKey(Users.USERS, DSL.name("CONSTRAINT_4"), new TableField[] { Users.USERS.ID }, true);
     public static final UniqueKey<UsersRecord> UK_USERS_EMAIL = Internal.createUniqueKey(Users.USERS, DSL.name("UK_USERS_EMAIL"), new TableField[] { Users.USERS.EMAIL }, true);
     public static final UniqueKey<UsersRecord> UK_USERS_NAME = Internal.createUniqueKey(Users.USERS, DSL.name("UK_USERS_NAME"), new TableField[] { Users.USERS.NAME }, true);
@@ -62,4 +65,6 @@ public class Keys {
     public static final ForeignKey<UrlTagsRecord, UrlTagsRecord> FK_URL_TAGS_PARENT = Internal.createForeignKey(UrlTags.URL_TAGS, DSL.name("FK_URL_TAGS_PARENT"), new TableField[] { UrlTags.URL_TAGS.PARENT_ID }, Keys.CONSTRAINT_F, new TableField[] { UrlTags.URL_TAGS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlTagsRecord, UsersRecord> FK_URL_TAGS_USER = Internal.createForeignKey(UrlTags.URL_TAGS, DSL.name("FK_URL_TAGS_USER"), new TableField[] { UrlTags.URL_TAGS.USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlsRecord, UsersRecord> FK_URLS_USER = Internal.createForeignKey(Urls.URLS, DSL.name("FK_URLS_USER"), new TableField[] { Urls.URLS.USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
+    public static final ForeignKey<UserRolesRecord, RolesRecord> FK_USER_ROLES_ROLE_ID = Internal.createForeignKey(UserRoles.USER_ROLES, DSL.name("FK_USER_ROLES_ROLE_ID"), new TableField[] { UserRoles.USER_ROLES.ROLE_ID }, Keys.CONSTRAINT_4A, new TableField[] { Roles.ROLES.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
+    public static final ForeignKey<UserRolesRecord, UsersRecord> FK_USER_ROLES_USER_ID = Internal.createForeignKey(UserRoles.USER_ROLES, DSL.name("FK_USER_ROLES_USER_ID"), new TableField[] { UserRoles.USER_ROLES.USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
 }

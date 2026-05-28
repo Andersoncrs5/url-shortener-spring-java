@@ -9,6 +9,7 @@ import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
+import com.write.api.generated.jooq.tables.UserRoles;
 import com.write.api.generated.jooq.tables.Users;
 
 import java.util.Arrays;
@@ -59,6 +60,11 @@ public class DefaultSchema extends SchemaImpl {
     public final Urls URLS = Urls.URLS;
 
     /**
+     * The table <code>USER_ROLES</code>.
+     */
+    public final UserRoles USER_ROLES = UserRoles.USER_ROLES;
+
+    /**
      * The table <code>USERS</code>.
      */
     public final Users USERS = Users.USERS;
@@ -84,6 +90,7 @@ public class DefaultSchema extends SchemaImpl {
             UrlTagLinks.URL_TAG_LINKS,
             UrlTags.URL_TAGS,
             Urls.URLS,
+            UserRoles.USER_ROLES,
             Users.USERS
         );
     }
