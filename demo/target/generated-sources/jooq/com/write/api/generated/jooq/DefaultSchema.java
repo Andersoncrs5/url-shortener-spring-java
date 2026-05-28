@@ -4,6 +4,8 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.Roles;
+import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
 import com.write.api.generated.jooq.tables.Urls;
@@ -30,6 +32,16 @@ public class DefaultSchema extends SchemaImpl {
      * The reference instance of <code>DEFAULT_SCHEMA</code>
      */
     public static final DefaultSchema DEFAULT_SCHEMA = new DefaultSchema();
+
+    /**
+     * The table <code>ROLES</code>.
+     */
+    public final Roles ROLES = Roles.ROLES;
+
+    /**
+     * The table <code>URL_REDIRECT_RULES</code>.
+     */
+    public final UrlRedirectRules URL_REDIRECT_RULES = UrlRedirectRules.URL_REDIRECT_RULES;
 
     /**
      * The table <code>URL_TAG_LINKS</code>.
@@ -67,6 +79,8 @@ public class DefaultSchema extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            Roles.ROLES,
+            UrlRedirectRules.URL_REDIRECT_RULES,
             UrlTagLinks.URL_TAG_LINKS,
             UrlTags.URL_TAGS,
             Urls.URLS,
