@@ -51,7 +51,7 @@ class RefreshTokenServiceTest {
                 "new-access-token",
                 "new-refresh-token",
                 user,
-                Collections.emptySet()
+                Collections.emptyList()
         );
     }
 

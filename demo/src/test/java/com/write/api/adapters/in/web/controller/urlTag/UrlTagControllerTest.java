@@ -33,13 +33,13 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldCreateUrlTag() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         this.helper.createUrlTag(user);
     }
 
     @Test
     void shouldReturn400BecauseIdempotentKeyIsMissed() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         var key = UUID.randomUUID().toString();
 
         CreateUrlTagDTO dto = new CreateUrlTagDTO(
@@ -60,7 +60,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn409BecauseNameAlready() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         var key = UUID.randomUUID().toString();
 
@@ -96,7 +96,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn409BecauseSlugAlready() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         var key = UUID.randomUUID().toString();
 
@@ -133,7 +133,7 @@ public class UrlTagControllerTest {
     // DELETE
     @Test
     void shouldDelUrlTag() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         var key = UUID.randomUUID().toString();
 
@@ -158,7 +158,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn404DelUrlTag() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         var key = UUID.randomUUID().toString();
 
         MvcResult result = mockMvc.perform(delete(URL + "/" + (user.tokens().user().getId()))
@@ -183,7 +183,7 @@ public class UrlTagControllerTest {
     // PATCH
     @Test
     void shouldUpdateUrlTag() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO created = this.helper.createUrlTag(user);
 
         var key = UUID.randomUUID().toString();
@@ -245,7 +245,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn404WhenUpdateUrlTagNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -289,7 +289,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn409WhenUpdateSlugAlreadyExists() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlTagResponseDTO first = this.helper.createUrlTag(user);
         UrlTagResponseDTO second = this.helper.createUrlTag(user);
@@ -336,7 +336,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn409WhenUpdateNameAlreadyExists() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlTagResponseDTO first = this.helper.createUrlTag(user);
         UrlTagResponseDTO second = this.helper.createUrlTag(user);
@@ -383,7 +383,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn409WhenParentIdIsSameTagId() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlTagResponseDTO tag = this.helper.createUrlTag(user);
 
@@ -429,7 +429,7 @@ public class UrlTagControllerTest {
 
     @Test
     void shouldReturn400WhenIdempotencyKeyIsMissingOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlTagResponseDTO tag = this.helper.createUrlTag(user);
 

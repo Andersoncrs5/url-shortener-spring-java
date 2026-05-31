@@ -38,13 +38,13 @@ public class UrlControllerTest {
 
     @Test
     void shouldCreateUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         this.helper.createUrl(user, null);
     }
 
     @Test
     void shouldDeleteSoftUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -83,7 +83,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailDeleteSoftUrlBecauseNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -109,7 +109,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldDeleteForceUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -142,7 +142,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailDeleteForceUrlBecauseKeyIsMissed() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         mockMvc.perform(delete(URL + "/" + url.id() + "/force")
@@ -152,7 +152,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailDeleteForceUrlBecauseNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -187,7 +187,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailDeleteForceUrlBecauseIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -212,7 +212,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldUpdateUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO created = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -272,7 +272,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailUpdateUrlBecauseIdempotencyKeyIsMissed() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO created = this.helper.createUrl(user, null);
 
         UpdateUrlDTO dto = new UpdateUrlDTO(
@@ -298,7 +298,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailUpdateUrlBecauseUrlNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -346,7 +346,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailUpdateUrlBecauseIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -399,7 +399,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailUpdateUrlBecauseTitleIsTooLong() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO created = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -430,7 +430,7 @@ public class UrlControllerTest {
 
     @Test
     void shouldFailUpdateUrlBecausePasswordIsTooShort() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO created = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();

@@ -38,7 +38,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldLinkTagToUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         this.helper.createLinkTagToUrl(user, url, urlTag);
@@ -46,7 +46,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseUrlNotFoundTheLinkTagToUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
 
         var key = UUID.randomUUID().toString();
@@ -80,7 +80,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseUrlTagNotFoundTheLinkTagToUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -114,7 +114,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseTagAlreadyExistsInUrlTheLinkTagToUrl() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         this.helper.createLinkTagToUrl(user, url, urlTag);
@@ -149,7 +149,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailLinkTagToUrlBecauseIdempotencyKeyIsMissing() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
 
@@ -187,7 +187,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailLinkTagToUrlBecauseUrlIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
 
         var key = UUID.randomUUID().toString();
@@ -221,7 +221,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailLinkTagToUrlBecauseNoteExceededLimit() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
 
@@ -258,7 +258,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailLinkTagToUrlBecauseTagIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         var key = UUID.randomUUID().toString();
@@ -281,7 +281,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailLinkTagToUrlBecausePrimaryTagIsNull() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
 
@@ -307,7 +307,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldDeleteUrlTagLink() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlResponseDTO url =
                 this.helper.createUrl(user, null);
@@ -354,7 +354,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailDeleteUrlTagLinkBecauseNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -392,7 +392,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailDeleteUrlTagLinkBecauseIdempotencyKeyIsMissing() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UrlResponseDTO url =
                 this.helper.createUrl(user, null);
@@ -415,7 +415,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailDeleteUrlTagLinkBecauseIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -456,7 +456,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldUpdateUrlTagLink() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO tag = this.helper.createUrlTag(user);
         UrlTagLinkDTO link = this.helper.createLinkTagToUrl(user, url, tag);
@@ -506,7 +506,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseUrlTagLinkNotFound() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -547,7 +547,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseIdempotencyKeyIsMissing() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlTagResponseDTO tag = this.helper.createUrlTag(user);
         UrlTagLinkDTO link = this.helper.createLinkTagToUrl(user, url, tag);
@@ -586,7 +586,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UpdateUrlTagLinkDTO dto = new UpdateUrlTagLinkDTO(
                 (short) 2,
@@ -618,7 +618,7 @@ public class UrlTagLinkControllerTest {
 
     @Test
     void shouldFailBecauseUrlNotFoundInUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO tag = this.helper.createUrlTag(user);
         UrlTagLinkDTO link = this.helper.createLinkTagToUrl(user, this.helper.createUrl(user, null), tag);
 

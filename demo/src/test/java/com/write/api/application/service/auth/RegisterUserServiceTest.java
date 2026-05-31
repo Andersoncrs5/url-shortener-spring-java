@@ -7,6 +7,7 @@ import com.write.api.application.shared.Result;
 import com.write.api.infrastructure.config.security.jwt.TokenService;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.CreateUserUseCase;
+import com.write.api.ports.out.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RegisterUserServiceTest {
+
+    @Mock
+    private IUserRepository repository;
 
     @Mock
     private CreateUserUseCase createUser;
@@ -56,7 +60,7 @@ class RegisterUserServiceTest {
                 "access-token",
                 "refresh-token",
                 user,
-                Collections.emptySet()
+                Collections.emptyList()
         );
     }
 
@@ -65,6 +69,7 @@ class RegisterUserServiceTest {
         when(registerUserMapper.toDomain(dto)).thenReturn(user);
         when(createUser.create(user)).thenReturn(Result.success(user, 201));
         when(tokenService.createTokens(user)).thenReturn(response);
+        when(repository.save(any())).thenReturn(user);
 
         Result<AuthTokenResponseDTO> result = service.execute(dto);
 

@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +51,7 @@ public class LoginUserServiceTest {
                         "access-token",
                         "refresh-token",
                         user,
-                        user.getRoles()
+                        List.of("USER")
                 );
     }
 

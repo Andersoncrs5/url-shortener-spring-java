@@ -42,14 +42,14 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldCreateRule() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         this.helper.createUrlRedirectRule(user, url);
     }
 
     @Test
     void shouldFailBecauseUrlNotFoundTheCreateRule() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         var key = UUID.randomUUID().toString();
 
@@ -90,7 +90,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRuleAlreadyExistsTheCreateRule() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlRedirectRuleDTO rule = this.helper.createUrlRedirectRule(user, url);
 
@@ -133,7 +133,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseIdempotencyKeyIsMissing() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         CreateUrlRedirectRuleDTO dto = new CreateUrlRedirectRuleDTO(
@@ -184,7 +184,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseUrlIdIsInvalid() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         CreateUrlRedirectRuleDTO dto = new CreateUrlRedirectRuleDTO(
                 0L,
@@ -221,7 +221,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRedirectUrlIsTooLong() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         String longUrl = "https://example.com/" + "a".repeat(2050);
@@ -261,7 +261,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseCountryCodeTooLong() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         CreateUrlRedirectRuleDTO dto = new CreateUrlRedirectRuleDTO(
@@ -299,7 +299,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldDeleteRuleSuccessfully() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         UrlRedirectRuleDTO rule =
@@ -330,7 +330,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRuleNotFoundOnDelete() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -368,7 +368,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseIdempotencyKeyIsMissingOnDelete() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         mockMvc.perform(delete(URL + "/" + idGen.nextId())
                         .header("Authorization", "Bearer " + user.tokens().token()))
@@ -377,7 +377,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseIdIsInvalidOnDelete() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -402,7 +402,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldUpdateRuleSuccessfully() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlRedirectRuleDTO rule = this.helper.createUrlRedirectRule(user, url);
 
@@ -459,7 +459,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRuleNotFoundOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         String key = UUID.randomUUID().toString();
 
@@ -502,7 +502,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRuleAlreadyExistsOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
 
         UrlRedirectRuleDTO rule1 =
@@ -593,7 +593,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseIdempotencyKeyIsMissingOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlRedirectRuleDTO rule = this.helper.createUrlRedirectRule(user, url);
 
@@ -643,7 +643,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseIdIsInvalidOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
 
         UpdateUrlRedirectRuleDTO dto = new UpdateUrlRedirectRuleDTO(
                 "US",
@@ -681,7 +681,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseRedirectUrlIsTooLongOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlRedirectRuleDTO rule = this.helper.createUrlRedirectRule(user, url);
 
@@ -724,7 +724,7 @@ public class UrlRedirectRuleControllerTest {
 
     @Test
     void shouldFailBecauseCountryCodeTooLongOnUpdate() throws Exception {
-        UserTest user = this.helper.loginMaster();
+        UserTest user = this.helper.createNewUser();
         UrlResponseDTO url = this.helper.createUrl(user, null);
         UrlRedirectRuleDTO rule = this.helper.createUrlRedirectRule(user, url);
 
