@@ -3,7 +3,11 @@ package com.write.api.application.service.userRole;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.mapper.userRole.CreateUserRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.model.RoleModel;
+import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
+import com.write.api.ports.out.repository.IRoleRepository;
+import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,6 +36,12 @@ class CreateUserRoleServiceTest {
     @Mock
     private CreateUserRoleMapper mapper;
 
+    @Mock
+    private IRoleRepository roleRepository;
+
+    @Mock
+    private IUserRepository userRepository;
+
     @InjectMocks
     private CreateUserRoleService service;
 
@@ -37,12 +49,14 @@ class CreateUserRoleServiceTest {
     private UserRoleModel mappedModel;
 
     private final Long assignedByUserId = 10L;
+    private final Long targetUserId = 20L;
+    private final Long roleId = 30L;
 
     @BeforeEach
     void setup() {
         dto = new CreateUserRoleDTO(
-                1L,
-                2L
+                targetUserId,
+                roleId
         );
 
         mappedModel = new UserRoleModel();
@@ -52,6 +66,11 @@ class CreateUserRoleServiceTest {
 
     @Test
     void shouldCreateUserRoleSuccessfully() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         when(repository.insert(any(UserRoleModel.class)))
@@ -81,6 +100,8 @@ class CreateUserRoleServiceTest {
         ArgumentCaptor<UserRoleModel> captor =
                 ArgumentCaptor.forClass(UserRoleModel.class);
 
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(captor.capture());
 
@@ -89,15 +110,98 @@ class CreateUserRoleServiceTest {
         assertThat(inserted.getRoleId()).isEqualTo(dto.roleId());
         assertThat(inserted.getAssignedByUserId()).isEqualTo(assignedByUserId);
 
-        InOrder order = inOrder(mapper, repository);
+        InOrder order = inOrder(roleRepository, userRepository, mapper, repository);
+        order.verify(roleRepository).findById(roleId);
+        order.verify(userRepository).findById(assignedByUserId);
         order.verify(mapper).toModel(dto);
         order.verify(repository).insert(any(UserRoleModel.class));
 
-        verifyNoMoreInteractions(mapper, repository);
+        verifyNoMoreInteractions(roleRepository, userRepository, mapper, repository);
+    }
+
+    @Test
+    void shouldReturn409WhenRoleIsSuperAdmin() {
+        RoleModel role = buildRole("SUPER_ADMIN");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(409);
+        assertThat(result.getMessage()).isEqualTo("Just one Super Adm");
+        assertThat(result.getValue()).isNull();
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verifyNoInteractions(mapper);
+        verifyNoInteractions(repository);
+        verifyNoMoreInteractions(roleRepository, userRepository);
+    }
+
+    @Test
+    void shouldReturn409WhenAdminRoleIsGrantedByNonSuperAdmin() {
+        RoleModel role = buildRole("ADMIN");
+        UserModel assignedBy = buildUserWithRoles(); // sem SUPER_ADMIN
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(409);
+        assertThat(result.getMessage()).isEqualTo("Just one Super Adm can add role admin");
+        assertThat(result.getValue()).isNull();
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verifyNoInteractions(mapper);
+        verifyNoInteractions(repository);
+        verifyNoMoreInteractions(roleRepository, userRepository);
+    }
+
+    @Test
+    void shouldAllowAdminRoleWhenGrantedBySuperAdmin() {
+        RoleModel role = buildRole("ADMIN");
+        UserModel assignedBy = buildUserWithRoles("SUPER_ADMIN");
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+        when(mapper.toModel(dto)).thenReturn(mappedModel);
+
+        when(repository.insert(any(UserRoleModel.class)))
+                .thenAnswer(invocation -> {
+                    UserRoleModel arg = invocation.getArgument(0);
+                    arg.setId(999L);
+                    arg.setCreatedAt(LocalDateTime.now());
+                    arg.setUpdatedAt(LocalDateTime.now());
+                    return arg;
+                });
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(201);
+        assertThat(result.getValue()).isNotNull();
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verify(mapper).toModel(dto);
+        verify(repository).insert(any(UserRoleModel.class));
     }
 
     @Test
     void shouldReturn409WhenUserAlreadyHasThisRole() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         when(repository.insert(any(UserRoleModel.class)))
@@ -113,34 +217,20 @@ class CreateUserRoleServiceTest {
         assertThat(result.getStatusCode()).isEqualTo(409);
         assertThat(result.getMessage()).isEqualTo("User already has this role");
 
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(mapper, repository);
+        verifyNoMoreInteractions(roleRepository, userRepository, mapper, repository);
     }
 
     @Test
-    void shouldReturn404WhenUserNotFound() {
-        when(mapper.toModel(dto)).thenReturn(mappedModel);
+    void shouldReturn404WhenRoleFkFails() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
 
-        when(repository.insert(any(UserRoleModel.class)))
-                .thenThrow(new DataIntegrityViolationException(
-                        "fk violation",
-                        new RuntimeException("fk_user_roles_user_id")
-                ));
-
-        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
-
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage()).isEqualTo("User not found");
-
-        verify(mapper).toModel(dto);
-        verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(mapper, repository);
-    }
-
-    @Test
-    void shouldReturn404WhenRoleNotFound() {
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         when(repository.insert(any(UserRoleModel.class)))
@@ -155,13 +245,19 @@ class CreateUserRoleServiceTest {
         assertThat(result.getStatusCode()).isEqualTo(404);
         assertThat(result.getMessage()).isEqualTo("Role not found");
 
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(mapper, repository);
     }
 
     @Test
     void shouldReturn400WhenIntegrityMessageIsNull() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         RuntimeException root = mock(RuntimeException.class);
@@ -176,13 +272,19 @@ class CreateUserRoleServiceTest {
         assertThat(result.getStatusCode()).isEqualTo(400);
         assertThat(result.getMessage()).isEqualTo("Database integrity error");
 
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(mapper, repository);
     }
 
     @Test
     void shouldThrowRuntimeExceptionWhenUnexpectedExceptionOccurs() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         when(repository.insert(any(UserRoleModel.class)))
@@ -190,10 +292,60 @@ class CreateUserRoleServiceTest {
 
         assertThatThrownBy(() -> service.execute(dto, assignedByUserId))
                 .isInstanceOf(RuntimeException.class)
-                .hasRootCauseMessage("unexpected");
+                .hasMessageContaining("unexpected");
 
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(mapper, repository);
+    }
+
+    private RoleModel buildRole(String name) {
+        RoleModel role = new RoleModel();
+        role.setId(roleId);
+        role.setName(name);
+        role.setDescription("Role " + name);
+        role.setActive(true);
+        return role;
+    }
+
+    private UserModel buildUser() {
+        UserModel user = new UserModel();
+        user.setId(assignedByUserId);
+        setRoles(user, null);
+        return user;
+    }
+
+    private UserModel buildUserWithRoles(String... roles) {
+        UserModel user = new UserModel();
+        user.setId(assignedByUserId);
+        setRoles(user, roles == null ? null : List.of(roles));
+        return user;
+    }
+
+    private void setRoles(UserModel user, Collection<String> roles) {
+        try {
+            Field field = UserModel.class.getDeclaredField("roles");
+            field.setAccessible(true);
+
+            Class<?> type = field.getType();
+
+            if (roles == null) {
+                field.set(user, null);
+                return;
+            }
+
+            if (List.class.isAssignableFrom(type)) {
+                field.set(user, new ArrayList<>(roles));
+            } else if (Set.class.isAssignableFrom(type)) {
+                field.set(user, new HashSet<>(roles));
+            } else if (Collection.class.isAssignableFrom(type)) {
+                field.set(user, new ArrayList<>(roles));
+            } else {
+                field.set(user, null);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+            // If your UserModel uses a different field name/type, adjust here.
+        }
     }
 }

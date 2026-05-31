@@ -3,8 +3,12 @@ package com.write.api.application.service.userRole;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.mapper.userRole.CreateUserRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.model.RoleModel;
+import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
 import com.write.api.ports.in.userRole.CreateUserRoleUseCase;
+import com.write.api.ports.out.repository.IRoleRepository;
+import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import com.write.api.shared.db.DatabaseConstraintHandler;
 import com.write.api.shared.tx.ResultTransaction;
@@ -19,6 +23,9 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreateUserRoleService implements CreateUserRoleUseCase {
     IUserRoleRepository repository;
+    IUserRepository userRepository;
+
+    IRoleRepository roleRepository;
     CreateUserRoleMapper mapper;
 
     @Override
@@ -27,13 +34,37 @@ public class CreateUserRoleService implements CreateUserRoleUseCase {
             CreateUserRoleDTO dto,
             Long assignedByUserId
     ) {
+        RoleModel role = roleRepository.findById(dto.roleId()).orElse(null);
+        if (role == null)
+            return Result.failure("Role not found", 404);
+
+        UserModel assignedBy = userRepository.findById(assignedByUserId).orElse(null);
+        if (assignedBy == null)
+            return Result.failure("Assigned user not found", 404);
+
+        var roles = repository.findRoleByUserId(assignedByUserId);
+
+        if ("SUPER_ADMIN".equals(role.getName())) {
+            return Result.failure("Just one Super Adm", 409);
+        }
+
+        boolean isSuperAdmin = roles != null && !roles.isEmpty()
+                && roles.contains("SUPER_ADMIN");
+
+        if ("ADMIN".equals(role.getName()) && !isSuperAdmin) {
+            return Result.failure(
+                    "Just one Super Adm can add role admin",
+                    409
+            );
+        }
+
         UserRoleModel model = mapper.toModel(dto);
         model.setAssignedByUserId(assignedByUserId);
 
         try {
             UserRoleModel inserted = repository.insert(model);
-
             return Result.success(inserted, 201);
+
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
 
@@ -42,24 +73,19 @@ public class CreateUserRoleService implements CreateUserRoleUseCase {
             }
 
             if (message.contains("uk_user_roles_user_role")) {
-                return Result.failure(
-                        "User already has this role",
-                        409
-                );
+                return Result.failure("User already has this role", 409);
             }
 
             if (message.contains("fk_user_roles_user_id")) {
-                return Result.failure(
-                        "User not found",
-                        404
-                );
+                return Result.failure("User not found", 404);
+            }
+
+            if (message.contains("fk_user_roles_assigned_by_user_id")) {
+                return Result.failure("Assigned user not found", 404);
             }
 
             if (message.contains("fk_user_roles_role_id")) {
-                return Result.failure(
-                        "Role not found",
-                        404
-                );
+                return Result.failure("Role not found", 404);
             }
 
             return DatabaseConstraintHandler.handle(e);

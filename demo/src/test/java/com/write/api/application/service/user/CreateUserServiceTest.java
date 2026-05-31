@@ -93,7 +93,7 @@ class CreateUserServiceTest {
                 .thenReturn("encoded");
 
         when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("duplicate key value violates uk_user_email");
+                .thenReturn("duplicate key ruleValue violates uk_user_email");
 
         when(repository.insert(any()))
                 .thenThrow(ex);
