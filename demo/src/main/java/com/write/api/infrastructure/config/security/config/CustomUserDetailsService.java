@@ -3,6 +3,7 @@ package com.write.api.infrastructure.config.security.config;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.out.repository.IUserRepository;
+import com.write.api.ports.out.repository.IUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -17,18 +18,21 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final IUserRepository userRepository;
+    private final IUserRoleRepository userRoleRepository;
 
     @Override
-    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+    public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
         UserModel user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        var roles = userRoleRepository.findRoleByUserId(user.getId());
 
         return new UserPrincipal(
                 user.getId(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.getRoles().stream()
-                        .map(SimpleGrantedAuthority::new)
+                roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .toList(),
                 user
         );
