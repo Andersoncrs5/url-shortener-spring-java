@@ -1,4 +1,9 @@
 spring:
+  super-adm:
+    name: superadm
+    email: superadm@gmail.com
+    password: 12345678
+
   application:
     name: demo
 
