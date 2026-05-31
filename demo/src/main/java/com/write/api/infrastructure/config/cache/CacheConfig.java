@@ -57,12 +57,12 @@ public class CacheConfig {
                                 RedisSerializer.json()
                         )
                 )
-                .computePrefixWith(cacheName -> "blog-write-api::" + cacheName + "::")
+                .computePrefixWith(cacheName -> "url-shortner-write-api::" + cacheName + "::")
                 .disableCachingNullValues();
 
         Map<String, RedisCacheConfiguration> configs = new HashMap<>();
 
-        configs.put("category",
+        configs.put("url",
                 defaultConfig.entryTtl(Duration.ofMinutes(15)));
 
         configs.put("user",
