@@ -4,7 +4,9 @@ import com.write.api.adapters.out.persistence.mapper.UserRepositoryMapper;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.ports.out.repository.IUserRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -16,11 +18,12 @@ import static com.write.api.generated.jooq.tables.Users.USERS;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUserRepository implements IUserRepository {
 
-    private final DSLContext dsl;
-    private final SnowflakeIdGenerator idGen;
-    private final UserRepositoryMapper mapper;
+    DSLContext dsl;
+    SnowflakeIdGenerator idGen;
+    UserRepositoryMapper mapper;
 
     @Override
     public UserModel save(UserModel user) {
@@ -29,8 +32,8 @@ public class JooqUserRepository implements IUserRepository {
         int rows = dsl.update(USERS)
                 .set(USERS.NAME, user.getName())
                 .set(USERS.EMAIL, user.getEmail())
-                .set(USERS.REFRESH_TOKEN ,user.getRefreshToken())
-                .set(USERS.PASSWORD_HASH , user.getPasswordHash())
+                .set(USERS.REFRESH_TOKEN, user.getRefreshToken())
+                .set(USERS.PASSWORD_HASH, user.getPasswordHash())
                 .set(USERS.ACTIVE, user.isActive())
                 .set(USERS.EMAIL_VERIFIED, user.isEmailVerified())
                 .set(USERS.LAST_LOGIN_AT, user.getLastLoginAt())
