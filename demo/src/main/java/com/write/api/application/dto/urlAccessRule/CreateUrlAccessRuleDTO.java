@@ -16,7 +16,7 @@ public record CreateUrlAccessRuleDTO(
         UrlAccessRuleTypeEnum type,
 
         @NotBlank
-        String value,
+        String ruleValue,
 
         LocalDateTime expiresAt
 
