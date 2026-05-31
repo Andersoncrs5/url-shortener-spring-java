@@ -24,23 +24,9 @@ public class UserModel {
     private LocalDateTime updatedAt;
     private LocalDateTime blockedAt;
     private int attemptsLoginFailed = 0;
-    private Set<String> roles = new HashSet<>();
 
     public void sumAttemptLogin() {
         attemptsLoginFailed++;
-    }
-
-    public boolean addRole(String role) {
-        return this.roles.add(role);
-    }
-
-    public boolean removeRole(String role) {
-        boolean contains = this.roles.contains(role);
-
-        if (!contains)
-            return true;
-
-        return this.roles.remove(role);
     }
 
 }
