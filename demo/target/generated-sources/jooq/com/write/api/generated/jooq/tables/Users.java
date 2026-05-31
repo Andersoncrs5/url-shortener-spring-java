@@ -6,6 +6,7 @@ package com.write.api.generated.jooq.tables;
 
 import com.write.api.generated.jooq.DefaultSchema;
 import com.write.api.generated.jooq.Keys;
+import com.write.api.generated.jooq.tables.UrlAccessRule.UrlAccessRulePath;
 import com.write.api.generated.jooq.tables.UrlTagLinks.UrlTagLinksPath;
 import com.write.api.generated.jooq.tables.UrlTags.UrlTagsPath;
 import com.write.api.generated.jooq.tables.Urls.UrlsPath;
@@ -21,6 +22,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.InverseForeignKey;
+import org.jooq.JSON;
 import org.jooq.Name;
 import org.jooq.Path;
 import org.jooq.PlainSQL;
@@ -89,6 +91,11 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>USERS.PASSWORD_HASH</code>.
      */
     public final TableField<UsersRecord, String> PASSWORD_HASH = createField(DSL.name("PASSWORD_HASH"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>USERS.ROLES</code>.
+     */
+    public final TableField<UsersRecord, JSON> ROLES = createField(DSL.name("ROLES"), SQLDataType.JSON, this, "");
 
     /**
      * The column <code>USERS.ACTIVE</code>.
@@ -200,6 +207,19 @@ public class Users extends TableImpl<UsersRecord> {
     @Override
     public List<UniqueKey<UsersRecord>> getUniqueKeys() {
         return Arrays.asList(Keys.UK_USERS_EMAIL, Keys.UK_USERS_NAME);
+    }
+
+    private transient UrlAccessRulePath _urlAccessRule;
+
+    /**
+     * Get the implicit to-many join path to the <code>URL_ACCESS_RULE</code>
+     * table
+     */
+    public UrlAccessRulePath urlAccessRule() {
+        if (_urlAccessRule == null)
+            _urlAccessRule = new UrlAccessRulePath(this, null, Keys.FK_URL_ACCESS_RULE_USER_ID.getInverseKey());
+
+        return _urlAccessRule;
     }
 
     private transient UrlTagLinksPath _urlTagLinks;

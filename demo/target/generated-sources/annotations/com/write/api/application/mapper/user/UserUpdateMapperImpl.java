@@ -4,14 +4,13 @@ import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.application.dto.user.UserResponseDTO;
 import com.write.api.core.domain.model.UserModel;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-28T19:44:49-0300",
+    date = "2026-05-31T18:43:59-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -39,17 +38,14 @@ public class UserUpdateMapperImpl implements UserUpdateMapper {
         String email = null;
         Long version = null;
         LocalDateTime createdAt = null;
-        Set<String> roles = null;
 
         id = model.getId();
         name = model.getName();
         email = model.getEmail();
         version = model.getVersion();
         createdAt = model.getCreatedAt();
-        Set<String> set = model.getRoles();
-        if ( set != null ) {
-            roles = new LinkedHashSet<String>( set );
-        }
+
+        Set<String> roles = null;
 
         UserResponseDTO userResponseDTO = new UserResponseDTO( id, name, email, version, createdAt, roles );
 
@@ -69,11 +65,6 @@ public class UserUpdateMapperImpl implements UserUpdateMapper {
         userModel.setName( dto.name() );
         userModel.setEmail( dto.email() );
         userModel.setCreatedAt( dto.createdAt() );
-        if ( dto.roles() != null ) {
-            for ( String role : dto.roles() ) {
-                userModel.addRole( role );
-            }
-        }
 
         return userModel;
     }

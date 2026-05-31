@@ -8,6 +8,7 @@ import com.write.api.generated.jooq.tables.Users;
 
 import java.time.LocalDateTime;
 
+import org.jooq.JSON;
 import org.jooq.Record1;
 import org.jooq.impl.UpdatableRecordImpl;
 
@@ -105,101 +106,115 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
     }
 
     /**
+     * Setter for <code>USERS.ROLES</code>.
+     */
+    public void setRoles(JSON value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>USERS.ROLES</code>.
+     */
+    public JSON getRoles() {
+        return (JSON) get(6);
+    }
+
+    /**
      * Setter for <code>USERS.ACTIVE</code>.
      */
     public void setActive(Boolean value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>USERS.ACTIVE</code>.
      */
     public Boolean getActive() {
-        return (Boolean) get(6);
+        return (Boolean) get(7);
     }
 
     /**
      * Setter for <code>USERS.EMAIL_VERIFIED</code>.
      */
     public void setEmailVerified(Boolean value) {
-        set(7, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>USERS.EMAIL_VERIFIED</code>.
      */
     public Boolean getEmailVerified() {
-        return (Boolean) get(7);
+        return (Boolean) get(8);
     }
 
     /**
      * Setter for <code>USERS.ATTEMPTS_LOGIN_FAILED</code>.
      */
     public void setAttemptsLoginFailed(Integer value) {
-        set(8, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>USERS.ATTEMPTS_LOGIN_FAILED</code>.
      */
     public Integer getAttemptsLoginFailed() {
-        return (Integer) get(8);
+        return (Integer) get(9);
     }
 
     /**
      * Setter for <code>USERS.BLOCKED_AT</code>.
      */
     public void setBlockedAt(LocalDateTime value) {
-        set(9, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>USERS.BLOCKED_AT</code>.
      */
     public LocalDateTime getBlockedAt() {
-        return (LocalDateTime) get(9);
+        return (LocalDateTime) get(10);
     }
 
     /**
      * Setter for <code>USERS.LAST_LOGIN_AT</code>.
      */
     public void setLastLoginAt(LocalDateTime value) {
-        set(10, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>USERS.LAST_LOGIN_AT</code>.
      */
     public LocalDateTime getLastLoginAt() {
-        return (LocalDateTime) get(10);
+        return (LocalDateTime) get(11);
     }
 
     /**
      * Setter for <code>USERS.CREATED_AT</code>.
      */
     public void setCreatedAt(LocalDateTime value) {
-        set(11, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>USERS.CREATED_AT</code>.
      */
     public LocalDateTime getCreatedAt() {
-        return (LocalDateTime) get(11);
+        return (LocalDateTime) get(12);
     }
 
     /**
      * Setter for <code>USERS.UPDATED_AT</code>.
      */
     public void setUpdatedAt(LocalDateTime value) {
-        set(12, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>USERS.UPDATED_AT</code>.
      */
     public LocalDateTime getUpdatedAt() {
-        return (LocalDateTime) get(12);
+        return (LocalDateTime) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -225,7 +240,7 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
     /**
      * Create a detached, initialised UsersRecord
      */
-    public UsersRecord(Long id, Long version, String name, String email, String refreshToken, String passwordHash, Boolean active, Boolean emailVerified, Integer attemptsLoginFailed, LocalDateTime blockedAt, LocalDateTime lastLoginAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UsersRecord(Long id, Long version, String name, String email, String refreshToken, String passwordHash, JSON roles, Boolean active, Boolean emailVerified, Integer attemptsLoginFailed, LocalDateTime blockedAt, LocalDateTime lastLoginAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(Users.USERS);
 
         setId(id);
@@ -234,6 +249,7 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
         setEmail(email);
         setRefreshToken(refreshToken);
         setPasswordHash(passwordHash);
+        setRoles(roles);
         setActive(active);
         setEmailVerified(emailVerified);
         setAttemptsLoginFailed(attemptsLoginFailed);

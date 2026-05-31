@@ -5,6 +5,7 @@ package com.write.api.generated.jooq;
 
 
 import com.write.api.generated.jooq.tables.Roles;
+import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
 import com.write.api.generated.jooq.tables.UrlTagLinks;
 import com.write.api.generated.jooq.tables.UrlTags;
@@ -23,6 +24,11 @@ public class Tables {
      * The table <code>ROLES</code>.
      */
     public static final Roles ROLES = Roles.ROLES;
+
+    /**
+     * The table <code>URL_ACCESS_RULE</code>.
+     */
+    public static final UrlAccessRule URL_ACCESS_RULE = UrlAccessRule.URL_ACCESS_RULE;
 
     /**
      * The table <code>URL_REDIRECT_RULES</code>.
