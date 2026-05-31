@@ -1,6 +1,5 @@
 package com.write.api.adapters.in.web.controller.util.helps;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
@@ -8,6 +7,8 @@ import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.dto.url.UrlResponseDTO;
+import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
+import com.write.api.application.dto.urlAccessRule.UrlAccessRuleResponseDTO;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.dto.urlRedirectRule.UrlRedirectRuleDTO;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
@@ -15,8 +16,13 @@ import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
 import com.write.api.application.dto.urlTagLink.UrlTagLinkDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
+import com.write.api.application.dto.user.LoginUserDTO;
+import com.write.api.application.dto.userRole.CreateUserRoleDTO;
+import com.write.api.application.dto.userRole.UserRoleDTO;
 import com.write.api.core.domain.enums.*;
+import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.out.repository.IRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -37,9 +43,120 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final SnowflakeIdGenerator idGen;
+    private final IRoleRepository roleRepository;
 
-    public UserTest loginMaster() {
-        return this.createNewUser();
+    public UrlAccessRuleResponseDTO addAccessRuleToUrl(
+            UrlResponseDTO url,
+            UserTest user
+    ) throws Exception {
+        String URL = "/v1/url-access-rule";
+        var key = UUID.randomUUID().toString();
+
+        CreateUrlAccessRuleDTO dto = new CreateUrlAccessRuleDTO(
+                url.id(),
+                UrlAccessRuleTypeEnum.MAX_CLICKS,
+                "34324324",
+                LocalDateTime.now().plusDays(1)
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + user.tokens().token())
+                        .header("X-Idempotency-Key", key)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        TypeReference<ResponseHttp<UrlAccessRuleResponseDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<UrlAccessRuleResponseDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotNull().isEqualTo(key);
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().urlId()).isNotNull().isEqualTo(url.id());
+
+        return response.data();
+    }
+
+    public UserRoleDTO addRoleAdmToUser(
+            AuthTokenResponseDTO superAdm,
+            UserTest user
+    ) throws Exception {
+        String URL = "/v1/user-role";
+        var key = UUID.randomUUID().toString();
+
+        RoleModel adminRole = roleRepository.findByNameIgnoreCase("ADMIN").orElse(null);
+        assert adminRole != null;
+
+        CreateUserRoleDTO dto = new CreateUserRoleDTO(
+                user.tokens().user().getId(),
+                adminRole.getId()
+        );
+
+        MvcResult result = mockMvc.perform(post(URL + "/add-role")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + superAdm.token())
+                        .header("X-Idempotency-Key", key)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        TypeReference<ResponseHttp<UserRoleDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<UserRoleDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotNull().isEqualTo(key);
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().userId()).isNotNull().isEqualTo(user.tokens().user().getId());
+        assertThat(response.data().roleId()).isNotNull().isEqualTo(adminRole.getId());
+
+        return response.data();
+    }
+
+    public AuthTokenResponseDTO loginSuperAdm() throws Exception {
+        String URL = "/v1/auth/";
+        var key = UUID.randomUUID();
+
+        LoginUserDTO dto = new LoginUserDTO(
+                "superadm@gmail.com",
+                "12345678"
+        );
+
+        MvcResult result = mockMvc.perform(post(URL + "/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", key)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<AuthTokenResponseDTO>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<AuthTokenResponseDTO> response =
+                objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.data().token()).isNotBlank();
+        assertThat(response.data().refreshToken()).isNotBlank();
+        assertThat(response.data().user().getEmail()).isNotBlank().isEqualTo(dto.email());
+
+        return response.data();
     }
 
     public UserTest createNewUser() {
