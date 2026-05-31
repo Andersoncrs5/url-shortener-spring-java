@@ -128,6 +128,15 @@ public class JooqUrlRepository implements IUrlRepository {
         );
     }
 
+    @Override
+    public boolean existsByUserIdAndUrlId(Long userId, Long urlId) {
+        return dsl.fetchExists(
+                dsl.selectFrom(URLS)
+                        .where(URLS.USER_ID.eq(userId))
+                        .and(URLS.ID.eq(urlId))
+        );
+    }
+
     private UrlModel toDomain(UrlsRecord record) {
         UrlModel model = new UrlModel();
 
