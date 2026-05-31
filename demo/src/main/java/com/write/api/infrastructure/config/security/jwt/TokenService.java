@@ -13,6 +13,7 @@ import com.write.api.application.shared.Result;
 import com.write.api.infrastructure.config.security.properties.JwtProperties;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
+import com.write.api.ports.out.repository.IUserRoleRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
+    private final IUserRoleRepository userRoleRepository;
     private final JwtProperties properties;
 
     public AuthTokenResponseDTO createTokens(UserModel user) {
@@ -41,7 +43,7 @@ public class TokenService {
                 token,
                 refreshToken,
                 user,
-                user.getRoles()
+                userRoleRepository.findRoleByUserId(user.getId())
         );
     }
 
@@ -53,7 +55,7 @@ public class TokenService {
                 .claim("email", user.getEmail())
                 .issueTime(Date.from(Instant.now()))
                 .expirationTime(Date.from(this.genExpirationDate()))
-                .claim("roles", user.getRoles())
+                .claim("roles", userRoleRepository.findRoleByUserId(user.getId()))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
 
