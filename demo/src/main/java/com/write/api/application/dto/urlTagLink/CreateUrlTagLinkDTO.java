@@ -16,7 +16,7 @@ public record CreateUrlTagLinkDTO(
         Long tagId,
 
         @Min(value = 0, message = "sortOrder cannot be negative")
-        @Max(value = 32767, message = "sortOrder exceeded maximum value")
+        @Max(value = 32767, message = "sortOrder exceeded maximum ruleValue")
         Short sortOrder,
 
         @Size(max = 500, message = "note exceeded 500 characters")
