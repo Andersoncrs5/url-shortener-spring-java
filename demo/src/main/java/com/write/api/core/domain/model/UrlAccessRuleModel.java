@@ -1,26 +1,25 @@
 package com.write.api.core.domain.model;
 
 import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
+import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-public class UrlAccessRuleModel {
-
-    private Long id;
+@Getter
+@Setter
+public class UrlAccessRuleModel extends BaseModel {
 
     private Long urlId;
 
     private UrlAccessRuleTypeEnum type;
 
-    private String value;
+    private String ruleValue;
 
     private boolean active;
 
-    private Long createdBy;
+    private Long assignedByUserId;
 
     private LocalDateTime expiresAt;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 }
