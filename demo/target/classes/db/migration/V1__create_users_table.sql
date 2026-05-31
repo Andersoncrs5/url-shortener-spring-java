@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL,
     refresh_token TEXT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    roles JSON NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     attempts_login_failed INT NOT NULL DEFAULT 0,
