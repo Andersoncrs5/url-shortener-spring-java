@@ -29,6 +29,7 @@ public class HelpRepositoryTest {
     JooqUrlTagLinkRepository urlTagLinkRepository;
     JooqUrlRedirectRuleRepository urlRedirectRuleRepository;
     JooqRoleRepository jooqRoleRepository;
+    JooqUserRoleRepository userRoleRepository;
 
     public UserModel createUser() {
         UserModel user = new UserModel();
@@ -189,5 +190,19 @@ public class HelpRepositoryTest {
         }
 
         return builder.substring(0, size);
+    }
+
+    public UserRoleModel createUserRole(
+            UserModel user,
+            RoleModel role,
+            UserModel assignedBy
+    ) {
+        UserRoleModel model = new UserRoleModel();
+
+        model.setUserId(user.getId());
+        model.setRoleId(role.getId());
+        model.setAssignedByUserId(assignedBy.getId());
+
+        return userRoleRepository.insert(model);
     }
 }
