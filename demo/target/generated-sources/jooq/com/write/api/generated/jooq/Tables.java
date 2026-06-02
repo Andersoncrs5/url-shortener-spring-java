@@ -4,6 +4,7 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.ApiKeys;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -19,6 +20,11 @@ import com.write.api.generated.jooq.tables.Users;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>API_KEYS</code>.
+     */
+    public static final ApiKeys API_KEYS = ApiKeys.API_KEYS;
 
     /**
      * The table <code>ROLES</code>.
