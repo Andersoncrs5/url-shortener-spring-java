@@ -5,6 +5,7 @@ package com.write.api.generated.jooq;
 
 
 import com.write.api.generated.jooq.tables.ApiKeys;
+import com.write.api.generated.jooq.tables.OutboxEvents;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -25,6 +26,11 @@ public class Tables {
      * The table <code>API_KEYS</code>.
      */
     public static final ApiKeys API_KEYS = ApiKeys.API_KEYS;
+
+    /**
+     * The table <code>OUTBOX_EVENTS</code>.
+     */
+    public static final OutboxEvents OUTBOX_EVENTS = OutboxEvents.OUTBOX_EVENTS;
 
     /**
      * The table <code>ROLES</code>.

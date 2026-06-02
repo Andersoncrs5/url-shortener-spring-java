@@ -5,6 +5,7 @@ package com.write.api.generated.jooq;
 
 
 import com.write.api.generated.jooq.tables.ApiKeys;
+import com.write.api.generated.jooq.tables.OutboxEvents;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -40,6 +41,11 @@ public class DefaultSchema extends SchemaImpl {
      * The table <code>API_KEYS</code>.
      */
     public final ApiKeys API_KEYS = ApiKeys.API_KEYS;
+
+    /**
+     * The table <code>OUTBOX_EVENTS</code>.
+     */
+    public final OutboxEvents OUTBOX_EVENTS = OutboxEvents.OUTBOX_EVENTS;
 
     /**
      * The table <code>ROLES</code>.
@@ -98,6 +104,7 @@ public class DefaultSchema extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             ApiKeys.API_KEYS,
+            OutboxEvents.OUTBOX_EVENTS,
             Roles.ROLES,
             UrlAccessRule.URL_ACCESS_RULE,
             UrlRedirectRules.URL_REDIRECT_RULES,
