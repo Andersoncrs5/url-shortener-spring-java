@@ -1,10 +1,7 @@
 package com.write.api.adapters.out.persistence.help;
 
 import com.write.api.adapters.out.persistence.repository.*;
-import com.write.api.core.domain.enums.BrowserEnum;
-import com.write.api.core.domain.enums.ContinentEnum;
-import com.write.api.core.domain.enums.MatchTypeEnum;
-import com.write.api.core.domain.enums.OperatingSystemEnum;
+import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.model.*;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.shared.utils.Base62;
@@ -31,6 +28,41 @@ public class HelpRepositoryTest {
     JooqRoleRepository jooqRoleRepository;
     JooqUserRoleRepository userRoleRepository;
     JooqApiKeyRepository apiKeyRepository;
+    JooqOutboxEventRepository outboxEventRepository;
+
+    public OutboxEventModel createOutBox() {
+        OutboxEventModel event = new OutboxEventModel();
+        event.setAggregateType(AggregateTypeEnum.USER);
+        event.setAggregateId(generator.nextId());
+        event.setEventType(EventTypeEnum.CREATED);
+        event.setPayload("""
+                {
+                  "id": 1,
+                  "name": "john",
+                  "email": "john@test.com"
+                }
+                """);
+        event.setStatus(OutboxStatusEnum.PENDING);
+        event.setRetryCount(0);
+        event.setErrorMessage(null);
+        event.setNextRetryAt(LocalDateTime.now().plusMinutes(5));
+        event.setProcessedAt(null);
+
+        OutboxEventModel saved = outboxEventRepository.insert(event);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getAggregateType()).isEqualTo(AggregateTypeEnum.USER);
+        assertThat(saved.getAggregateId()).isEqualTo(event.getAggregateId());
+        assertThat(saved.getEventType()).isEqualTo(EventTypeEnum.CREATED);
+        assertThat(saved.getPayload()).isNotBlank();
+        assertThat(saved.getStatus()).isEqualTo(OutboxStatusEnum.PENDING);
+        assertThat(saved.getRetryCount()).isEqualTo(0);
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getUpdatedAt()).isNotNull();
+
+        return saved;
+    }
 
     public ApiKeyModel createApiKey(UserModel user) {
         ApiKeyModel apiKey = new ApiKeyModel();
