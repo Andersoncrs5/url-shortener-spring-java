@@ -4,6 +4,7 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.ApiKeys;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -28,6 +29,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index IDX_API_KEYS_NAME = Internal.createIndex(DSL.name("IDX_API_KEYS_NAME"), ApiKeys.API_KEYS, new OrderField[] { ApiKeys.API_KEYS.NAME }, false);
     public static final Index IDX_ROLES_NAME = Internal.createIndex(DSL.name("IDX_ROLES_NAME"), Roles.ROLES, new OrderField[] { Roles.ROLES.NAME }, false);
     public static final Index IDX_URL_ACCESS_RULE_EXPIRES_AT = Internal.createIndex(DSL.name("IDX_URL_ACCESS_RULE_EXPIRES_AT"), UrlAccessRule.URL_ACCESS_RULE, new OrderField[] { UrlAccessRule.URL_ACCESS_RULE.EXPIRES_AT }, false);
     public static final Index IDX_URL_ACCESS_RULE_URL_ID = Internal.createIndex(DSL.name("IDX_URL_ACCESS_RULE_URL_ID"), UrlAccessRule.URL_ACCESS_RULE, new OrderField[] { UrlAccessRule.URL_ACCESS_RULE.URL_ID }, false);
