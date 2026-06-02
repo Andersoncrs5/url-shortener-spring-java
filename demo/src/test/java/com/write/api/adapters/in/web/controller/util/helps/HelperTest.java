@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
+import com.write.api.application.dto.apiKey.CreateApiKeyDTO;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.dto.url.UrlResponseDTO;
@@ -44,6 +45,40 @@ public class HelperTest {
     private final ObjectMapper objectMapper;
     private final SnowflakeIdGenerator idGen;
     private final IRoleRepository roleRepository;
+
+    public String createApiKey(
+            AuthTokenResponseDTO superAdm
+    ) throws Exception {
+        var key = UUID.randomUUID().toString();
+        String URL = "/v1/api-key";
+
+        CreateApiKeyDTO dto = new CreateApiKeyDTO(
+                "sei la 123" + key,
+                LocalDateTime.now().plusDays(23),
+                true
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Idempotency-Key", key)
+                .content(objectMapper.writeValueAsString(dto))
+                .header("Authorization", "Bearer " + superAdm.token())
+        ).andExpect(status().isCreated()).andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<String>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<String> response =
+                objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(key);
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.data()).isNotBlank();
+
+        return response.data();
+    }
 
     public UrlAccessRuleResponseDTO addAccessRuleToUrl(
             UrlResponseDTO url,
