@@ -30,6 +30,20 @@ public class HelpRepositoryTest {
     JooqUrlRedirectRuleRepository urlRedirectRuleRepository;
     JooqRoleRepository jooqRoleRepository;
     JooqUserRoleRepository userRoleRepository;
+    JooqApiKeyRepository apiKeyRepository;
+
+    public ApiKeyModel createApiKey(UserModel user) {
+        ApiKeyModel apiKey = new ApiKeyModel();
+
+        apiKey.setUserId(user.getId());
+        apiKey.setName("Production");
+        apiKey.setKeyHash("sha256-test-key");
+        apiKey.setActive(true);
+        apiKey.setLastUsedAt(LocalDateTime.now().minusHours(1));
+        apiKey.setExpiresAt(LocalDateTime.now().plusDays(30));
+
+        return apiKeyRepository.insert(apiKey);
+    }
 
     public UserModel createUser() {
         UserModel user = new UserModel();
