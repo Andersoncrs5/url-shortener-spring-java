@@ -1,4 +1,4 @@
-package com.write.api.shared.cache;
+package com.write.api.infrastructure.config.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 

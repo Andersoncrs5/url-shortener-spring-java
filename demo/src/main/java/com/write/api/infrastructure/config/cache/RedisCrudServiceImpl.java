@@ -1,4 +1,4 @@
-package com.write.api.shared.cache;
+package com.write.api.infrastructure.config.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ public class RedisCrudServiceImpl implements RedisCrudService {
             String json = objectMapper.writeValueAsString(value);
             redisTemplate.opsForValue().set(key, json, ttl);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to save value in Redis", e);
+            throw new IllegalStateException("Failed to save ruleValue in Redis", e);
         }
     }
 
@@ -33,7 +33,7 @@ public class RedisCrudServiceImpl implements RedisCrudService {
             String json = objectMapper.writeValueAsString(value);
             redisTemplate.opsForValue().set(key, json);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to save value in Redis", e);
+            throw new IllegalStateException("Failed to save ruleValue in Redis", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class RedisCrudServiceImpl implements RedisCrudService {
 
             return Optional.of(objectMapper.readValue(json, type));
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to read value from Redis", e);
+            throw new IllegalStateException("Failed to read ruleValue from Redis", e);
         }
     }
 
@@ -63,7 +63,7 @@ public class RedisCrudServiceImpl implements RedisCrudService {
 
             return Optional.of(objectMapper.readValue(json, typeReference));
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to read value from Redis", e);
+            throw new IllegalStateException("Failed to read ruleValue from Redis", e);
         }
     }
 
@@ -95,7 +95,7 @@ public class RedisCrudServiceImpl implements RedisCrudService {
             Boolean ok = redisTemplate.opsForValue().setIfAbsent(key, json, ttl);
             return Boolean.TRUE.equals(ok);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to save value in Redis", e);
+            throw new IllegalStateException("Failed to save ruleValue in Redis", e);
         }
     }
 
