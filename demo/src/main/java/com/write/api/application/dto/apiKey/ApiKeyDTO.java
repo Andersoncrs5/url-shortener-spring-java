@@ -8,6 +8,9 @@ public record ApiKeyDTO(
 
         @IsId
         Long id,
+        
+        @IsId
+        Long ownerUserId,
 
         String name,
 
