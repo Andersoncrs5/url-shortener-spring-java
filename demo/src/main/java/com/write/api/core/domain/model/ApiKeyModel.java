@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ApiKeyModel extends BaseModel {
     private Long userId;
+    private Long ownerUserId;
     private String keyHash;
     private String name;
     private boolean active;
