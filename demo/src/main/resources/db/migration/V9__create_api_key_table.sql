@@ -3,6 +3,8 @@ CREATE TABLE api_keys (
 
     user_id BIGINT NOT NULL,
 
+    owner_user_id BIGINT NOT NULL,
+
     key_hash VARCHAR(255) NOT NULL,
 
     name VARCHAR(100) NOT NULL,
@@ -22,11 +24,19 @@ CREATE TABLE api_keys (
         REFERENCES users(id)
         ON DELETE CASCADE,
 
+    CONSTRAINT fk_api_keys_owner_user_id
+        FOREIGN KEY (owner_user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
     CONSTRAINT uk_api_keys_key_hash
         UNIQUE (key_hash),
 
     CONSTRAINT uk_api_keys_name
-        UNIQUE (name)
+        UNIQUE (name),
+
+    CONSTRAINT uk_api_keys_owner_name
+        UNIQUE (owner_user_id, name)
 );
 
 CREATE INDEX idx_api_keys_name
