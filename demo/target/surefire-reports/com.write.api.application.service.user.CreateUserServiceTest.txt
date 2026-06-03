@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: com.write.api.application.service.user.CreateUserServiceTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.056 s <<< FAILURE! -- in com.write.api.application.service.user.CreateUserServiceTest
+com.write.api.application.service.user.CreateUserServiceTest.shouldReturnUsernameAlreadyExists -- Time elapsed: 0.040 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+
+expected: 409
+ but was: 400
+	at com.write.api.application.service.user.CreateUserServiceTest.shouldReturnUsernameAlreadyExists(CreateUserServiceTest.java:136)
+
+com.write.api.application.service.user.CreateUserServiceTest.shouldReturnEmailAlreadyExists -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+
+expected: 409
+ but was: 400
+	at com.write.api.application.service.user.CreateUserServiceTest.shouldReturnEmailAlreadyExists(CreateUserServiceTest.java:107)
+
