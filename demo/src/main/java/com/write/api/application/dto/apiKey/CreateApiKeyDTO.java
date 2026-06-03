@@ -1,5 +1,6 @@
 package com.write.api.application.dto.apiKey;
 
+import com.write.api.shared.validation.snowflake.IsId;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 
@@ -13,6 +14,9 @@ public record CreateApiKeyDTO(
         @Future
         LocalDateTime expiresAt,
 
-        boolean active
+        boolean active,
+
+        @IsId
+        Long ownerUserId
 ) {
 }
