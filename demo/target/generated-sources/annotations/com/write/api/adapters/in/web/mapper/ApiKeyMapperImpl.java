@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-02T18:28:43-0300",
+    date = "2026-06-02T20:04:24-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -21,6 +21,7 @@ public class ApiKeyMapperImpl implements ApiKeyMapper {
         }
 
         Long id = null;
+        Long ownerUserId = null;
         String name = null;
         boolean active = false;
         LocalDateTime lastUsedAt = null;
@@ -29,6 +30,7 @@ public class ApiKeyMapperImpl implements ApiKeyMapper {
         LocalDateTime updatedAt = null;
 
         id = model.getId();
+        ownerUserId = model.getOwnerUserId();
         name = model.getName();
         active = model.isActive();
         lastUsedAt = model.getLastUsedAt();
@@ -36,7 +38,7 @@ public class ApiKeyMapperImpl implements ApiKeyMapper {
         createdAt = model.getCreatedAt();
         updatedAt = model.getUpdatedAt();
 
-        ApiKeyDTO apiKeyDTO = new ApiKeyDTO( id, name, active, lastUsedAt, expiresAt, createdAt, updatedAt );
+        ApiKeyDTO apiKeyDTO = new ApiKeyDTO( id, ownerUserId, name, active, lastUsedAt, expiresAt, createdAt, updatedAt );
 
         return apiKeyDTO;
     }

@@ -210,16 +210,30 @@ public class Users extends TableImpl<UsersRecord> {
         return Arrays.asList(Keys.UK_USERS_EMAIL, Keys.UK_USERS_NAME);
     }
 
-    private transient ApiKeysPath _apiKeys;
+    private transient ApiKeysPath _fkApiKeysOwnerUserId;
 
     /**
-     * Get the implicit to-many join path to the <code>API_KEYS</code> table
+     * Get the implicit to-many join path to the <code>API_KEYS</code> table,
+     * via the <code>FK_API_KEYS_OWNER_USER_ID</code> key
      */
-    public ApiKeysPath apiKeys() {
-        if (_apiKeys == null)
-            _apiKeys = new ApiKeysPath(this, null, Keys.FK_API_KEYS_USER_ID.getInverseKey());
+    public ApiKeysPath fkApiKeysOwnerUserId() {
+        if (_fkApiKeysOwnerUserId == null)
+            _fkApiKeysOwnerUserId = new ApiKeysPath(this, null, Keys.FK_API_KEYS_OWNER_USER_ID.getInverseKey());
 
-        return _apiKeys;
+        return _fkApiKeysOwnerUserId;
+    }
+
+    private transient ApiKeysPath _fkApiKeysUserId;
+
+    /**
+     * Get the implicit to-many join path to the <code>API_KEYS</code> table,
+     * via the <code>FK_API_KEYS_USER_ID</code> key
+     */
+    public ApiKeysPath fkApiKeysUserId() {
+        if (_fkApiKeysUserId == null)
+            _fkApiKeysUserId = new ApiKeysPath(this, null, Keys.FK_API_KEYS_USER_ID.getInverseKey());
+
+        return _fkApiKeysUserId;
     }
 
     private transient UrlAccessRulePath _urlAccessRule;

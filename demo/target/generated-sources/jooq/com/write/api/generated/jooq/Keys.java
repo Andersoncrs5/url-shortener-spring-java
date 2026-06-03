@@ -47,6 +47,7 @@ public class Keys {
     public static final UniqueKey<ApiKeysRecord> CONSTRAINT_6 = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("CONSTRAINT_6"), new TableField[] { ApiKeys.API_KEYS.ID }, true);
     public static final UniqueKey<ApiKeysRecord> UK_API_KEYS_KEY_HASH = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("UK_API_KEYS_KEY_HASH"), new TableField[] { ApiKeys.API_KEYS.KEY_HASH }, true);
     public static final UniqueKey<ApiKeysRecord> UK_API_KEYS_NAME = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("UK_API_KEYS_NAME"), new TableField[] { ApiKeys.API_KEYS.NAME }, true);
+    public static final UniqueKey<ApiKeysRecord> UK_API_KEYS_OWNER_NAME = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("UK_API_KEYS_OWNER_NAME"), new TableField[] { ApiKeys.API_KEYS.OWNER_USER_ID, ApiKeys.API_KEYS.NAME }, true);
     public static final UniqueKey<OutboxEventsRecord> CONSTRAINT_9 = Internal.createUniqueKey(OutboxEvents.OUTBOX_EVENTS, DSL.name("CONSTRAINT_9"), new TableField[] { OutboxEvents.OUTBOX_EVENTS.ID }, true);
     public static final UniqueKey<OutboxEventsRecord> UK_OUTBOX_EVENT_AGGREGATE_ID = Internal.createUniqueKey(OutboxEvents.OUTBOX_EVENTS, DSL.name("UK_OUTBOX_EVENT_AGGREGATE_ID"), new TableField[] { OutboxEvents.OUTBOX_EVENTS.ID }, true);
     public static final UniqueKey<RolesRecord> CONSTRAINT_4A = Internal.createUniqueKey(Roles.ROLES, DSL.name("CONSTRAINT_4A"), new TableField[] { Roles.ROLES.ID }, true);
@@ -71,6 +72,7 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<ApiKeysRecord, UsersRecord> FK_API_KEYS_OWNER_USER_ID = Internal.createForeignKey(ApiKeys.API_KEYS, DSL.name("FK_API_KEYS_OWNER_USER_ID"), new TableField[] { ApiKeys.API_KEYS.OWNER_USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<ApiKeysRecord, UsersRecord> FK_API_KEYS_USER_ID = Internal.createForeignKey(ApiKeys.API_KEYS, DSL.name("FK_API_KEYS_USER_ID"), new TableField[] { ApiKeys.API_KEYS.USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlAccessRuleRecord, UrlsRecord> FK_URL_ACCESS_RULE_URL_ID = Internal.createForeignKey(UrlAccessRule.URL_ACCESS_RULE, DSL.name("FK_URL_ACCESS_RULE_URL_ID"), new TableField[] { UrlAccessRule.URL_ACCESS_RULE.URL_ID }, Keys.CONSTRAINT_2, new TableField[] { Urls.URLS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);
     public static final ForeignKey<UrlAccessRuleRecord, UsersRecord> FK_URL_ACCESS_RULE_USER_ID = Internal.createForeignKey(UrlAccessRule.URL_ACCESS_RULE, DSL.name("FK_URL_ACCESS_RULE_USER_ID"), new TableField[] { UrlAccessRule.URL_ACCESS_RULE.ASSIGNED_BY_USER_ID }, Keys.CONSTRAINT_4, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.RESTRICT);

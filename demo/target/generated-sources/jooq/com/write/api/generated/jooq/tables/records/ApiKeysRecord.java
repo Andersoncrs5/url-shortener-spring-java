@@ -49,101 +49,115 @@ public class ApiKeysRecord extends UpdatableRecordImpl<ApiKeysRecord> {
     }
 
     /**
+     * Setter for <code>API_KEYS.OWNER_USER_ID</code>.
+     */
+    public void setOwnerUserId(Long value) {
+        set(2, value);
+    }
+
+    /**
+     * Getter for <code>API_KEYS.OWNER_USER_ID</code>.
+     */
+    public Long getOwnerUserId() {
+        return (Long) get(2);
+    }
+
+    /**
      * Setter for <code>API_KEYS.KEY_HASH</code>.
      */
     public void setKeyHash(String value) {
-        set(2, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>API_KEYS.KEY_HASH</code>.
      */
     public String getKeyHash() {
-        return (String) get(2);
+        return (String) get(3);
     }
 
     /**
      * Setter for <code>API_KEYS.NAME</code>.
      */
     public void setName(String value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>API_KEYS.NAME</code>.
      */
     public String getName() {
-        return (String) get(3);
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>API_KEYS.ACTIVE</code>.
      */
     public void setActive(Boolean value) {
-        set(4, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>API_KEYS.ACTIVE</code>.
      */
     public Boolean getActive() {
-        return (Boolean) get(4);
+        return (Boolean) get(5);
     }
 
     /**
      * Setter for <code>API_KEYS.LAST_USED_AT</code>.
      */
     public void setLastUsedAt(LocalDateTime value) {
-        set(5, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>API_KEYS.LAST_USED_AT</code>.
      */
     public LocalDateTime getLastUsedAt() {
-        return (LocalDateTime) get(5);
+        return (LocalDateTime) get(6);
     }
 
     /**
      * Setter for <code>API_KEYS.EXPIRES_AT</code>.
      */
     public void setExpiresAt(LocalDateTime value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>API_KEYS.EXPIRES_AT</code>.
      */
     public LocalDateTime getExpiresAt() {
-        return (LocalDateTime) get(6);
+        return (LocalDateTime) get(7);
     }
 
     /**
      * Setter for <code>API_KEYS.CREATED_AT</code>.
      */
     public void setCreatedAt(LocalDateTime value) {
-        set(7, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>API_KEYS.CREATED_AT</code>.
      */
     public LocalDateTime getCreatedAt() {
-        return (LocalDateTime) get(7);
+        return (LocalDateTime) get(8);
     }
 
     /**
      * Setter for <code>API_KEYS.UPDATED_AT</code>.
      */
     public void setUpdatedAt(LocalDateTime value) {
-        set(8, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>API_KEYS.UPDATED_AT</code>.
      */
     public LocalDateTime getUpdatedAt() {
-        return (LocalDateTime) get(8);
+        return (LocalDateTime) get(9);
     }
 
     // -------------------------------------------------------------------------
@@ -169,11 +183,12 @@ public class ApiKeysRecord extends UpdatableRecordImpl<ApiKeysRecord> {
     /**
      * Create a detached, initialised ApiKeysRecord
      */
-    public ApiKeysRecord(Long id, Long userId, String keyHash, String name, Boolean active, LocalDateTime lastUsedAt, LocalDateTime expiresAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ApiKeysRecord(Long id, Long userId, Long ownerUserId, String keyHash, String name, Boolean active, LocalDateTime lastUsedAt, LocalDateTime expiresAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(ApiKeys.API_KEYS);
 
         setId(id);
         setUserId(userId);
+        setOwnerUserId(ownerUserId);
         setKeyHash(keyHash);
         setName(name);
         setActive(active);

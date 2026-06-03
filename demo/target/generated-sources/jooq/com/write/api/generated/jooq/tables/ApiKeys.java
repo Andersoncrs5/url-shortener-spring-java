@@ -70,6 +70,11 @@ public class ApiKeys extends TableImpl<ApiKeysRecord> {
     public final TableField<ApiKeysRecord, Long> USER_ID = createField(DSL.name("USER_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
+     * The column <code>API_KEYS.OWNER_USER_ID</code>.
+     */
+    public final TableField<ApiKeysRecord, Long> OWNER_USER_ID = createField(DSL.name("OWNER_USER_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
      * The column <code>API_KEYS.KEY_HASH</code>.
      */
     public final TableField<ApiKeysRecord, String> KEY_HASH = createField(DSL.name("KEY_HASH"), SQLDataType.VARCHAR(255).nullable(false), this, "");
@@ -183,24 +188,38 @@ public class ApiKeys extends TableImpl<ApiKeysRecord> {
 
     @Override
     public List<UniqueKey<ApiKeysRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.UK_API_KEYS_KEY_HASH, Keys.UK_API_KEYS_NAME);
+        return Arrays.asList(Keys.UK_API_KEYS_KEY_HASH, Keys.UK_API_KEYS_NAME, Keys.UK_API_KEYS_OWNER_NAME);
     }
 
     @Override
     public List<ForeignKey<ApiKeysRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.FK_API_KEYS_USER_ID);
+        return Arrays.asList(Keys.FK_API_KEYS_OWNER_USER_ID, Keys.FK_API_KEYS_USER_ID);
     }
 
-    private transient UsersPath _users;
+    private transient UsersPath _fkApiKeysOwnerUserId;
 
     /**
-     * Get the implicit join path to the <code>USERS</code> table.
+     * Get the implicit join path to the <code>USERS</code> table, via the
+     * <code>FK_API_KEYS_OWNER_USER_ID</code> key.
      */
-    public UsersPath users() {
-        if (_users == null)
-            _users = new UsersPath(this, Keys.FK_API_KEYS_USER_ID, null);
+    public UsersPath fkApiKeysOwnerUserId() {
+        if (_fkApiKeysOwnerUserId == null)
+            _fkApiKeysOwnerUserId = new UsersPath(this, Keys.FK_API_KEYS_OWNER_USER_ID, null);
 
-        return _users;
+        return _fkApiKeysOwnerUserId;
+    }
+
+    private transient UsersPath _fkApiKeysUserId;
+
+    /**
+     * Get the implicit join path to the <code>USERS</code> table, via the
+     * <code>FK_API_KEYS_USER_ID</code> key.
+     */
+    public UsersPath fkApiKeysUserId() {
+        if (_fkApiKeysUserId == null)
+            _fkApiKeysUserId = new UsersPath(this, Keys.FK_API_KEYS_USER_ID, null);
+
+        return _fkApiKeysUserId;
     }
 
     @Override
