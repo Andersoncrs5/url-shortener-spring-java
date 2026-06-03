@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-03T09:40:26-0300",
+    date = "2026-06-03T17:49:29-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -61,10 +61,10 @@ public class UserUpdateMapperImpl implements UserUpdateMapper {
         UserModel userModel = new UserModel();
 
         userModel.setId( dto.id() );
+        userModel.setCreatedAt( dto.createdAt() );
         userModel.setVersion( dto.version() );
         userModel.setName( dto.name() );
         userModel.setEmail( dto.email() );
-        userModel.setCreatedAt( dto.createdAt() );
 
         return userModel;
     }

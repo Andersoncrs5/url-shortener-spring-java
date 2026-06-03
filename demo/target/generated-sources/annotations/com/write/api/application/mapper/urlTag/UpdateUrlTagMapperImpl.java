@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-03T09:40:26-0300",
+    date = "2026-06-03T17:49:29-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -34,6 +34,8 @@ public class UpdateUrlTagMapperImpl implements UpdateUrlTagMapper {
         if ( dto.parentId() != null ) {
             model.setParentId( dto.parentId() );
         }
-        model.setActive( dto.active() );
+        if ( dto.active() != null ) {
+            model.setActive( dto.active() );
+        }
     }
 }

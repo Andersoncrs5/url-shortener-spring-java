@@ -50,6 +50,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/apiKey/CreateApiKeyDTO.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/apiKey/UpdateApiKeyDTO.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/auth/AuthTokenResponseDTO.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/messaging/OutboxEventMessage.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/CreateOutboxEventCommand.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlCreatedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlDeleteEvent.java
@@ -102,6 +103,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/mapper/userRole/CreateUserRoleMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/apiKey/CreateApiKeyService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/apiKey/DeleteApiKeyService.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/apiKey/FindByKeyApiKeyService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/apiKey/UpdateApiKeyService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/apiKey/ValidateApiKeyService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/auth/LoginUserService.java
@@ -112,6 +114,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/PublishPendingOutboxEventsService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/CreateRoleService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/UpdateRoleService.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/url/CreateUrlFromApiKeyService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/url/CreateUrlService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/url/DeleteUrlByIdForceService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/url/DeleteUrlByIdSoftService.java
@@ -195,6 +198,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/scheduler/UrlDeleteJob.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/CreateApiKeyUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/DeleteApiKeyUseCase.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/FindByKeyApiKeyUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/UpdateApiKeyUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/ValidateApiKeyUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/auth/LoginUserUseCase.java
@@ -206,6 +210,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/PublishPendingOutboxEventsUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/CreateRoleUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/UpdateRoleUseCase.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/url/CreateUrlFromApiKeyUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/url/CreateUrlUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/url/DeleteUrlByIdForceUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/url/DeleteUrlByIdSoftUseCase.java
@@ -258,8 +263,10 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/enums/UrlRedirectRulesContinent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/enums/UrlRedirectRulesMatchType.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/enums/UrlRedirectRulesOs.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/ApiKeyPermissions.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/ApiKeys.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/OutboxEvents.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/Permissions.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/Roles.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/UrlAccessRule.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/UrlRedirectRules.java
@@ -268,8 +275,10 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/Urls.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/UserRoles.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/Users.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/ApiKeyPermissionsRecord.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/ApiKeysRecord.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/OutboxEventsRecord.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/PermissionsRecord.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/RolesRecord.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/UrlAccessRuleRecord.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/target/generated-sources/jooq/com/write/api/generated/jooq/tables/records/UrlRedirectRulesRecord.java

@@ -1,1 +1,7 @@
+com/write/api/generated/jooq/tables/records/PermissionsRecord.class
+com/write/api/generated/jooq/tables/records/ApiKeyPermissionsRecord.class
+com/write/api/generated/jooq/tables/Permissions.class
+com/write/api/generated/jooq/tables/ApiKeyPermissions$ApiKeyPermissionsPath.class
+com/write/api/generated/jooq/tables/ApiKeyPermissions.class
+com/write/api/generated/jooq/tables/Permissions$PermissionsPath.class
 com/write/api/infrastructure/scheduler/UrlDeleteJob.class

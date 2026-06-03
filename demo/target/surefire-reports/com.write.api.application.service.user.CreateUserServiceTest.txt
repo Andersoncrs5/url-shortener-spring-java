@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.application.service.user.CreateUserServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.056 s <<< FAILURE! -- in com.write.api.application.service.user.CreateUserServiceTest
-com.write.api.application.service.user.CreateUserServiceTest.shouldReturnUsernameAlreadyExists -- Time elapsed: 0.040 s <<< FAILURE!
+Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.050 s <<< FAILURE! -- in com.write.api.application.service.user.CreateUserServiceTest
+com.write.api.application.service.user.CreateUserServiceTest.shouldReturnUsernameAlreadyExists -- Time elapsed: 0.036 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: 
 
 expected: 409

@@ -25,6 +25,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/out/persistence/repository/JooqUserRoleRepositoryTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/apiKey/CreateApiKeyServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/apiKey/DeleteApiKeyServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/apiKey/FindByKeyApiKeyServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/apiKey/UpdateApiKeyServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/auth/LoginUserServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/auth/LogoutAuthServiceTest.java
@@ -33,6 +34,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/CreateOutboxEventServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/CreateRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/UpdateRoleServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/url/CreateUrlFromApiKeyServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/url/CreateUrlServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/url/DeleteUrlByIdForceServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/url/DeleteUrlByIdSoftServiceTest.java
@@ -54,3 +56,4 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/user/UpdateUserServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/userRole/CreateUserRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/userRole/DeleteUserRoleServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/help/RandomStringGenerator.java

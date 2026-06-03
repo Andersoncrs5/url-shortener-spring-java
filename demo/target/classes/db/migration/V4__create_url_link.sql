@@ -13,7 +13,7 @@ CREATE TABLE url_tag_links (
     created_by BIGINT,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_url_tag_links_url
         FOREIGN KEY (url_id)

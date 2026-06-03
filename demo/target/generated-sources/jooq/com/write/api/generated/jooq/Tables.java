@@ -4,8 +4,10 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.ApiKeyPermissions;
 import com.write.api.generated.jooq.tables.ApiKeys;
 import com.write.api.generated.jooq.tables.OutboxEvents;
+import com.write.api.generated.jooq.tables.Permissions;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -23,6 +25,11 @@ import com.write.api.generated.jooq.tables.Users;
 public class Tables {
 
     /**
+     * The table <code>API_KEY_PERMISSIONS</code>.
+     */
+    public static final ApiKeyPermissions API_KEY_PERMISSIONS = ApiKeyPermissions.API_KEY_PERMISSIONS;
+
+    /**
      * The table <code>API_KEYS</code>.
      */
     public static final ApiKeys API_KEYS = ApiKeys.API_KEYS;
@@ -31,6 +38,11 @@ public class Tables {
      * The table <code>OUTBOX_EVENTS</code>.
      */
     public static final OutboxEvents OUTBOX_EVENTS = OutboxEvents.OUTBOX_EVENTS;
+
+    /**
+     * The table <code>PERMISSIONS</code>.
+     */
+    public static final Permissions PERMISSIONS = Permissions.PERMISSIONS;
 
     /**
      * The table <code>ROLES</code>.

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-03T09:40:26-0300",
+    date = "2026-06-03T17:49:30-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
 )
 @Component
@@ -54,14 +54,14 @@ public class UrlTagLinkMapperImpl implements UrlTagLinkMapper {
         UrlTagLinkModel urlTagLinkModel = new UrlTagLinkModel();
 
         urlTagLinkModel.setId( dto.id() );
+        urlTagLinkModel.setCreatedAt( dto.createdAt() );
+        urlTagLinkModel.setUpdatedAt( dto.updatedAt() );
         urlTagLinkModel.setUrlId( dto.urlId() );
         urlTagLinkModel.setTagId( dto.tagId() );
         urlTagLinkModel.setSortOrder( dto.sortOrder() );
         urlTagLinkModel.setNote( dto.note() );
         urlTagLinkModel.setPrimaryTag( dto.primaryTag() );
         urlTagLinkModel.setCreatedBy( dto.createdBy() );
-        urlTagLinkModel.setCreatedAt( dto.createdAt() );
-        urlTagLinkModel.setUpdatedAt( dto.updatedAt() );
 
         return urlTagLinkModel;
     }

@@ -4,8 +4,10 @@
 package com.write.api.generated.jooq;
 
 
+import com.write.api.generated.jooq.tables.ApiKeyPermissions;
 import com.write.api.generated.jooq.tables.ApiKeys;
 import com.write.api.generated.jooq.tables.OutboxEvents;
+import com.write.api.generated.jooq.tables.Permissions;
 import com.write.api.generated.jooq.tables.Roles;
 import com.write.api.generated.jooq.tables.UrlAccessRule;
 import com.write.api.generated.jooq.tables.UrlRedirectRules;
@@ -30,6 +32,8 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index IDX_API_KEY_PERMISSIONS_API_KEY_ID = Internal.createIndex(DSL.name("IDX_API_KEY_PERMISSIONS_API_KEY_ID"), ApiKeyPermissions.API_KEY_PERMISSIONS, new OrderField[] { ApiKeyPermissions.API_KEY_PERMISSIONS.API_KEY_ID }, false);
+    public static final Index IDX_API_KEY_PERMISSIONS_PERMISSION_ID = Internal.createIndex(DSL.name("IDX_API_KEY_PERMISSIONS_PERMISSION_ID"), ApiKeyPermissions.API_KEY_PERMISSIONS, new OrderField[] { ApiKeyPermissions.API_KEY_PERMISSIONS.PERMISSION_ID }, false);
     public static final Index IDX_API_KEYS_NAME = Internal.createIndex(DSL.name("IDX_API_KEYS_NAME"), ApiKeys.API_KEYS, new OrderField[] { ApiKeys.API_KEYS.NAME }, false);
     public static final Index IDX_OUTBOX_AGGREGATE = Internal.createIndex(DSL.name("IDX_OUTBOX_AGGREGATE"), OutboxEvents.OUTBOX_EVENTS, new OrderField[] { OutboxEvents.OUTBOX_EVENTS.AGGREGATE_TYPE, OutboxEvents.OUTBOX_EVENTS.AGGREGATE_ID }, false);
     public static final Index IDX_OUTBOX_NEXT_RETRY = Internal.createIndex(DSL.name("IDX_OUTBOX_NEXT_RETRY"), OutboxEvents.OUTBOX_EVENTS, new OrderField[] { OutboxEvents.OUTBOX_EVENTS.NEXT_RETRY_AT }, false);
@@ -63,6 +67,8 @@ public class Indexes {
     public static final Index IDX_USER_ROLES_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID }, false);
     public static final Index IDX_USER_ROLES_USER = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.USER_ID }, false);
     public static final Index IDX_USER_ROLES_USER_ROLE = Internal.createIndex(DSL.name("IDX_USER_ROLES_USER_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.ROLE_ID, UserRoles.USER_ROLES.USER_ID }, false);
+    public static final Index UK_API_KEY_PERMISSIONS = Internal.createIndex(DSL.name("UK_API_KEY_PERMISSIONS"), ApiKeyPermissions.API_KEY_PERMISSIONS, new OrderField[] { ApiKeyPermissions.API_KEY_PERMISSIONS.API_KEY_ID, ApiKeyPermissions.API_KEY_PERMISSIONS.PERMISSION_ID }, true);
+    public static final Index UK_PERMISSION_CODE = Internal.createIndex(DSL.name("UK_PERMISSION_CODE"), Permissions.PERMISSIONS, new OrderField[] { Permissions.PERMISSIONS.CODE }, true);
     public static final Index UK_RULE_HASH = Internal.createIndex(DSL.name("UK_RULE_HASH"), UrlRedirectRules.URL_REDIRECT_RULES, new OrderField[] { UrlRedirectRules.URL_REDIRECT_RULES.RULE_HASH }, true);
     public static final Index UK_USER_ROLES_USER_ROLE = Internal.createIndex(DSL.name("UK_USER_ROLES_USER_ROLE"), UserRoles.USER_ROLES, new OrderField[] { UserRoles.USER_ROLES.USER_ID, UserRoles.USER_ROLES.ROLE_ID }, true);
 }
