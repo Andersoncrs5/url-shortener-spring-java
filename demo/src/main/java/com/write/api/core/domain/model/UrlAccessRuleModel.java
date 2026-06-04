@@ -2,24 +2,27 @@ package com.write.api.core.domain.model;
 
 import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
 import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UrlAccessRuleModel extends BaseModel {
 
-    private Long urlId;
+    Long urlId;
 
-    private UrlAccessRuleTypeEnum type;
+    UrlAccessRuleTypeEnum type;
 
-    private String ruleValue;
+    String ruleValue;
 
-    private boolean active;
+    boolean active;
 
-    private Long assignedByUserId;
+    Long assignedByUserId;
 
-    private LocalDateTime expiresAt;
+    LocalDateTime expiresAt;
 }
