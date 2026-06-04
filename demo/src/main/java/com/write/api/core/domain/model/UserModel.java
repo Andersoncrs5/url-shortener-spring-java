@@ -1,29 +1,28 @@
 package com.write.api.core.domain.model;
 
+import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
-public class UserModel {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UserModel extends BaseModel {
 
-    private Long id;
-    private Long version;
-    private String name;
-    private String email;
-    private String refreshToken;
-    private String passwordHash;
-    private boolean active;
-    private boolean emailVerified;
-    private LocalDateTime lastLoginAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime blockedAt;
-    private int attemptsLoginFailed = 0;
+    Long version;
+    String name;
+    String email;
+    String refreshToken;
+    String passwordHash;
+    boolean active;
+    boolean emailVerified;
+    LocalDateTime lastLoginAt;
+    LocalDateTime blockedAt;
+    int attemptsLoginFailed = 0;
 
     public void sumAttemptLogin() {
         attemptsLoginFailed++;
