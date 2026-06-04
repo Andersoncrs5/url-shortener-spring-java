@@ -6,6 +6,7 @@ import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ public interface UrlTagControllerDocs {
 
     @Idempotent
     @DeleteMapping("/{id}")
+    @RateLimiter(name = "delete")
     ResponseEntity<ResponseHttp<?>> del(
             @PathVariable Long id,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
@@ -23,6 +25,7 @@ public interface UrlTagControllerDocs {
 
     @Idempotent
     @PostMapping
+    @RateLimiter(name = "create")
     ResponseEntity<ResponseHttp<UrlTagResponseDTO>> create(
             @RequestBody @Valid CreateUrlTagDTO dto,
             @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey,
@@ -31,6 +34,7 @@ public interface UrlTagControllerDocs {
 
     @Idempotent
     @PatchMapping("/{id}")
+    @RateLimiter(name = "update")
     ResponseEntity<ResponseHttp<UrlTagResponseDTO>> create(
             @PathVariable Long id,
             @RequestBody @Valid UpdateUrlTagDTO dto,

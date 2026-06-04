@@ -8,6 +8,7 @@ import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.api.key.ApiKey;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.shared.validation.snowflake.IsId;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ public interface ApiKeyControllerDocs {
     @ApiKey
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/test")
+    @RateLimiter(name = "test")
     ResponseEntity<String> test(
             @RequestHeader("X-API-KEY") String key
     );
@@ -27,6 +29,7 @@ public interface ApiKeyControllerDocs {
     @Idempotent
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    @RateLimiter(name = "create")
     ResponseEntity<ResponseHttp<String>> create(
             @RequestBody @Valid CreateApiKeyDTO dto,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey,
@@ -36,6 +39,7 @@ public interface ApiKeyControllerDocs {
     @Idempotent
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    @RateLimiter(name = "update")
     ResponseEntity<ResponseHttp<ApiKeyDTO>> update(
             @PathVariable @IsId Long id,
             @RequestBody @Valid UpdateApiKeyDTO dto,
@@ -45,6 +49,7 @@ public interface ApiKeyControllerDocs {
 
     @Idempotent
     @DeleteMapping("/{id}")
+    @RateLimiter(name = "delete")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     ResponseEntity<ResponseHttp<Void>> delete(
             @PathVariable @IsId Long id,

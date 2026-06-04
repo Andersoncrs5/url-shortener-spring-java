@@ -6,6 +6,7 @@ import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.application.dto.user.LoginUserDTO;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 public interface AuthControllerDocs {
     @PostMapping("/login")
+    @RateLimiter(name = "login")
     ResponseEntity<ResponseHttp<AuthTokenResponseDTO>> login(
             @Valid @RequestBody LoginUserDTO dto,
             @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey
     );
 
     @PostMapping("/register")
+    @RateLimiter(name = "create")
     ResponseEntity<ResponseHttp<AuthTokenResponseDTO>> register(
             @Valid @RequestBody CreateUserDTO dto,
             @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey
@@ -27,12 +30,14 @@ public interface AuthControllerDocs {
 
     @Idempotent
     @GetMapping("/logout")
+    @RateLimiter(name = "logout")
     ResponseEntity<?> logout(
             @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey,
             @AuthenticationPrincipal UserPrincipal principal
     );
 
     @GetMapping("/refresh-token/{refreshToken}")
+    @RateLimiter(name = "refresh-token")
     ResponseEntity<ResponseHttp<?>> refreshToken(
             @PathVariable @NotBlank String refreshToken,
             @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey
