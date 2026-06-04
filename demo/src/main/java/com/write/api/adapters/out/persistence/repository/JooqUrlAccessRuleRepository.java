@@ -3,6 +3,7 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.mapper.UrlAccessRuleRepositoryMapper;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.generated.jooq.tables.records.UrlAccessRuleRecord;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,24 +27,24 @@ public class JooqUrlAccessRuleRepository implements IUrlAccessRuleRepository {
 
     @Override
     public UrlAccessRuleModel save(UrlAccessRuleModel entity) {
-        int rows = dsl.update(URL_ACCESS_RULE)
-                .set(URL_ACCESS_RULE.URL_ID, entity.getUrlId())
-                .set(URL_ACCESS_RULE.TYPE,
-                        entity.getType() != null ? entity.getType().name() : null)
-                .set(URL_ACCESS_RULE.RULE_VALUE, entity.getRuleValue())
-                .set(URL_ACCESS_RULE.ACTIVE, entity.isActive())
-                .set(URL_ACCESS_RULE.ASSIGNED_BY_USER_ID, entity.getAssignedByUserId())
-                .set(URL_ACCESS_RULE.EXPIRES_AT, entity.getExpiresAt())
-                .set(URL_ACCESS_RULE.UPDATED_AT, LocalDateTime.now())
-                .where(URL_ACCESS_RULE.ID.eq(entity.getId()))
-                .execute();
+
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        UrlAccessRuleRecord record =
+                mapper.toRecord(entity);
+
+        int rows = dsl.executeUpdate(record);
 
         if (rows == 0) {
-            throw new IllegalStateException("UrlAccessRule not found: " + entity.getId());
+            throw new IllegalStateException(
+                    "UrlAccessRule not found: " + entity.getId()
+            );
         }
 
         if (rows > 1) {
-            throw new IllegalStateException("More than one row affected");
+            throw new IllegalStateException(
+                    "More than one row affected"
+            );
         }
 
         return entity;
@@ -51,29 +52,23 @@ public class JooqUrlAccessRuleRepository implements IUrlAccessRuleRepository {
 
     @Override
     public UrlAccessRuleModel insert(UrlAccessRuleModel entity) {
+
         long id = idGen.nextId();
         LocalDateTime now = LocalDateTime.now();
-
-        int rows = dsl.insertInto(URL_ACCESS_RULE)
-                .set(URL_ACCESS_RULE.ID, id)
-                .set(URL_ACCESS_RULE.URL_ID, entity.getUrlId())
-                .set(URL_ACCESS_RULE.TYPE,
-                        entity.getType() != null ? entity.getType().name() : null)
-                .set(URL_ACCESS_RULE.RULE_VALUE, entity.getRuleValue())
-                .set(URL_ACCESS_RULE.ACTIVE, entity.isActive())
-                .set(URL_ACCESS_RULE.ASSIGNED_BY_USER_ID, entity.getAssignedByUserId())
-                .set(URL_ACCESS_RULE.EXPIRES_AT, entity.getExpiresAt())
-                .set(URL_ACCESS_RULE.CREATED_AT, now)
-                .set(URL_ACCESS_RULE.UPDATED_AT, now)
-                .execute();
-
-        if (rows != 1) {
-            throw new RuntimeException("Failed to insert url access rule");
-        }
 
         entity.setId(id);
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
+
+        UrlAccessRuleRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeInsert(record);
+
+        if (rows != 1) {
+            throw new RuntimeException(
+                    "Failed to insert url access rule"
+            );
+        }
 
         return entity;
     }

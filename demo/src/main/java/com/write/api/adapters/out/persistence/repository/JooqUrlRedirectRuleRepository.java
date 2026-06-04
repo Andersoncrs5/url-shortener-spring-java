@@ -11,8 +11,11 @@ import com.write.api.generated.jooq.enums.UrlRedirectRulesBrowser;
 import com.write.api.generated.jooq.enums.UrlRedirectRulesContinent;
 import com.write.api.generated.jooq.enums.UrlRedirectRulesMatchType;
 import com.write.api.generated.jooq.enums.UrlRedirectRulesOs;
+import com.write.api.generated.jooq.tables.records.UrlRedirectRulesRecord;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -23,44 +26,20 @@ import static com.write.api.generated.jooq.Tables.URL_REDIRECT_RULES;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUrlRedirectRuleRepository implements IUrlRedirectRuleRepository {
 
-    private final DSLContext dsl;
-    private final SnowflakeIdGenerator idGen;
-    private final UrlRedirectRuleRepositoryMapper mapper;
+    DSLContext dsl;
+    SnowflakeIdGenerator idGen;
+    UrlRedirectRuleRepositoryMapper mapper;
 
     @Override
     public UrlRedirectRuleModel save(UrlRedirectRuleModel entity) {
+        entity.setUpdatedAt(LocalDateTime.now());
 
-        int rows = dsl.update(URL_REDIRECT_RULES)
-                .set(URL_REDIRECT_RULES.URL_ID, entity.getUrlId())
-                .set(URL_REDIRECT_RULES.COUNTRY_CODE, entity.getCountryCode())
-                .set(URL_REDIRECT_RULES.REGION, entity.getRegion())
-                .set(URL_REDIRECT_RULES.CONTINENT,
-                        entity.getContinent() != null
-                                ? UrlRedirectRulesContinent.valueOf(entity.getContinent().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.OS,
-                        entity.getOs() != null
-                                ? UrlRedirectRulesOs.valueOf(entity.getOs().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.BROWSER,
-                        entity.getBrowser() != null
-                                ? UrlRedirectRulesBrowser.valueOf(entity.getBrowser().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.MATCH_TYPE,
-                        entity.getMatchType() != null
-                                ? UrlRedirectRulesMatchType.valueOf(entity.getMatchType().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.REDIRECT_URL, entity.getRedirectUrl())
-                .set(URL_REDIRECT_RULES.RULE_HASH, entity.getRuleHash())
-                .set(URL_REDIRECT_RULES.PRIORITY, entity.getPriority())
-                .set(URL_REDIRECT_RULES.ACTIVE, entity.isActive())
-                .set(URL_REDIRECT_RULES.START_AT, entity.getStartAt())
-                .set(URL_REDIRECT_RULES.END_AT, entity.getEndAt())
-                .set(URL_REDIRECT_RULES.UPDATED_AT, LocalDateTime.now())
-                .where(URL_REDIRECT_RULES.ID.eq(entity.getId()))
-                .execute();
+        UrlRedirectRulesRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeUpdate(record);
 
         if (rows == 0) {
             throw new IllegalStateException("UrlRedirectRule not found: " + entity.getId());
@@ -78,44 +57,17 @@ public class JooqUrlRedirectRuleRepository implements IUrlRedirectRuleRepository
         long id = idGen.nextId();
         LocalDateTime now = LocalDateTime.now();
 
-        int rows = dsl.insertInto(URL_REDIRECT_RULES)
-                .set(URL_REDIRECT_RULES.ID, id)
-                .set(URL_REDIRECT_RULES.URL_ID, entity.getUrlId())
-                .set(URL_REDIRECT_RULES.COUNTRY_CODE, entity.getCountryCode())
-                .set(URL_REDIRECT_RULES.REGION, entity.getRegion())
-                .set(URL_REDIRECT_RULES.CONTINENT,
-                        entity.getContinent() != null
-                                ? UrlRedirectRulesContinent.valueOf(entity.getContinent().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.OS,
-                        entity.getOs() != null
-                                ? UrlRedirectRulesOs.valueOf(entity.getOs().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.BROWSER,
-                        entity.getBrowser() != null
-                                ? UrlRedirectRulesBrowser.valueOf(entity.getBrowser().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.MATCH_TYPE,
-                        entity.getMatchType() != null
-                                ? UrlRedirectRulesMatchType.valueOf(entity.getMatchType().name())
-                                : null)
-                .set(URL_REDIRECT_RULES.REDIRECT_URL, entity.getRedirectUrl())
-                .set(URL_REDIRECT_RULES.RULE_HASH, entity.getRuleHash())
-                .set(URL_REDIRECT_RULES.PRIORITY, entity.getPriority())
-                .set(URL_REDIRECT_RULES.ACTIVE, entity.isActive())
-                .set(URL_REDIRECT_RULES.START_AT, entity.getStartAt())
-                .set(URL_REDIRECT_RULES.END_AT, entity.getEndAt())
-                .set(URL_REDIRECT_RULES.CREATED_AT, now)
-                .set(URL_REDIRECT_RULES.UPDATED_AT, now)
-                .execute();
+        entity.setId(id);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
+
+        UrlRedirectRulesRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeInsert(record);
 
         if (rows != 1) {
             throw new RuntimeException("Failed to insert url redirect rule");
         }
-
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
 
         return entity;
     }

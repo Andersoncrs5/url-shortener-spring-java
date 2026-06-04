@@ -6,6 +6,8 @@ import com.write.api.core.domain.service.SnowflakeIdGenerator;
 
 import static com.write.api.generated.jooq.Tables.ROLES;
 import static com.write.api.generated.jooq.Tables.USER_ROLES;
+
+import com.write.api.generated.jooq.tables.records.UserRolesRecord;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +31,11 @@ public class JooqUserRoleRepository implements IUserRoleRepository {
     @Override
     public UserRoleModel save(UserRoleModel entity) {
 
-        int rows = dsl.update(USER_ROLES)
-                .set(USER_ROLES.USER_ID, entity.getUserId())
-                .set(USER_ROLES.ROLE_ID, entity.getRoleId())
-                .set(USER_ROLES.ASSIGNED_BY_USER_ID, entity.getAssignedByUserId())
-                .set(USER_ROLES.UPDATED_AT, LocalDateTime.now())
-                .where(USER_ROLES.ID.eq(entity.getId()))
-                .execute();
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        UserRolesRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeUpdate(record);
 
         if (rows == 0) {
             throw new IllegalStateException(
@@ -58,24 +58,19 @@ public class JooqUserRoleRepository implements IUserRoleRepository {
         long id = idGen.nextId();
         LocalDateTime now = LocalDateTime.now();
 
-        int rows = dsl.insertInto(USER_ROLES)
-                .set(USER_ROLES.ID, id)
-                .set(USER_ROLES.USER_ID, entity.getUserId())
-                .set(USER_ROLES.ROLE_ID, entity.getRoleId())
-                .set(USER_ROLES.ASSIGNED_BY_USER_ID, entity.getAssignedByUserId())
-                .set(USER_ROLES.CREATED_AT, now)
-                .set(USER_ROLES.UPDATED_AT, now)
-                .execute();
+        entity.setId(id);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
+
+        UserRolesRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeInsert(record);
 
         if (rows != 1) {
             throw new RuntimeException(
                     "Failed to insert user role"
             );
         }
-
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
 
         return entity;
     }

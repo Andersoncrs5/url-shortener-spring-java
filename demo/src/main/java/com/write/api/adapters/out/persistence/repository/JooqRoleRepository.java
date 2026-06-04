@@ -3,6 +3,7 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.mapper.RoleRepositoryMapper;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.generated.jooq.tables.records.RolesRecord;
 import com.write.api.ports.out.repository.IRoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,55 @@ public class JooqRoleRepository implements IRoleRepository {
     RoleRepositoryMapper mapper;
 
     @Override
+    public RoleModel save(RoleModel entity) {
+        if (entity.getId() == null)
+            return insert(entity);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        RolesRecord record = mapper.toRecord(entity);
+
+        record.setUpdatedAt(now);
+
+        int rows = dsl.executeUpdate(record);
+
+        if (rows == 0) {
+            throw new IllegalStateException(
+                    "Role not found: " + entity.getId()
+            );
+        }
+
+        if (rows > 1) {
+            throw new IllegalStateException(
+                    "More than one row affected"
+            );
+        }
+
+        return mapper.toDomain(record);
+    }
+
+    @Override
+    public RoleModel insert(RoleModel entity) {
+
+        long id = generator.nextId();
+        LocalDateTime now = LocalDateTime.now();
+
+        RolesRecord record = mapper.toRecord(entity);
+
+        record.setId(id);
+        record.setCreatedAt(now);
+        record.setUpdatedAt(now);
+
+        int rows = dsl.executeInsert(record);
+
+        if (rows != 1) {
+            throw new RuntimeException("Failed to insert role");
+        }
+
+        return mapper.toDomain(record);
+    }
+
+    @Override
     public boolean existsByNameIgnoreCase(String name) {
         if (name == null || name.isBlank()) {
             return false;
@@ -43,55 +93,6 @@ public class JooqRoleRepository implements IRoleRepository {
                 .where(ROLES.NAME.equalIgnoreCase(name))
                 .fetchOptional()
                 .map(mapper::toDomain);
-    }
-
-    @Override
-    public RoleModel save(RoleModel entity) {
-        LocalDateTime now = LocalDateTime.now();
-
-        int rows = dsl.update(ROLES)
-                .set(ROLES.NAME, entity.getName())
-                .set(ROLES.DESCRIPTION, entity.getDescription())
-                .set(ROLES.ACTIVE, entity.isActive())
-                .set(ROLES.UPDATED_AT, now)
-                .where(ROLES.ID.eq(entity.getId()))
-                .execute();
-
-        if (rows == 0) {
-            throw new IllegalStateException("Role not found: " + entity.getId());
-        }
-
-        if (rows > 1) {
-            throw new IllegalStateException("More than one row affected");
-        }
-
-        entity.setUpdatedAt(now);
-        return entity;
-    }
-
-    @Override
-    public RoleModel insert(RoleModel entity) {
-        long id = generator.nextId();
-        LocalDateTime now = LocalDateTime.now();
-
-        int rows = dsl.insertInto(ROLES)
-                .set(ROLES.ID, id)
-                .set(ROLES.NAME, entity.getName())
-                .set(ROLES.DESCRIPTION, entity.getDescription())
-                .set(ROLES.ACTIVE, entity.isActive())
-                .set(ROLES.CREATED_AT, now)
-                .set(ROLES.UPDATED_AT, now)
-                .execute();
-
-        if (rows != 1) {
-            throw new RuntimeException("Failed to insert role");
-        }
-
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
-
-        return entity;
     }
 
     @Override

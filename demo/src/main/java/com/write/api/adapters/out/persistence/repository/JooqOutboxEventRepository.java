@@ -17,6 +17,7 @@ import org.jooq.JSON;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static com.write.api.generated.jooq.tables.OutboxEvents.OUTBOX_EVENTS;
@@ -117,5 +118,63 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
 
     private OutboxStatusEnum toStatus(String value) {
         return value == null ? null : OutboxStatusEnum.valueOf(value);
+    }
+
+    public List<OutboxEventModel> claimPending(int limit) {
+        return dsl.transactionResult(configuration -> {
+            DSLContext tx = org.jooq.impl.DSL.using(configuration);
+
+            var records = tx.selectFrom(OUTBOX_EVENTS)
+                    .where(OUTBOX_EVENTS.STATUS.eq(OutboxStatusEnum.PENDING.name()))
+                    .orderBy(OUTBOX_EVENTS.CREATED_AT.asc(), OUTBOX_EVENTS.ID.asc())
+                    .limit(limit)
+                    .forUpdate()
+                    .fetch();
+
+            if (records.isEmpty()) {
+                return List.of();
+            }
+
+            List<OutboxEventModel> events = records
+                    .stream()
+                    .map(mapper::toDomain)
+                    .toList();
+
+            tx.update(OUTBOX_EVENTS)
+                    .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.PROCESSING.name())
+                    .set(OUTBOX_EVENTS.UPDATED_AT, LocalDateTime.now())
+                    .where(OUTBOX_EVENTS.ID.in(
+                            events.stream()
+                                    .map(OutboxEventModel::getId)
+                                    .toList()
+                    ))
+                    .and(OUTBOX_EVENTS.STATUS.eq(OutboxStatusEnum.PENDING.name()))
+                    .execute();
+
+            events.forEach(e -> e.setStatus(OutboxStatusEnum.PROCESSING));
+
+            return events;
+        });
+    }
+
+    @Override
+    public int markProcessed(Long id) {
+        return dsl.update(OUTBOX_EVENTS)
+                .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.PROCESSED.name())
+                .set(OUTBOX_EVENTS.PROCESSED_AT, LocalDateTime.now())
+                .set(OUTBOX_EVENTS.UPDATED_AT, LocalDateTime.now())
+                .where(OUTBOX_EVENTS.ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public int markFailed(Long id, String errorMessage, LocalDateTime nextRetryAt) {
+        return dsl.update(OUTBOX_EVENTS)
+                .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.FAILED.name())
+                .set(OUTBOX_EVENTS.ERROR_MESSAGE, errorMessage)
+                .set(OUTBOX_EVENTS.NEXT_RETRY_AT, nextRetryAt)
+                .set(OUTBOX_EVENTS.UPDATED_AT, LocalDateTime.now())
+                .where(OUTBOX_EVENTS.ID.eq(id))
+                .execute();
     }
 }

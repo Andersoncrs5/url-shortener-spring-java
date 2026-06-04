@@ -3,8 +3,11 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.mapper.UrlTagLinkRepositoryMapper;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.generated.jooq.tables.records.UrlTagLinksRecord;
 import com.write.api.ports.out.repository.IUrlTagLinkRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -15,23 +18,19 @@ import static com.write.api.generated.jooq.Tables.URL_TAG_LINKS;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUrlTagLinkRepository implements IUrlTagLinkRepository {
 
-    private final DSLContext dsl;
-    private final SnowflakeIdGenerator idGen;
-    private final UrlTagLinkRepositoryMapper mapper;
+    DSLContext dsl;
+    SnowflakeIdGenerator idGen;
+    UrlTagLinkRepositoryMapper mapper;
 
     @Override
     public UrlTagLinkModel save(UrlTagLinkModel entity) {
-        int rows = dsl.update(URL_TAG_LINKS)
-                .set(URL_TAG_LINKS.URL_ID, entity.getUrlId())
-                .set(URL_TAG_LINKS.TAG_ID, entity.getTagId())
-                .set(URL_TAG_LINKS.SORT_ORDER, entity.getSortOrder())
-                .set(URL_TAG_LINKS.NOTE, entity.getNote())
-                .set(URL_TAG_LINKS.PRIMARY_TAG, entity.isPrimaryTag())
-                .set(URL_TAG_LINKS.CREATED_BY, entity.getCreatedBy())
-                .where(URL_TAG_LINKS.ID.eq(entity.getId()))
-                .execute();
+
+        UrlTagLinksRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeUpdate(record);
 
         if (rows == 0) {
             throw new IllegalStateException(
@@ -50,28 +49,22 @@ public class JooqUrlTagLinkRepository implements IUrlTagLinkRepository {
 
     @Override
     public UrlTagLinkModel insert(UrlTagLinkModel entity) {
+
         long id = idGen.nextId();
         LocalDateTime now = LocalDateTime.now();
 
-        int rows = dsl.insertInto(URL_TAG_LINKS)
-                .set(URL_TAG_LINKS.ID, id)
-                .set(URL_TAG_LINKS.URL_ID, entity.getUrlId())
-                .set(URL_TAG_LINKS.TAG_ID, entity.getTagId())
-                .set(URL_TAG_LINKS.SORT_ORDER, entity.getSortOrder())
-                .set(URL_TAG_LINKS.NOTE, entity.getNote())
-                .set(URL_TAG_LINKS.PRIMARY_TAG, entity.isPrimaryTag())
-                .set(URL_TAG_LINKS.CREATED_BY, entity.getCreatedBy())
-                .set(URL_TAG_LINKS.CREATED_AT, now)
-                .execute();
+        entity.setId(id);
+        entity.setCreatedAt(now);
+
+        UrlTagLinksRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeInsert(record);
 
         if (rows != 1) {
             throw new RuntimeException(
                     "Failed to insert url tag link"
             );
         }
-
-        entity.setId(id);
-        entity.setCreatedAt(now);
 
         return entity;
     }

@@ -3,26 +3,31 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.mapper.UrlRepositoryMapper;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
+import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.UrlsRecord;
 import com.write.api.ports.out.repository.IUrlRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static com.write.api.generated.jooq.tables.Urls.URLS;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUrlRepository implements IUrlRepository {
 
-    private final DSLContext dsl;
-    private final UrlRepositoryMapper mapper;
-    private final SnowflakeIdGenerator idGen;
+    DSLContext dsl;
+    UrlRepositoryMapper mapper;
+    SnowflakeIdGenerator idGen;
 
     @Override
     public UrlModel save(UrlModel entity) {
@@ -135,6 +140,24 @@ public class JooqUrlRepository implements IUrlRepository {
                         .where(URLS.USER_ID.eq(userId))
                         .and(URLS.ID.eq(urlId))
         );
+    }
+
+    @Override
+    public List<UrlModel> findToDelete(UrlStatusEnum status, int limit, LocalDateTime deletedAt) {
+    var records = dsl.selectFrom(URLS)
+            .where(URLS.STATUS.eq(status.name()))
+            .and(URLS.DELETED_AT.lessOrEqual(deletedAt))
+            .limit(limit)
+            .fetch();
+
+        if (records.isEmpty()) {
+            return List.of();
+        }
+
+        return records
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     private UrlModel toDomain(UrlsRecord record) {
