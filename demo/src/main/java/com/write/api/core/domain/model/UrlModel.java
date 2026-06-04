@@ -2,6 +2,7 @@ package com.write.api.core.domain.model;
 
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
+import com.write.api.core.domain.model.shared.BaseModel;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,9 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UrlModel {
-    Long id;
-    Long version;
+public class UrlModel extends BaseModel {
     Long userId;
     String shortCode;
     String description;
@@ -29,6 +28,4 @@ public class UrlModel {
     LocalDateTime deletedAt;
     LocalDateTime expiresAt;
     LocalDateTime lastAccessAt;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
 }
