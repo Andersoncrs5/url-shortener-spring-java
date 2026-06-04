@@ -3,6 +3,7 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.mapper.ApiKeyRepositoryMapper;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.generated.jooq.tables.records.ApiKeysRecord;
 import com.write.api.ports.out.repository.IApiKeyRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,25 +31,17 @@ public class JooqApiKeyRepository implements IApiKeyRepository {
         long id = idGen.nextId();
         LocalDateTime now = LocalDateTime.now();
 
-        int rows = dsl.insertInto(API_KEYS)
-                .set(API_KEYS.ID, id)
-                .set(API_KEYS.USER_ID, entity.getUserId())
-                .set(API_KEYS.KEY_HASH, entity.getKeyHash())
-                .set(API_KEYS.NAME, entity.getName())
-                .set(API_KEYS.ACTIVE, entity.isActive())
-                .set(API_KEYS.LAST_USED_AT, entity.getLastUsedAt())
-                .set(API_KEYS.EXPIRES_AT, entity.getExpiresAt())
-                .set(API_KEYS.CREATED_AT, now)
-                .set(API_KEYS.UPDATED_AT, now)
-                .execute();
+        entity.setId(id);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
+
+        ApiKeysRecord record = mapper.toRecord(entity);
+
+        int rows = dsl.executeInsert(record);
 
         if (rows != 1) {
             throw new RuntimeException("Failed to insert api key");
         }
-
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
 
         return entity;
     }
@@ -58,12 +51,10 @@ public class JooqApiKeyRepository implements IApiKeyRepository {
 
         entity.setUpdatedAt(LocalDateTime.now());
 
+        ApiKeysRecord record = mapper.toRecord(entity);
+
         int rows = dsl.update(API_KEYS)
-                .set(API_KEYS.NAME, entity.getName())
-                .set(API_KEYS.ACTIVE, entity.isActive())
-                .set(API_KEYS.LAST_USED_AT, entity.getLastUsedAt())
-                .set(API_KEYS.EXPIRES_AT, entity.getExpiresAt())
-                .set(API_KEYS.UPDATED_AT, entity.getUpdatedAt())
+                .set(record)
                 .where(API_KEYS.ID.eq(entity.getId()))
                 .execute();
 
