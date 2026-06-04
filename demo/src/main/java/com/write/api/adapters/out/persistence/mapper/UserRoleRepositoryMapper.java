@@ -13,4 +13,5 @@ public interface UserRoleRepositoryMapper {
 
     UserRoleModel toDomain(UserRolesRecord record);
 
+    UserRolesRecord toRecord(UserRoleModel model);
 }
