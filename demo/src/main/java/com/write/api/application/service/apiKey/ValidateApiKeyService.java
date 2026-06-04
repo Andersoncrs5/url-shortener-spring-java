@@ -27,12 +27,9 @@ public class ValidateApiKeyService implements ValidateApiKeyUseCase {
 
     @Override
     public Result<Boolean> execute(String apiKey) {
-
         String hash = sha256(apiKey);
 
-        ApiKeyModel key = repository
-                .findByKeyHash(hash)
-                .orElse(null);
+        ApiKeyModel key = repository.findByKeyHash(hash).orElse(null);
 
         if (key == null) {
             return Result.failure(
@@ -60,13 +57,9 @@ public class ValidateApiKeyService implements ValidateApiKeyUseCase {
 
     private String sha256(String value) {
         try {
-            MessageDigest digest =
-                    MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-            byte[] hash =
-                    digest.digest(
-                            value.getBytes(StandardCharsets.UTF_8)
-                    );
+            byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
 
             return HexFormat.of().formatHex(hash);
 
