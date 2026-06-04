@@ -5,32 +5,35 @@ import com.write.api.core.domain.enums.ContinentEnum;
 import com.write.api.core.domain.enums.MatchTypeEnum;
 import com.write.api.core.domain.enums.OperatingSystemEnum;
 import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UrlRedirectRuleModel extends BaseModel {
 
-    private Long urlId;
+    Long urlId;
 
-    private String countryCode;
-    private String region;
-    private ContinentEnum continent;
+    String countryCode;
+    String region;
+    ContinentEnum continent;
 
-    private OperatingSystemEnum os;
-    private BrowserEnum browser;
+    OperatingSystemEnum os;
+    BrowserEnum browser;
 
-    private MatchTypeEnum matchType;
+    MatchTypeEnum matchType;
 
-    private String redirectUrl;
-    private String ruleHash;
-    private Integer priority;
+    String redirectUrl;
+    String ruleHash;
+    Integer priority;
 
-    private boolean active;
+    boolean active;
 
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    LocalDateTime startAt;
+    LocalDateTime endAt;
 }
