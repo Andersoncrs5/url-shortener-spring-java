@@ -1,10 +1,12 @@
 package com.write.api.adapters.out.persistence.repository;
 
+import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UserRepositoryMapper;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.UsersRecord;
 import com.write.api.ports.out.repository.IUserRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,111 +21,128 @@ import static com.write.api.generated.jooq.tables.Users.USERS;
 @Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class JooqUserRepository implements IUserRepository {
+public class JooqUserRepository extends JooqRepository implements IUserRepository {
 
-    DSLContext dsl;
-    SnowflakeIdGenerator idGen;
     UserRepositoryMapper mapper;
 
     @Override
+    @Retry(name = "database")
     public UserModel save(UserModel user) {
+        return execute(() -> {
+            user.setUpdatedAt(LocalDateTime.now());
 
-        user.setUpdatedAt(LocalDateTime.now());
+            UsersRecord record = mapper.toRecord(user);
 
-        UsersRecord record = mapper.toRecord(user);
+            int rows = dsl.executeUpdate(record);
 
-        int rows = dsl.executeUpdate(record);
+            if (rows == 0) {
+                throw new IllegalStateException(
+                        "User not found: " + user.getId()
+                );
+            }
 
-        if (rows == 0) {
-            throw new IllegalStateException(
-                    "User not found: " + user.getId()
-            );
-        }
+            if (rows > 1) {
+                throw new IllegalStateException(
+                        "More than one row affected"
+                );
+            }
 
-        if (rows > 1) {
-            throw new IllegalStateException(
-                    "More than one row affected"
-            );
-        }
-
-        return user;
+            return user;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public UserModel insert(UserModel user) {
+        return execute(() -> {
+            long id = idGen.nextId();
+            LocalDateTime now = LocalDateTime.now();
 
-        long id = idGen.nextId();
-        LocalDateTime now = LocalDateTime.now();
+            user.setId(id);
+            user.setCreatedAt(now);
+            user.setUpdatedAt(now);
 
-        user.setId(id);
-        user.setCreatedAt(now);
-        user.setUpdatedAt(now);
+            if (user.getVersion() == null) {
+                user.setVersion(1L);
+            }
 
-        if (user.getVersion() == null) {
-            user.setVersion(1L);
-        }
+            UsersRecord record = mapper.toRecord(user);
 
-        UsersRecord record = mapper.toRecord(user);
+            int rows = dsl.executeInsert(record);
 
-        int rows = dsl.executeInsert(record);
+            if (rows != 1) {
+                throw new RuntimeException("Failed to insert user");
+            }
 
-        if (rows != 1) {
-            throw new RuntimeException(
-                    "Failed to insert user"
-            );
-        }
-
-        return user;
+            return user;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
-        return dsl.delete(USERS)
-                .where(USERS.ID.eq(id))
-                .execute();
-    }
-
-    @Override
-    public boolean existsByEmailIgnoreCase(String email) {
-        Integer count = dsl
-                .selectCount()
-                .from(USERS)
-                .where(USERS.EMAIL.equalIgnoreCase(email))
-                .fetchOne(0, Integer.class);
-
-        return count != null && count > 0;
-    }
-
-    @Override
-    public Optional<UserModel> findByEmailIgnoreCase(String email) {
-        return dsl.selectFrom(USERS)
-                .where(USERS.EMAIL.equalIgnoreCase(email))
-                .fetchOptional()
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Optional<UserModel> findById(Long id) {
-        return dsl.selectFrom(USERS)
-                .where(USERS.ID.eq(id))
-                .fetchOptional()
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public Optional<UserModel> findByRefreshToken(String refreshToken) {
-        return dsl.selectFrom(USERS)
-                .where(USERS.REFRESH_TOKEN.equalIgnoreCase(refreshToken))
-                .fetchOptional()
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return dsl.fetchExists(
-                dsl.selectFrom(USERS)
+        return execute(() ->
+                dsl.delete(USERS)
                         .where(USERS.ID.eq(id))
+                        .execute()
         );
     }
 
+    @Override
+    @Retry(name = "database")
+    public boolean existsByEmailIgnoreCase(String email) {
+        return execute(() -> {
+            Integer count = dsl
+                    .selectCount()
+                    .from(USERS)
+                    .where(USERS.EMAIL.equalIgnoreCase(email))
+                    .fetchOne(0, Integer.class);
+
+            return count != null && count > 0;
+        });
+    }
+
+    @Override
+    @Retry(name = "database")
+    public Optional<UserModel> findByEmailIgnoreCase(String email) {
+        return execute(() ->
+                dsl.selectFrom(USERS)
+                        .where(USERS.EMAIL.equalIgnoreCase(email))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
+    public Optional<UserModel> findById(Long id) {
+        return execute(() ->
+                dsl.selectFrom(USERS)
+                        .where(USERS.ID.eq(id))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
+    public Optional<UserModel> findByRefreshToken(String refreshToken) {
+        return execute(() ->
+                dsl.selectFrom(USERS)
+                        .where(USERS.REFRESH_TOKEN.equalIgnoreCase(refreshToken))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
+    public boolean existsById(Long id) {
+        return execute(() ->
+                dsl.fetchExists(
+                        dsl.selectFrom(USERS)
+                                .where(USERS.ID.eq(id))
+                )
+        );
+    }
 }

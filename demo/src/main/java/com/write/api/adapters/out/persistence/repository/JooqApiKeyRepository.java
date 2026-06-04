@@ -1,10 +1,13 @@
 package com.write.api.adapters.out.persistence.repository;
 
+import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.ApiKeyRepositoryMapper;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.ApiKeysRecord;
 import com.write.api.ports.out.repository.IApiKeyRepository;
+import com.write.api.shared.persistence.RetryTranslation;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,87 +22,110 @@ import static com.write.api.generated.jooq.Tables.API_KEYS;
 @Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class JooqApiKeyRepository implements IApiKeyRepository {
+public class JooqApiKeyRepository extends JooqRepository implements IApiKeyRepository {
 
-    DSLContext dsl;
-    SnowflakeIdGenerator idGen;
     ApiKeyRepositoryMapper mapper;
 
     @Override
+    @Retry(name = "database")
     public ApiKeyModel insert(ApiKeyModel entity) {
 
-        long id = idGen.nextId();
-        LocalDateTime now = LocalDateTime.now();
+        return retryTranslator.execute(() -> {
 
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
+            long id = idGen.nextId();
+            LocalDateTime now = LocalDateTime.now();
 
-        ApiKeysRecord record = mapper.toRecord(entity);
+            entity.setId(id);
+            entity.setCreatedAt(now);
+            entity.setUpdatedAt(now);
 
-        int rows = dsl.executeInsert(record);
+            ApiKeysRecord record = mapper.toRecord(entity);
 
-        if (rows != 1) {
-            throw new RuntimeException("Failed to insert api key");
-        }
+            int rows = dsl.executeInsert(record);
 
-        return entity;
+            if (rows != 1) {
+                throw new RuntimeException("Failed to insert api key");
+            }
+
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public ApiKeyModel save(ApiKeyModel entity) {
 
-        entity.setUpdatedAt(LocalDateTime.now());
+        return retryTranslator.execute(() -> {
 
-        ApiKeysRecord record = mapper.toRecord(entity);
+            entity.setUpdatedAt(LocalDateTime.now());
 
-        int rows = dsl.update(API_KEYS)
-                .set(record)
-                .where(API_KEYS.ID.eq(entity.getId()))
-                .execute();
+            ApiKeysRecord record = mapper.toRecord(entity);
 
-        if (rows == 0) {
-            throw new IllegalStateException(
-                    "ApiKey not found: " + entity.getId()
-            );
-        }
+            int rows = dsl.update(API_KEYS)
+                    .set(record)
+                    .where(API_KEYS.ID.eq(entity.getId()))
+                    .execute();
 
-        if (rows > 1) {
-            throw new IllegalStateException(
-                    "More than one row affected"
-            );
-        }
+            if (rows == 0) {
+                throw new IllegalStateException(
+                        "ApiKey not found: " + entity.getId()
+                );
+            }
 
-        return entity;
+            if (rows > 1) {
+                throw new IllegalStateException(
+                        "More than one row affected"
+                );
+            }
+
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
-        return dsl.delete(API_KEYS)
-                .where(API_KEYS.ID.eq(id))
-                .execute();
-    }
 
-    @Override
-    public Optional<ApiKeyModel> findById(Long id) {
-        return dsl.selectFrom(API_KEYS)
-                .where(API_KEYS.ID.eq(id))
-                .fetchOptional()
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return dsl.fetchExists(
-                dsl.selectFrom(API_KEYS)
+        return retryTranslator.execute(() ->
+                dsl.delete(API_KEYS)
                         .where(API_KEYS.ID.eq(id))
+                        .execute()
         );
     }
 
     @Override
+    @Retry(name = "database")
+    public Optional<ApiKeyModel> findById(Long id) {
+
+        return retryTranslator.execute(() ->
+                dsl.selectFrom(API_KEYS)
+                        .where(API_KEYS.ID.eq(id))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
+    public boolean existsById(Long id) {
+
+        return retryTranslator.execute(() ->
+                dsl.fetchExists(
+                        dsl.selectFrom(API_KEYS)
+                                .where(API_KEYS.ID.eq(id))
+                )
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
     public Optional<ApiKeyModel> findByKeyHash(String keyHash) {
-        return dsl.selectFrom(API_KEYS)
-                .where(API_KEYS.KEY_HASH.equalIgnoreCase(keyHash))
-                .fetchOptional().map(mapper::toDomain);
+
+        return retryTranslator.execute(() ->
+                dsl.selectFrom(API_KEYS)
+                        .where(API_KEYS.KEY_HASH.equalIgnoreCase(keyHash))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
     }
 }

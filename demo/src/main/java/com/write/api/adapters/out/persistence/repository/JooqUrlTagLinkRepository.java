@@ -1,10 +1,12 @@
 package com.write.api.adapters.out.persistence.repository;
 
+import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlTagLinkRepositoryMapper;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.UrlTagLinksRecord;
 import com.write.api.ports.out.repository.IUrlTagLinkRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,73 +21,90 @@ import static com.write.api.generated.jooq.Tables.URL_TAG_LINKS;
 @Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class JooqUrlTagLinkRepository implements IUrlTagLinkRepository {
+public class JooqUrlTagLinkRepository extends JooqRepository implements IUrlTagLinkRepository {
 
-    DSLContext dsl;
-    SnowflakeIdGenerator idGen;
     UrlTagLinkRepositoryMapper mapper;
 
     @Override
+    @Retry(name = "database")
     public UrlTagLinkModel save(UrlTagLinkModel entity) {
+        return execute(() -> {
+            entity.setUpdatedAt(LocalDateTime.now());
 
-        UrlTagLinksRecord record = mapper.toRecord(entity);
+            UrlTagLinksRecord record = mapper.toRecord(entity);
 
-        int rows = dsl.executeUpdate(record);
+            int rows = dsl.executeUpdate(record);
 
-        if (rows == 0) {
-            throw new IllegalStateException(
-                    "UrlTagLink not found: " + entity.getId()
-            );
-        }
+            if (rows == 0) {
+                throw new IllegalStateException(
+                        "UrlTagLink not found: " + entity.getId()
+                );
+            }
 
-        if (rows > 1) {
-            throw new IllegalStateException(
-                    "More than one row affected"
-            );
-        }
+            if (rows > 1) {
+                throw new IllegalStateException(
+                        "More than one row affected"
+                );
+            }
 
-        return entity;
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public UrlTagLinkModel insert(UrlTagLinkModel entity) {
+        return execute(() -> {
+            long id = idGen.nextId();
+            LocalDateTime now = LocalDateTime.now();
 
-        long id = idGen.nextId();
-        LocalDateTime now = LocalDateTime.now();
+            entity.setId(id);
+            entity.setCreatedAt(now);
+            entity.setUpdatedAt(now);
 
-        entity.setId(id);
-        entity.setCreatedAt(now);
+            UrlTagLinksRecord record = mapper.toRecord(entity);
 
-        UrlTagLinksRecord record = mapper.toRecord(entity);
+            int rows = dsl.executeInsert(record);
 
-        int rows = dsl.executeInsert(record);
+            if (rows != 1) {
+                throw new RuntimeException(
+                        "Failed to insert url tag link"
+                );
+            }
 
-        if (rows != 1) {
-            throw new RuntimeException(
-                    "Failed to insert url tag link"
-            );
-        }
-
-        return entity;
+            return entity;
+        });
     }
 
     @Override
-    public int deleteById(Long aLong) {
-        return dsl.delete(URL_TAG_LINKS)
-                .where(URL_TAG_LINKS.ID.eq(aLong))
-                .execute();
+    @Retry(name = "database")
+    public int deleteById(Long id) {
+        return execute(() ->
+                dsl.delete(URL_TAG_LINKS)
+                        .where(URL_TAG_LINKS.ID.eq(id))
+                        .execute()
+        );
     }
 
     @Override
-    public Optional<UrlTagLinkModel> findById(Long aLong) {
-        return dsl.selectFrom(URL_TAG_LINKS)
-                .where(URL_TAG_LINKS.ID.eq(aLong))
-                .fetchOptional()
-                .map(mapper::toDomain);
+    @Retry(name = "database")
+    public Optional<UrlTagLinkModel> findById(Long id) {
+        return execute(() ->
+                dsl.selectFrom(URL_TAG_LINKS)
+                        .where(URL_TAG_LINKS.ID.eq(id))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
     }
 
     @Override
-    public boolean existsById(Long aLong) {
-        return dsl.fetchExists(dsl.selectFrom(URL_TAG_LINKS).where(URL_TAG_LINKS.ID.eq(aLong)));
+    @Retry(name = "database")
+    public boolean existsById(Long id) {
+        return execute(() ->
+                dsl.fetchExists(
+                        dsl.selectFrom(URL_TAG_LINKS)
+                                .where(URL_TAG_LINKS.ID.eq(id))
+                )
+        );
     }
 }

@@ -1,6 +1,7 @@
 package com.write.api.adapters.out.persistence.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.JooqOutboxEventRepositoryMapper;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
@@ -9,6 +10,8 @@ import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.OutboxEventsRecord;
 import com.write.api.ports.out.repository.IOutboxEventRepository;
+import com.write.api.shared.persistence.RetryTranslation;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,14 +28,12 @@ import static com.write.api.generated.jooq.tables.OutboxEvents.OUTBOX_EVENTS;
 @Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class JooqOutboxEventRepository implements IOutboxEventRepository {
+public class JooqOutboxEventRepository extends JooqRepository implements IOutboxEventRepository {
 
-    DSLContext dsl;
-    SnowflakeIdGenerator generator;
-    ObjectMapper objectMapper;
     JooqOutboxEventRepositoryMapper mapper;
 
     @Override
+    @Retry(name = "database")
     public OutboxEventModel save(OutboxEventModel entity) {
 
         if (entity.getId() == null) {
@@ -68,23 +69,33 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
     }
 
     @Override
+    @Retry(name = "database")
     public OutboxEventModel insert(OutboxEventModel entity) {
-        entity.setId(generator.nextId());
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
 
-        OutboxEventsRecord record = mapper.toRecord(entity);
+        return retryTranslator.execute(() -> {
 
-        int rows = dsl.executeInsert(record);
-        if (rows != 1) {
-            throw new IllegalStateException("Failed to insert outbox event");
-        }
+            entity.setId(idGen.nextId());
 
-        return entity;
+            LocalDateTime now = LocalDateTime.now();
+            entity.setCreatedAt(now);
+            entity.setUpdatedAt(now);
+
+            OutboxEventsRecord record = mapper.toRecord(entity);
+
+            int rows = dsl.executeInsert(record);
+
+            if (rows != 1) {
+                throw new IllegalStateException(
+                        "Failed to insert outbox event"
+                );
+            }
+
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
         return dsl.delete(OUTBOX_EVENTS)
                 .where(OUTBOX_EVENTS.ID.eq(id))
@@ -92,6 +103,7 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<OutboxEventModel> findById(Long id) {
         return dsl.selectFrom(OUTBOX_EVENTS)
                 .where(OUTBOX_EVENTS.ID.eq(id))
@@ -100,6 +112,7 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsById(Long id) {
         return dsl.fetchExists(OUTBOX_EVENTS, OUTBOX_EVENTS.ID.eq(id));
     }
@@ -120,6 +133,7 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
         return value == null ? null : OutboxStatusEnum.valueOf(value);
     }
 
+    @Retry(name = "database")
     public List<OutboxEventModel> claimPending(int limit) {
         return dsl.transactionResult(configuration -> {
             DSLContext tx = org.jooq.impl.DSL.using(configuration);
@@ -158,16 +172,21 @@ public class JooqOutboxEventRepository implements IOutboxEventRepository {
     }
 
     @Override
+    @Retry(name = "database")
     public int markProcessed(Long id) {
-        return dsl.update(OUTBOX_EVENTS)
-                .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.PROCESSED.name())
-                .set(OUTBOX_EVENTS.PROCESSED_AT, LocalDateTime.now())
-                .set(OUTBOX_EVENTS.UPDATED_AT, LocalDateTime.now())
-                .where(OUTBOX_EVENTS.ID.eq(id))
-                .execute();
+
+        return retryTranslator.execute(() ->
+                dsl.update(OUTBOX_EVENTS)
+                        .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.PROCESSED.name())
+                        .set(OUTBOX_EVENTS.PROCESSED_AT, LocalDateTime.now())
+                        .set(OUTBOX_EVENTS.UPDATED_AT, LocalDateTime.now())
+                        .where(OUTBOX_EVENTS.ID.eq(id))
+                        .execute()
+        );
     }
 
     @Override
+    @Retry(name = "database")
     public int markFailed(Long id, String errorMessage, LocalDateTime nextRetryAt) {
         return dsl.update(OUTBOX_EVENTS)
                 .set(OUTBOX_EVENTS.STATUS, OutboxStatusEnum.FAILED.name())

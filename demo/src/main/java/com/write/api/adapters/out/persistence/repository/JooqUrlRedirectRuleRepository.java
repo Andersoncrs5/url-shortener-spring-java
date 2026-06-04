@@ -1,5 +1,6 @@
 package com.write.api.adapters.out.persistence.repository;
 
+import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlRedirectRuleRepositoryMapper;
 import com.write.api.core.domain.enums.BrowserEnum;
 import com.write.api.core.domain.enums.ContinentEnum;
@@ -13,6 +14,7 @@ import com.write.api.generated.jooq.enums.UrlRedirectRulesMatchType;
 import com.write.api.generated.jooq.enums.UrlRedirectRulesOs;
 import com.write.api.generated.jooq.tables.records.UrlRedirectRulesRecord;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,71 +29,92 @@ import static com.write.api.generated.jooq.Tables.URL_REDIRECT_RULES;
 @Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class JooqUrlRedirectRuleRepository implements IUrlRedirectRuleRepository {
+public class JooqUrlRedirectRuleRepository
+        extends JooqRepository
+        implements IUrlRedirectRuleRepository {
 
-    DSLContext dsl;
-    SnowflakeIdGenerator idGen;
     UrlRedirectRuleRepositoryMapper mapper;
 
     @Override
+    @Retry(name = "database")
     public UrlRedirectRuleModel save(UrlRedirectRuleModel entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+        return execute(() -> {
+            entity.setUpdatedAt(LocalDateTime.now());
 
-        UrlRedirectRulesRecord record = mapper.toRecord(entity);
+            UrlRedirectRulesRecord record = mapper.toRecord(entity);
 
-        int rows = dsl.executeUpdate(record);
+            int rows = dsl.executeUpdate(record);
 
-        if (rows == 0) {
-            throw new IllegalStateException("UrlRedirectRule not found: " + entity.getId());
-        }
+            if (rows == 0) {
+                throw new IllegalStateException(
+                        "UrlRedirectRule not found: " + entity.getId()
+                );
+            }
 
-        if (rows > 1) {
-            throw new IllegalStateException("More than one row affected");
-        }
+            if (rows > 1) {
+                throw new IllegalStateException(
+                        "More than one row affected"
+                );
+            }
 
-        return entity;
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public UrlRedirectRuleModel insert(UrlRedirectRuleModel entity) {
-        long id = idGen.nextId();
-        LocalDateTime now = LocalDateTime.now();
+        return execute(() -> {
+            long id = idGen.nextId();
+            LocalDateTime now = LocalDateTime.now();
 
-        entity.setId(id);
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
+            entity.setId(id);
+            entity.setCreatedAt(now);
+            entity.setUpdatedAt(now);
 
-        UrlRedirectRulesRecord record = mapper.toRecord(entity);
+            UrlRedirectRulesRecord record = mapper.toRecord(entity);
 
-        int rows = dsl.executeInsert(record);
+            int rows = dsl.executeInsert(record);
 
-        if (rows != 1) {
-            throw new RuntimeException("Failed to insert url redirect rule");
-        }
+            if (rows != 1) {
+                throw new RuntimeException(
+                        "Failed to insert url redirect rule"
+                );
+            }
 
-        return entity;
+            return entity;
+        });
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
-        return dsl.delete(URL_REDIRECT_RULES)
-                .where(URL_REDIRECT_RULES.ID.eq(id))
-                .execute();
+        return execute(() ->
+                dsl.delete(URL_REDIRECT_RULES)
+                        .where(URL_REDIRECT_RULES.ID.eq(id))
+                        .execute()
+        );
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<UrlRedirectRuleModel> findById(Long id) {
-        return dsl.selectFrom(URL_REDIRECT_RULES)
-                .where(URL_REDIRECT_RULES.ID.eq(id))
-                .fetchOptional()
-                .map(mapper::toDomain);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return dsl.fetchExists(
+        return execute(() ->
                 dsl.selectFrom(URL_REDIRECT_RULES)
                         .where(URL_REDIRECT_RULES.ID.eq(id))
+                        .fetchOptional()
+                        .map(mapper::toDomain)
+        );
+    }
+
+    @Override
+    @Retry(name = "database")
+    public boolean existsById(Long id) {
+        return execute(() ->
+                dsl.fetchExists(
+                        dsl.selectFrom(URL_REDIRECT_RULES)
+                                .where(URL_REDIRECT_RULES.ID.eq(id))
+                )
         );
     }
 }
