@@ -1,28 +1,25 @@
 package com.write.api.core.domain.model;
 
+import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-public class UrlTagLinkModel {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UrlTagLinkModel extends BaseModel {
 
-    private Long id;
+    Long urlId;
+    Long tagId;
 
-    private Long urlId;
-    private Long tagId;
+    Short sortOrder;
 
-    private Short sortOrder;
+    String note;
 
-    private String note;
+    boolean primaryTag;
 
-    private boolean primaryTag;
-
-    private Long createdBy;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    Long createdBy;
 
 }
