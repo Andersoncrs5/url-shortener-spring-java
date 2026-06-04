@@ -104,7 +104,7 @@ public class UrlTagLinks extends TableImpl<UrlTagLinksRecord> {
     /**
      * The column <code>URL_TAG_LINKS.UPDATED_AT</code>.
      */
-    public final TableField<UrlTagLinksRecord, LocalDateTime> UPDATED_AT = createField(DSL.name("UPDATED_AT"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.LOCALDATETIME)), this, "");
+    public final TableField<UrlTagLinksRecord, LocalDateTime> UPDATED_AT = createField(DSL.name("UPDATED_AT"), SQLDataType.LOCALDATETIME(6).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.LOCALDATETIME)), this, "");
 
     private UrlTagLinks(Name alias, Table<UrlTagLinksRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

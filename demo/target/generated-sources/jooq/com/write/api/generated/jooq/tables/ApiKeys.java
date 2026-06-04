@@ -7,6 +7,7 @@ package com.write.api.generated.jooq.tables;
 import com.write.api.generated.jooq.DefaultSchema;
 import com.write.api.generated.jooq.Indexes;
 import com.write.api.generated.jooq.Keys;
+import com.write.api.generated.jooq.tables.ApiKeyPermissions.ApiKeyPermissionsPath;
 import com.write.api.generated.jooq.tables.Users.UsersPath;
 import com.write.api.generated.jooq.tables.records.ApiKeysRecord;
 
@@ -220,6 +221,19 @@ public class ApiKeys extends TableImpl<ApiKeysRecord> {
             _fkApiKeysUserId = new UsersPath(this, Keys.FK_API_KEYS_USER_ID, null);
 
         return _fkApiKeysUserId;
+    }
+
+    private transient ApiKeyPermissionsPath _apiKeyPermissions;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>API_KEY_PERMISSIONS</code> table
+     */
+    public ApiKeyPermissionsPath apiKeyPermissions() {
+        if (_apiKeyPermissions == null)
+            _apiKeyPermissions = new ApiKeyPermissionsPath(this, null, Keys.FK_API_KEY_PERMISSIONS_API_KEY_ID.getInverseKey());
+
+        return _apiKeyPermissions;
     }
 
     @Override

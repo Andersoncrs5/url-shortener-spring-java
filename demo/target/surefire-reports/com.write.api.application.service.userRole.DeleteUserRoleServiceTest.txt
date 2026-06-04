@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.application.service.userRole.DeleteUserRoleServiceTest
 -------------------------------------------------------------------------------
-Tests run: 10, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 0.026 s <<< FAILURE! -- in com.write.api.application.service.userRole.DeleteUserRoleServiceTest
+Tests run: 10, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 0.023 s <<< FAILURE! -- in com.write.api.application.service.userRole.DeleteUserRoleServiceTest
 com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn409WhenTryingToRemoveSuperAdminRole -- Time elapsed: 0.002 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
@@ -16,7 +16,7 @@ For your reference, here is the list of all invocations ([?] - means unverified)
 
 	at com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn409WhenTryingToRemoveSuperAdminRole(DeleteUserRoleServiceTest.java:187)
 
-com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldDeleteUserRoleSuccessfully -- Time elapsed: 0.003 s <<< FAILURE!
+com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldDeleteUserRoleSuccessfully -- Time elapsed: 0.002 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
@@ -31,7 +31,7 @@ For your reference, here is the list of all invocations ([?] - means unverified)
 
 	at com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldDeleteUserRoleSuccessfully(DeleteUserRoleServiceTest.java:94)
 
-com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn409WhenNonSuperAdminTriesToRemoveAdminRole -- Time elapsed: 0.003 s <<< FAILURE!
+com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn409WhenNonSuperAdminTriesToRemoveAdminRole -- Time elapsed: 0.001 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
@@ -45,13 +45,13 @@ For your reference, here is the list of all invocations ([?] - means unverified)
 
 	at com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn409WhenNonSuperAdminTriesToRemoveAdminRole(DeleteUserRoleServiceTest.java:208)
 
-com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldAllowSuperAdminToRemoveAdminRole -- Time elapsed: 0.003 s <<< FAILURE!
+com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldAllowSuperAdminToRemoveAdminRole -- Time elapsed: 0.001 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: 
 
 Expecting value to be true but was false
 	at com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldAllowSuperAdminToRemoveAdminRole(DeleteUserRoleServiceTest.java:221)
 
-com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn404WhenPerformedByUserNotFound -- Time elapsed: 0.002 s <<< FAILURE!
+com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn404WhenPerformedByUserNotFound -- Time elapsed: 0.001 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
@@ -65,7 +65,7 @@ For your reference, here is the list of all invocations ([?] - means unverified)
 
 	at com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn404WhenPerformedByUserNotFound(DeleteUserRoleServiceTest.java:167)
 
-com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn500WhenDeleteAffectsZeroRowsAfterPassingChecks -- Time elapsed: 0.003 s <<< FAILURE!
+com.write.api.application.service.userRole.DeleteUserRoleServiceTest.shouldReturn500WhenDeleteAffectsZeroRowsAfterPassingChecks -- Time elapsed: 0.002 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:

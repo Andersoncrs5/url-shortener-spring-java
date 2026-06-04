@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.application.service.url.CreateUrlFromApiKeyServiceTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.093 s <<< FAILURE! -- in com.write.api.application.service.url.CreateUrlFromApiKeyServiceTest
+Tests run: 6, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.083 s <<< FAILURE! -- in com.write.api.application.service.url.CreateUrlFromApiKeyServiceTest
 com.write.api.application.service.url.CreateUrlFromApiKeyServiceTest.shouldReturn409WhenApiKeyIsInvalid -- Time elapsed: 0.005 s <<< ERROR!
 java.lang.NullPointerException: Cannot invoke "com.write.api.application.shared.Result.isFailure()" because "apiKeyResult" is null
 	at com.write.api.application.service.url.CreateUrlFromApiKeyService.execute(CreateUrlFromApiKeyService.java:41)

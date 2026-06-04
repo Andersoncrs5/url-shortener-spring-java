@@ -1,3 +1,18 @@
+resilience4j:
+  retry:
+    instances:
+      database:
+        max-attempts: 3
+        wait-duration: 300ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 3
+        retry-exceptions:
+          - com.write.api.core.domain.exception.TransientDatabaseException
+
+        ignore-exceptions:
+          - org.springframework.dao.DataIntegrityViolationException
+          - java.lang.IllegalStateException
+
 spring:
   super-adm:
     name: superadm

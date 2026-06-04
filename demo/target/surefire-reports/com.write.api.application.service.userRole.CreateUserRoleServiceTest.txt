@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.application.service.userRole.CreateUserRoleServiceTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 0.068 s <<< FAILURE! -- in com.write.api.application.service.userRole.CreateUserRoleServiceTest
-com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenUserAlreadyHasThisRole -- Time elapsed: 0.045 s <<< FAILURE!
+Tests run: 8, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 0.116 s <<< FAILURE! -- in com.write.api.application.service.userRole.CreateUserRoleServiceTest
+com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenUserAlreadyHasThisRole -- Time elapsed: 0.052 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
@@ -16,13 +16,13 @@ For your reference, here is the list of all invocations ([?] - means unverified)
 
 	at com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenUserAlreadyHasThisRole(CreateUserRoleServiceTest.java:224)
 
-com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldAllowAdminRoleWhenGrantedBySuperAdmin -- Time elapsed: 0.005 s <<< FAILURE!
+com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldAllowAdminRoleWhenGrantedBySuperAdmin -- Time elapsed: 0.046 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: 
 
 Expecting value to be true but was false
 	at com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldAllowAdminRoleWhenGrantedBySuperAdmin(CreateUserRoleServiceTest.java:188)
 
-com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldCreateUserRoleSuccessfully -- Time elapsed: 0.003 s <<< FAILURE!
+com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldCreateUserRoleSuccessfully -- Time elapsed: 0.004 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
@@ -46,7 +46,7 @@ But found these interactions on mock 'repository':
 Actually, above is the only interaction with this mock.
 	at com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenAdminRoleIsGrantedByNonSuperAdmin(CreateUserRoleServiceTest.java:164)
 
-com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenRoleIsSuperAdmin -- Time elapsed: 0.001 s <<< FAILURE!
+com.write.api.application.service.userRole.CreateUserRoleServiceTest.shouldReturn409WhenRoleIsSuperAdmin -- Time elapsed: 0.002 s <<< FAILURE!
 org.mockito.exceptions.verification.NoInteractionsWanted: 
 
 No interactions wanted here:
