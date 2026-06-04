@@ -19,6 +19,83 @@ resilience4j:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
 
+      kafka:
+        timeout-duration: 5s
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 4
+        retry-exceptions:
+          - org.apache.kafka.common.errors.RetriableException
+          - org.springframework.kafka.KafkaException
+
+  circuitbreaker:
+    instances:
+      kafka:
+        sliding-window-size: 20
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  bulkhead:
+    instances:
+      kafka:
+        max-concurrent-calls: 10
+        max-wait-duration: 0
+
+      outbox:
+        max-concurrent-calls: 2
+        max-wait-duration: 0
+
+  timelimiter:
+    instances:
+      kafka:
+        timeout-duration: 2s
+
+  ratelimiter:
+    instances:
+      create:
+        limit-for-period: 80
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      create-internal:
+        limit-for-period: 100
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      login:
+        limit-for-period: 80
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      logout:
+        limit-for-period: 60
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      refresh-token:
+        limit-for-period: 100
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      test:
+        limit-for-period: 20
+        limit-refresh-period: 10s
+        timeout-duration: 0
+
+      delete:
+        limit-for-period: 100
+        limit-refresh-period: 4s
+        timeout-duration: 0
+
+      update:
+        limit-for-period: 10
+        limit-refresh-period: 4s
+        timeout-duration: 0
+
+
 spring:
   super-adm:
     name: superadm
