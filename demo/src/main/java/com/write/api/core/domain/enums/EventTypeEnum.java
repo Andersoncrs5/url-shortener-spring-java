@@ -20,6 +20,8 @@ public enum EventTypeEnum {
     USER_LOGIN_SUCCESS,
     USER_LOGIN_FAILED,
 
+    URL_ACCESS_RULE_CREATED,
+
     URL_CREATED,
     URL_UPDATED,
     URL_DELETED,
