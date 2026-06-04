@@ -5,32 +5,35 @@ import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.model.shared.BaseModel;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OutboxEventModel extends BaseModel {
 
-    private AggregateTypeEnum aggregateType;
+    AggregateTypeEnum aggregateType;
 
-    private Long aggregateId;
+    Long aggregateId;
 
-    private EventTypeEnum eventType;
+    EventTypeEnum eventType;
 
-    private String payload;
+    String payload;
 
-    private TopicEnum topic;
+    TopicEnum topic;
 
-    private OutboxStatusEnum status;
+    OutboxStatusEnum status;
 
-    private Integer retryCount;
+    Integer retryCount;
 
-    private String errorMessage;
+    String errorMessage;
 
-    private LocalDateTime nextRetryAt;
+    LocalDateTime nextRetryAt;
 
-    private LocalDateTime processedAt;
+    LocalDateTime processedAt;
 }
