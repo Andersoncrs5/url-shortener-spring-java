@@ -52,9 +52,7 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
 
         List<String> role = userRoleRepository.findRoleByUserId(userId);
 
-        boolean isAdmin =
-                role.contains("ADMIN") ||
-                        role.contains("SUPER_ADMIN");
+        boolean isAdmin = role.contains("ADMIN") || role.contains("SUPER_ADMIN");
 
         if (!isAdmin) {
             return Result.failure(
@@ -74,6 +72,7 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
         apiKey.setId(idGen.nextId());
         apiKey.setUserId(userId);
         apiKey.setKeyHash(hash);
+        apiKey.setOwnerUserId(dto.ownerUserId());
 
         try {
 
@@ -110,6 +109,13 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
             if (normalized.contains("fk_api_keys_user_id")) {
                 return Result.failure(
                         "User not found",
+                        404
+                );
+            }
+
+            if (normalized.contains("uk_api_keys_owner_name")) {
+                return Result.failure(
+                        "Owner User not found",
                         404
                 );
             }
