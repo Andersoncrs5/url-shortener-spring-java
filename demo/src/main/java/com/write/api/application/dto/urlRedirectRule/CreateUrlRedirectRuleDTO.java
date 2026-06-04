@@ -5,21 +5,26 @@ import com.write.api.core.domain.enums.ContinentEnum;
 import com.write.api.core.domain.enums.MatchTypeEnum;
 import com.write.api.core.domain.enums.OperatingSystemEnum;
 import com.write.api.shared.validation.snowflake.IsId;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+
+import java.time.LocalDateTime;
 
 public record CreateUrlRedirectRuleDTO(
 
-        @IsId
-        @NotNull(message = "urlId is required")
-        @Positive(message = "urlId must be greater than 0")
+        @IsId(message = "Url id is invalid")
         Long urlId,
 
-        @Size(max = 2, message = "countryCode must have at most 2 characters")
+        @Size(
+                min = 2,
+                max = 2,
+                message = "Country code must contain exactly 2 characters"
+        )
         String countryCode,
 
-        @Size(max = 100, message = "region must have at most 100 characters")
+        @Size(
+                max = 100,
+                message = "Region must not exceed 100 characters"
+        )
         String region,
 
         ContinentEnum continent,
@@ -28,21 +33,30 @@ public record CreateUrlRedirectRuleDTO(
 
         BrowserEnum browser,
 
-        @NotNull(message = "matchType is required")
+        @NotNull(message = "Match type is required")
         MatchTypeEnum matchType,
 
-        @NotNull(message = "redirectUrl is required")
-        @Size(max = 2048, message = "redirectUrl exceeded 2048 characters")
+        @NotBlank(message = "Redirect URL is required")
+        @Size(
+                max = 2048,
+                message = "Redirect URL must not exceed 2048 characters"
+        )
         String redirectUrl,
 
-        @Positive(message = "priority must be greater than 0")
+        @Min(
+                value = 0,
+                message = "Priority must be greater than or equal to 0"
+        )
         Integer priority,
 
         Boolean active,
 
-        java.time.LocalDateTime startAt,
+        @FutureOrPresent(
+                message = "Start date must be in the present or future"
+        )
+        LocalDateTime startAt,
 
-        java.time.LocalDateTime endAt
+        LocalDateTime endAt
 
 ) {
 }

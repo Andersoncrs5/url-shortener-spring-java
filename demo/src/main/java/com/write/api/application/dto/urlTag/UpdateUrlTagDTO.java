@@ -1,11 +1,43 @@
 package com.write.api.application.dto.urlTag;
 
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 public record UpdateUrlTagDTO(
+        @Size(
+                max = 120,
+                message = "name exceeded 120 characters"
+        )
         String name,
+
+        @Size(
+                max = 140,
+                message = "slug exceeded 140 characters"
+        )
+        @Pattern(
+                regexp = "^[a-z0-9-]+$",
+                message = "slug must contain only lowercase letters, numbers and hyphens"
+        )
         String slug,
+
+        @Size(
+                max = 20,
+                message = "color exceeded 20 characters"
+        )
+        @Pattern(
+                regexp = "^#?[0-9A-Fa-f]{6}$",
+                message = "color must be a valid hex color"
+        )
         String color,
+
+        @Size(
+                max = 255,
+                message = "description exceeded 255 characters"
+        )
         String description,
+
         Long parentId,
-        boolean active
+
+        Boolean active
 ) {
 }
