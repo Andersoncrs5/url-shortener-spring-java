@@ -9,6 +9,7 @@ public enum AggregateTypeEnum {
 
     USER,
     URL,
+    URL_ACCESS_RULE,
     URL_TAG,
     API_KEY,
     ROLE
