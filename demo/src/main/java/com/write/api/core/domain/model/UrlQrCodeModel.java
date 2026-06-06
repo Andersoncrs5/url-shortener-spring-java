@@ -2,12 +2,9 @@ package com.write.api.core.domain.model;
 
 import com.write.api.core.domain.enums.QrCodeFormatEnum;
 import com.write.api.core.domain.enums.QrCodeStatusEnum;
+import com.write.api.core.domain.model.shared.BaseModel;
 
-import java.time.LocalDateTime;
-
-public class UrlQrCodeModel {
-
-    private Long id;
+public class UrlQrCodeModel extends BaseModel {
 
     private Long urlId;
 
@@ -30,8 +27,4 @@ public class UrlQrCodeModel {
     private boolean withLogo;
 
     private Long generatedBy;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 }
