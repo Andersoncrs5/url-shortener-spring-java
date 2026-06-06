@@ -1,6 +1,7 @@
 package com.write.api.application.service.urlAccessRule;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.urlAccessRule.DeleteUrlAccessRuleUseCase;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
 import com.write.api.shared.tx.ResultTransaction;
@@ -22,6 +23,7 @@ public class DeleteUrlAccessRuleService implements DeleteUrlAccessRuleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.access.delete")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

@@ -5,6 +5,7 @@ import com.write.api.application.dto.outbox.events.url.UrlUpdatedEvent;
 import com.write.api.application.dto.url.UpdateUrlDTO;
 import com.write.api.application.mapper.url.UpdateUrlMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -33,6 +34,7 @@ public class UpdateUrlService implements UpdateUrlUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.update")
     public Result<UrlModel> execute(Long id, UpdateUrlDTO dto) {
         UrlModel url = repository.findById(id).orElse(null);
 

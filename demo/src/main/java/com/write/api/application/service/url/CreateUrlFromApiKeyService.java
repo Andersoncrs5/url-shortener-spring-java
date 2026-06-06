@@ -2,12 +2,14 @@ package com.write.api.application.service.url;
 
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.in.apiKey.FindByKeyApiKeyUseCase;
 import com.write.api.ports.in.apiKey.ValidateApiKeyUseCase;
 import com.write.api.ports.in.url.CreateUrlFromApiKeyUseCase;
 import com.write.api.ports.in.url.CreateUrlUseCase;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +31,8 @@ public class CreateUrlFromApiKeyService implements CreateUrlFromApiKeyUseCase {
     FindByKeyApiKeyUseCase findByKeyApiKey;
 
     @Override
+    @ResultTransaction
+    @TrackExecutionTime("url.create.from.api")
     public Result<UrlModel> execute(String key, CreateUrlDTO dto) {
         Result<Boolean> booleanResult = validateApiKey.execute(key);
 

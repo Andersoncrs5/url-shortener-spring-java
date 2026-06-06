@@ -1,6 +1,7 @@
 package com.write.api.application.service.userRole;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
@@ -25,6 +26,7 @@ public class DeleteUserRoleService implements DeleteUserRoleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("user.role.delete")
     public Result<Void> deleteById(
             Long id,
             Long performedByUserId

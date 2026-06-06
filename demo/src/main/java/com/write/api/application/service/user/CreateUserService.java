@@ -1,6 +1,7 @@
 package com.write.api.application.service.user;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.CreateUserUseCase;
@@ -20,6 +21,7 @@ public class CreateUserService implements CreateUserUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("user.create")
     public Result<UserModel> create(UserModel user) {
         try {
             user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));

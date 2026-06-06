@@ -3,6 +3,7 @@ package com.write.api.application.service.user;
 import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.outbox.events.user.UserDeletedEvent;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -26,6 +27,7 @@ public class DeleteUserByIdUserService implements DeleteByIdUserUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("user.delete")
     public Result<Void> deleteById(Long id) {
         UserModel user = this.repository.findById(id).orElse(null);
 

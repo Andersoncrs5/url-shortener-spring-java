@@ -1,9 +1,11 @@
 package com.write.api.application.service.apiKey;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.ports.in.apiKey.FindByKeyApiKeyUseCase;
 import com.write.api.ports.out.repository.IApiKeyRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +27,7 @@ public class FindByKeyApiKeyService implements FindByKeyApiKeyUseCase {
 
     IApiKeyRepository repository;
 
+    @TrackExecutionTime("apikey.find")
     public Result<ApiKeyModel> execute(String key) {
         String hash = sha256(key);
 

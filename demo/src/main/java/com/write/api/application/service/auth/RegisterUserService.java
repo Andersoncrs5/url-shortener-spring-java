@@ -6,6 +6,7 @@ import com.write.api.application.dto.outbox.events.user.UserCreatedEvent;
 import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.application.mapper.auth.RegisterUserMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -35,6 +36,7 @@ public class RegisterUserService implements RegisterUserUseCase {
     CreateOutboxEventUseCase outbox;
 
     @ResultTransaction
+    @TrackExecutionTime("auth.register")
     public Result<AuthTokenResponseDTO> execute(CreateUserDTO dto) {
         Result<UserModel> result = createUser.create(registerUserMapper.toDomain(dto));
         UserModel user;

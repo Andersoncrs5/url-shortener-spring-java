@@ -3,11 +3,13 @@ package com.write.api.application.service.role;
 import com.write.api.application.dto.role.UpdateRoleDTO;
 import com.write.api.application.mapper.role.UpdateRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.ports.in.role.UpdateRoleUseCase;
 import com.write.api.ports.out.repository.IRoleRepository;
 import com.write.api.shared.db.DatabaseConstraintHandler;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +28,8 @@ public class UpdateRoleService implements UpdateRoleUseCase {
     UpdateRoleMapper mapper;
 
     @Override
+    @ResultTransaction
+    @TrackExecutionTime("role.update")
     public Result<RoleModel> execute(Long id, UpdateRoleDTO dto) {
         RoleModel role = repository.findById(id).orElse(null);
 

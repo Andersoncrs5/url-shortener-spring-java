@@ -3,6 +3,7 @@ package com.write.api.application.service.apiKey;
 import com.write.api.application.dto.apiKey.CreateApiKeyDTO;
 import com.write.api.application.mapper.apiKey.CreateApiKeyMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -39,6 +40,7 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("apikey.create")
     public Result<String> execute(
             CreateApiKeyDTO dto,
             Long userId

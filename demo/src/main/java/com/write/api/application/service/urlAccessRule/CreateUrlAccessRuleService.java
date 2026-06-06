@@ -6,6 +6,7 @@ import com.write.api.application.dto.outbox.events.urlAccessRule.UrlAccessRuleCr
 import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.mapper.urlAccessRule.CreateUrlAccessRuleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -40,6 +41,7 @@ public class CreateUrlAccessRuleService implements CreateUrlAccessRuleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.access.create")
     public Result<UrlAccessRuleModel> execute(CreateUrlAccessRuleDTO dto, Long assignedByUserId) {
         if (dto.type() == UrlAccessRuleTypeEnum.MAX_CLICKS) {
             try {

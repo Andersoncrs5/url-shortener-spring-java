@@ -3,6 +3,7 @@ package com.write.api.application.service.urlTag;
 import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
 import com.write.api.application.mapper.urlTag.UpdateUrlTagMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagModel;
 import com.write.api.ports.in.urlTag.UpdateUrlTagUseCase;
@@ -20,6 +21,7 @@ public class UpdateUrlTagService implements UpdateUrlTagUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.update")
     public Result<UrlTagModel> execute(Long id, UpdateUrlTagDTO dto) {
         UrlTagModel tag = repository.findById(id)
                 .orElse(null);

@@ -1,6 +1,7 @@
 package com.write.api.infrastructure.scheduler;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.in.url.DeleteUrlByIdForceUseCase;
@@ -29,6 +30,7 @@ public class UrlDeleteJob {
             fixedDelay = 10,
             timeUnit = TimeUnit.MINUTES
     )
+    @TrackExecutionTime("job.url.delete")
     public void delete() {
         List<UrlModel> list = repository.findToDelete(
                 UrlStatusEnum.DELETED,

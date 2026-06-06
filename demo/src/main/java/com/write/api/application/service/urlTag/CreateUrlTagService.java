@@ -3,6 +3,7 @@ package com.write.api.application.service.urlTag;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.mapper.urlTag.CreateUrlTagMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagModel;
 import com.write.api.ports.in.urlTag.CreateUrlTagUseCase;
@@ -21,6 +22,7 @@ public class CreateUrlTagService implements CreateUrlTagUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.create")
     public Result<UrlTagModel> execute(CreateUrlTagDTO dto, Long userId) {
         UrlTagModel model = mapper.toModel(dto);
         model.setUserId(userId);

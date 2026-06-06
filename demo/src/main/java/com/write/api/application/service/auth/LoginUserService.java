@@ -7,6 +7,7 @@ import com.write.api.application.dto.outbox.events.user.UserLoginFailEvent;
 import com.write.api.application.dto.outbox.events.user.UserLoginSuccessEvent;
 import com.write.api.application.dto.user.LoginUserDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -36,6 +37,7 @@ public class LoginUserService implements LoginUserUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("auth.login")
     public Result<AuthTokenResponseDTO> login(LoginUserDTO dto) {
         UserModel user = repository.findByEmailIgnoreCase(dto.email()).orElse(null);
 

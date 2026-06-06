@@ -5,6 +5,7 @@ import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.mapper.url.CreateUrlMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
@@ -41,6 +42,7 @@ public class CreateUrlService implements CreateUrlUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.create")
     public Result<UrlModel> execute(CreateUrlDTO dto, Long userId) {
         long id = idGen.nextId();
         String shortCode = Base62.encode(id);

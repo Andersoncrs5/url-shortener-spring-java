@@ -2,6 +2,7 @@ package com.write.api.application.service.auth;
 
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.infrastructure.config.security.jwt.TokenService;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.RefreshTokenUseCase;
@@ -19,6 +20,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("auth.refresh.token")
     public Result<AuthTokenResponseDTO> execute(String refreshToken) {
         Result<String> validated = this.service.validateTokenV2(refreshToken);
         if (validated.isFailure()) return Result.failure(validated.getStatusCode(), validated.getMessage());

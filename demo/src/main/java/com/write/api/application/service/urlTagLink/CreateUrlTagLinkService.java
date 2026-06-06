@@ -3,6 +3,7 @@ package com.write.api.application.service.urlTagLink;
 import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
 import com.write.api.application.mapper.urlTagLink.CreateUrlTagLinkMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.ports.in.urlTagLink.CreateUrlTagLinkUseCase;
@@ -25,6 +26,7 @@ public class CreateUrlTagLinkService implements CreateUrlTagLinkUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.link.create")
     public Result<UrlTagLinkModel> execute(CreateUrlTagLinkDTO dto, Long userId) {
         UrlTagLinkModel link = mapper.toModel(dto);
         link.setCreatedBy(userId);

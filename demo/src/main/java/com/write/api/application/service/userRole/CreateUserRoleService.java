@@ -3,6 +3,7 @@ package com.write.api.application.service.userRole;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.mapper.userRole.CreateUserRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
@@ -30,6 +31,7 @@ public class CreateUserRoleService implements CreateUserRoleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("user.role.create")
     public Result<UserRoleModel> execute(
             CreateUserRoleDTO dto,
             Long assignedByUserId

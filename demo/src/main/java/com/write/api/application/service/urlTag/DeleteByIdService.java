@@ -1,6 +1,7 @@
 package com.write.api.application.service.urlTag;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.urlTag.DeleteByIdUseCase;
 import com.write.api.ports.out.repository.IUrlTagRepository;
 import com.write.api.shared.tx.ResultTransaction;
@@ -15,6 +16,7 @@ public class DeleteByIdService implements DeleteByIdUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.delete")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

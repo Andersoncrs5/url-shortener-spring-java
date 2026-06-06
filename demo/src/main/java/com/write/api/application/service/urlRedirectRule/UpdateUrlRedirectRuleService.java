@@ -3,6 +3,7 @@ package com.write.api.application.service.urlRedirectRule;
 import com.write.api.application.dto.urlRedirectRule.UpdateUrlRedirectRuleDTO;
 import com.write.api.application.mapper.urlRedirectRule.UpdateUrlRedirectRuleServiceMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
 import com.write.api.ports.in.urlRedirectRule.UpdateUrlRedirectRuleUseCase;
@@ -25,6 +26,7 @@ public class UpdateUrlRedirectRuleService implements UpdateUrlRedirectRuleUseCas
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.redirect.update")
     public Result<UrlRedirectRuleModel> execute(Long id, UpdateUrlRedirectRuleDTO dto) {
         var rule = this.repository.findById(id).orElse(null);
         if (rule == null) return Result.failure(404, "Rule not found");

@@ -3,6 +3,7 @@ package com.write.api.application.service.role;
 import com.write.api.application.dto.role.CreateRoleDTO;
 import com.write.api.application.mapper.role.CreateRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.ports.in.role.CreateRoleUseCase;
@@ -28,6 +29,7 @@ public class CreateRoleService implements CreateRoleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("role.create")
     public Result<RoleModel> execute(CreateRoleDTO dto) {
         RoleModel model = mapper.toModel(dto);
 

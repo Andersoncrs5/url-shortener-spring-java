@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.OutboxEventModel;
@@ -12,6 +13,7 @@ import com.write.api.infrastructure.config.cache.RedisCrudService;
 import com.write.api.ports.in.outbox.HandlerDlqUseCase;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
 import com.write.api.ports.out.repository.IOutboxEventRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +34,8 @@ public class HandlerDlqService implements HandlerDlqUseCase {
     ObjectMapper objectMapper;
     RedisCrudService redisCrudService;
 
+    @ResultTransaction
+    @TrackExecutionTime("outbox.handler.dql")
     public <T> Result<Void> execute(
             String payload,
             TypeReference<OutboxEventMessage<T>> typeRef

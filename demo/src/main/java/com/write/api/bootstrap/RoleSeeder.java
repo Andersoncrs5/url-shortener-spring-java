@@ -1,5 +1,6 @@
 package com.write.api.bootstrap;
 
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.ports.out.repository.IRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class RoleSeeder implements ApplicationRunner {
 
     @Override
     @Transactional
+    @TrackExecutionTime("role.seeder")
     public void run(@NonNull ApplicationArguments args) {
 
         createIfNotExists(

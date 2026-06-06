@@ -1,10 +1,12 @@
 package com.write.api.application.service.outbox;
 
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.ports.in.outbox.PublishPendingOutboxEventsUseCase;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
 import com.write.api.ports.out.repository.IOutboxEventRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +27,8 @@ public class PublishPendingOutboxEventsService implements PublishPendingOutboxEv
     OutboxEventPublisher publisher;
 
     @Override
+    @ResultTransaction
+    @TrackExecutionTime("outbox.publish.pending")
     public void execute() {
         List<OutboxEventModel> events = repository.findByStatus(OutboxStatusEnum.PENDING,100);
         List<OutboxEventModel> toSave = new java.util.ArrayList<>();

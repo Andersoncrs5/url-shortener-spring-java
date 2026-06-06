@@ -1,6 +1,7 @@
 package com.write.api.application.service.urlRedirectRule;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.urlRedirectRule.DeleteUrlRedirectRuleUseCase;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
 import com.write.api.shared.tx.ResultTransaction;
@@ -17,6 +18,7 @@ public class DeleteUrlRedirectRuleService implements DeleteUrlRedirectRuleUseCas
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.redirect.delete")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

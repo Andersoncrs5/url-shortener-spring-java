@@ -3,6 +3,7 @@ package com.write.api.bootstrap;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.infrastructure.config.properties.SuperAdminProperties;
 import com.write.api.ports.in.auth.RegisterUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
@@ -27,6 +28,7 @@ public class UserSuperAdminBootstrap implements ApplicationRunner {
     IUserRepository userRepository;
 
     @Override
+    @TrackExecutionTime("user.super.create")
     public void run(ApplicationArguments args) {
         if (userRepository.existsByEmailIgnoreCase(properties.getEmail())) {
             log.info("Super admin already exists");

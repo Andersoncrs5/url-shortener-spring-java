@@ -1,6 +1,7 @@
 package com.write.api.application.service.urlTagLink;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.urlTagLink.DeleteUrlTagLinkByIdUseCase;
 import com.write.api.ports.out.repository.IUrlTagLinkRepository;
 import com.write.api.shared.tx.ResultTransaction;
@@ -14,6 +15,7 @@ public class DeleteUrlTagLinkByIdService implements DeleteUrlTagLinkByIdUseCase 
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.link.delete")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

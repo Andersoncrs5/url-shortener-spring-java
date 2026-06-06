@@ -3,24 +3,29 @@ package com.write.api.application.service.user;
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.application.mapper.user.UserUpdateMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.user.UpdateUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UpdateUserService implements UpdateUserUseCase {
 
-    private final IUserRepository repository;
-    private final UserUpdateMapper mapper;
-    private final PasswordEncoder passwordEncoder;
+    IUserRepository repository;
+    UserUpdateMapper mapper;
+    PasswordEncoder passwordEncoder;
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("user.update")
     public Result<UserModel> update(UserModel user, UpdateUserDTO dto) {
         mapper.updateUserFromDto(dto, user);
 

@@ -1,5 +1,6 @@
 package com.write.api.infrastructure.scheduler;
 
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.outbox.PublishFailedOutboxEventsUseCase;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.AccessLevel;
@@ -21,6 +22,7 @@ public class OutboxFailJob {
             timeUnit = TimeUnit.MINUTES
     )
     @Bulkhead(name = "outbox")
+    @TrackExecutionTime("job.outbox.publisher.fail")
     public void publishPendingEvents() {
         useCase.execute();
     }

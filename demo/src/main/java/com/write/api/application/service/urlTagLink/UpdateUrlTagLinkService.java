@@ -3,6 +3,7 @@ package com.write.api.application.service.urlTagLink;
 import com.write.api.application.dto.urlTagLink.UpdateUrlTagLinkDTO;
 import com.write.api.application.mapper.urlTagLink.UpdateUrlTagLinkMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.ports.in.urlTagLink.UpdateUrlTagLinkUseCase;
@@ -25,6 +26,7 @@ public class UpdateUrlTagLinkService implements UpdateUrlTagLinkUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.tag.link.update")
     public Result<UrlTagLinkModel> execute(UpdateUrlTagLinkDTO dto, Long id) {
         UrlTagLinkModel link = this.repository.findById(id).orElse(null);
         if (link == null) return Result.failure(404, "Url Tag Link not found");

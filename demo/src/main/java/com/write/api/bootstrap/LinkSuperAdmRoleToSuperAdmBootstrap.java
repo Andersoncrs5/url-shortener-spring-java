@@ -2,6 +2,7 @@ package com.write.api.bootstrap;
 
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
@@ -37,6 +38,7 @@ public class LinkSuperAdmRoleToSuperAdmBootstrap implements ApplicationRunner {
     SnowflakeIdGenerator generator;
 
     @Override
+    @TrackExecutionTime("link.super.adm.to.super.adm")
     public void run(ApplicationArguments args) {
         var roleName = "SUPER_ADMIN";
         UserModel superAdm = userRepository

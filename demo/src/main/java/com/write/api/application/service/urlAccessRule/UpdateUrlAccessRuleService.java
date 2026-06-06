@@ -3,6 +3,7 @@ package com.write.api.application.service.urlAccessRule;
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
 import com.write.api.application.mapper.urlAccessRule.UpdateUrlAccessRuleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
 import com.write.api.ports.in.urlAccessRule.UpdateUrlAccessRuleUseCase;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
@@ -26,6 +27,7 @@ public class UpdateUrlAccessRuleService implements UpdateUrlAccessRuleUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.access.update")
     public Result<UrlAccessRuleModel> execute(UpdateUrlAccessRuleDTO dto, Long id) {
         var rule = this.repository.findById(id).orElse(null);
 

@@ -1,9 +1,11 @@
 package com.write.api.application.service.apiKey;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.ports.in.apiKey.DeleteApiKeyUseCase;
 import com.write.api.ports.out.repository.IApiKeyRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +26,8 @@ public class DeleteApiKeyService implements DeleteApiKeyUseCase {
     IUserRoleRepository userRoleRepository;
 
     @Override
+    @ResultTransaction
+    @TrackExecutionTime("apikey.delete")
     public Result<Void> execute(Long id, Long userId) {
         List<String> role = userRoleRepository.findRoleByUserId(userId);
 

@@ -1,6 +1,7 @@
 package com.write.api.application.service.url;
 
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.in.url.DeleteUrlByIdSoftUseCase;
@@ -19,6 +20,7 @@ public class DeleteUrlByIdSoftService implements DeleteUrlByIdSoftUseCase {
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.delete.soft")
     public Result<Void> execute(Long id) {
         UrlModel url = repository.findById(id).orElse(null);
 

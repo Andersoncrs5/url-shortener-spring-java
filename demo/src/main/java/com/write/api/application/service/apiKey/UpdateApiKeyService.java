@@ -3,12 +3,14 @@ package com.write.api.application.service.apiKey;
 import com.write.api.application.dto.apiKey.UpdateApiKeyDTO;
 import com.write.api.application.mapper.apiKey.UpdateApiKeyMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.ports.in.apiKey.UpdateApiKeyUseCase;
 import com.write.api.ports.out.repository.IApiKeyRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import com.write.api.shared.db.DatabaseConstraintHandler;
+import com.write.api.shared.tx.ResultTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +34,8 @@ public class UpdateApiKeyService implements UpdateApiKeyUseCase {
     UpdateApiKeyMapper mapper;
 
     @Override
+    @ResultTransaction
+    @TrackExecutionTime("apikey.update")
     public Result<ApiKeyModel> execute(
             UpdateApiKeyDTO dto,
             Long id,

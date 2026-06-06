@@ -2,6 +2,7 @@ package com.write.api.infrastructure.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.CircuitBreakerException;
 import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
@@ -27,6 +28,7 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
     @CircuitBreaker(name = "kafka", fallbackMethod = "fallbackPublish")
     @Retry(name = "kafka")
     @Bulkhead(name = "kafka")
+    @TrackExecutionTime("kafka.publish")
     public SendResult<String, String> publish(OutboxEventModel event) {
 
         OutboxEventMessage message = new OutboxEventMessage(

@@ -1,8 +1,11 @@
 management:
+  metrics:
+    enable:
+      http: true
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus
+        include: health,info,metrics,prometheus
 
 resilience4j:
   retry:
@@ -162,5 +165,7 @@ app:
         - "*"
       allow-credentials: true
 
+server:
+  port: 8080
 
 kind: Application

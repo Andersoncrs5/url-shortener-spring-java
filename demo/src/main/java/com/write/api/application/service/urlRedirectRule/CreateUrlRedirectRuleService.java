@@ -3,6 +3,7 @@ package com.write.api.application.service.urlRedirectRule;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.mapper.urlRedirectRule.CreateUrlRedirectRuleServiceMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -26,6 +27,7 @@ public class CreateUrlRedirectRuleService implements CreateUrlRedirectRuleUseCas
 
     @Override
     @ResultTransaction
+    @TrackExecutionTime("url.redirect.create")
     public Result<UrlRedirectRuleModel> execute(CreateUrlRedirectRuleDTO dto) {
         UrlRedirectRuleModel rule = mapper.toModel(dto);
         rule.setId(idGen.nextId());
