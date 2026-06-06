@@ -1,18 +1,22 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.mapper.url.CreateUrlMapper;
 import com.write.api.application.shared.Result;
-import com.write.api.core.domain.enums.UrlAccessTypeEnum;
-import com.write.api.core.domain.enums.UrlStatusEnum;
+import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.in.url.CreateUrlUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import com.write.api.shared.utils.Base62;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,12 +30,14 @@ import java.util.regex.Pattern;
 @Service
 @Validated
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreateUrlService implements CreateUrlUseCase {
 
-    private final CreateUrlMapper mapper;
-    private final IUrlRepository repository;
-    private final PasswordEncoder passwordEncoder;
-    private final SnowflakeIdGenerator idGen;
+    CreateUrlMapper mapper;
+    IUrlRepository repository;
+    PasswordEncoder passwordEncoder;
+    SnowflakeIdGenerator idGen;
+    CreateOutboxEventUseCase outbox;
 
     @Override
     @ResultTransaction
@@ -52,6 +58,24 @@ public class CreateUrlService implements CreateUrlUseCase {
 
         try {
             UrlModel save = repository.insert(model);
+
+            var outboxResult = outbox.execute(
+                    new CreateOutboxEventCommand(
+                            AggregateTypeEnum.URL,
+                            save.getId(),
+                            EventTypeEnum.URL_CREATED,
+                            TopicEnum.URL_CREATED,
+                            UrlCreatedEvent.create(
+                                    save.getId(),
+                                    save.getTitle(),
+                                    save.getShortCode(),
+                                    save.getStatus(),
+                                    save.getCreatedAt()
+                            )
+                    )
+            );
+
+            if (outboxResult.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
 
             return Result.success(save, 201);
         } catch (DataIntegrityViolationException e) {

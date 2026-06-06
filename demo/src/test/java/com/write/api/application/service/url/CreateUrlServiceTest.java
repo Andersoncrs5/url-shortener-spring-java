@@ -1,13 +1,19 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.mapper.url.CreateUrlMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +44,9 @@ class CreateUrlServiceTest {
     private IUrlRepository repository;
 
     @Mock
+    private CreateOutboxEventUseCase outbox;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -48,7 +57,6 @@ class CreateUrlServiceTest {
 
     private CreateUrlDTO dto;
     private UrlModel mappedUrl;
-    private UrlModel savedUrl;
 
     private final Long userId = 1L;
     private final Long generatedId = 123445234L;
@@ -76,23 +84,6 @@ class CreateUrlServiceTest {
         mappedUrl.setStatus(UrlStatusEnum.ACTIVE);
         mappedUrl.setAccessType(dto.accessType());
         mappedUrl.setCustomAlias(false);
-
-        savedUrl = new UrlModel();
-        savedUrl.setId(generatedId);
-        savedUrl.setVersion(1L);
-        savedUrl.setUserId(userId);
-        savedUrl.setShortCode(expectedShortCode);
-        savedUrl.setDescription(dto.description());
-        savedUrl.setFaviconUrl(dto.faviconUrl());
-        savedUrl.setOriginalUrl(dto.originalUrl());
-        savedUrl.setTitle(dto.title());
-        savedUrl.setDomain(dto.domain());
-        savedUrl.setStatus(UrlStatusEnum.ACTIVE);
-        savedUrl.setAccessType(dto.accessType());
-        savedUrl.setPasswordHash("encoded-password");
-        savedUrl.setCustomAlias(false);
-        savedUrl.setCreatedAt(LocalDateTime.now());
-        savedUrl.setUpdatedAt(LocalDateTime.now());
     }
 
     @Test
@@ -100,6 +91,7 @@ class CreateUrlServiceTest {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
         when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
+
         when(repository.insert(any(UrlModel.class))).thenAnswer(invocation -> {
             UrlModel arg = invocation.getArgument(0);
             arg.setId(generatedId);
@@ -109,6 +101,9 @@ class CreateUrlServiceTest {
             arg.setUpdatedAt(LocalDateTime.now());
             return arg;
         });
+
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
 
         Result<UrlModel> result = service.execute(dto, userId);
 
@@ -127,16 +122,34 @@ class CreateUrlServiceTest {
         assertThat(value.getTitle()).isEqualTo(dto.title());
         assertThat(value.getDomain()).isEqualTo(dto.domain());
         assertThat(value.getStatus()).isEqualTo(UrlStatusEnum.ACTIVE);
-        assertThat(value.getAccessType()).isEqualTo(dto.accessType());
+        assertThat(value.getAccessType()).isEqualTo(UrlAccessTypeEnum.PASSWORD_PROTECTED);
         assertThat(value.getPasswordHash()).isEqualTo("encoded-password");
 
-        InOrder order = inOrder(idGen, mapper, passwordEncoder, repository);
+        ArgumentCaptor<UrlModel> urlCaptor = ArgumentCaptor.forClass(UrlModel.class);
+        ArgumentCaptor<CreateOutboxEventCommand> outboxCaptor =
+                ArgumentCaptor.forClass(CreateOutboxEventCommand.class);
+
+        InOrder order = inOrder(idGen, mapper, passwordEncoder, repository, outbox);
         order.verify(idGen).nextId();
         order.verify(mapper).toModel(dto);
         order.verify(passwordEncoder).encode(dto.password());
-        order.verify(repository).insert(any(UrlModel.class));
+        order.verify(repository).insert(urlCaptor.capture());
+        order.verify(outbox).execute(outboxCaptor.capture());
 
-        verifyNoMoreInteractions(idGen, mapper, passwordEncoder, repository);
+        UrlModel inserted = urlCaptor.getValue();
+        assertThat(inserted.getUserId()).isEqualTo(userId);
+        assertThat(inserted.getShortCode()).isEqualTo(expectedShortCode);
+        assertThat(inserted.getPasswordHash()).isEqualTo("encoded-password");
+        assertThat(inserted.getAccessType()).isEqualTo(UrlAccessTypeEnum.PASSWORD_PROTECTED);
+
+        CreateOutboxEventCommand command = outboxCaptor.getValue();
+        assertThat(command.aggregateType()).isEqualTo(AggregateTypeEnum.URL);
+        assertThat(command.aggregateId()).isEqualTo(generatedId);
+        assertThat(command.eventType()).isEqualTo(EventTypeEnum.URL_CREATED);
+        assertThat(command.topic()).isEqualTo(TopicEnum.URL_CREATED);
+        assertThat(command.payload()).isInstanceOf(UrlCreatedEvent.class);
+
+        verifyNoMoreInteractions(idGen, mapper, passwordEncoder, repository, outbox);
     }
 
     @Test
@@ -164,6 +177,7 @@ class CreateUrlServiceTest {
 
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dtoWithoutPassword)).thenReturn(mappedWithoutPassword);
+
         when(repository.insert(any(UrlModel.class))).thenAnswer(invocation -> {
             UrlModel arg = invocation.getArgument(0);
             arg.setId(generatedId);
@@ -174,17 +188,21 @@ class CreateUrlServiceTest {
             return arg;
         });
 
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
+
         Result<UrlModel> result = service.execute(dtoWithoutPassword, userId);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(201);
         assertThat(result.getValue()).isNotNull();
         assertThat(result.getValue().getPasswordHash()).isNull();
+        assertThat(result.getValue().getAccessType()).isEqualTo(UrlAccessTypeEnum.PUBLIC);
 
-        ArgumentCaptor<UrlModel> captor = ArgumentCaptor.forClass(UrlModel.class);
-        verify(repository).insert(captor.capture());
+        ArgumentCaptor<UrlModel> urlCaptor = ArgumentCaptor.forClass(UrlModel.class);
+        verify(repository).insert(urlCaptor.capture());
 
-        UrlModel inserted = captor.getValue();
+        UrlModel inserted = urlCaptor.getValue();
         assertThat(inserted.getUserId()).isEqualTo(userId);
         assertThat(inserted.getShortCode()).isEqualTo(expectedShortCode);
         assertThat(inserted.getPasswordHash()).isNull();
@@ -197,6 +215,7 @@ class CreateUrlServiceTest {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
         when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
+
         when(repository.insert(any(UrlModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "duplicate key",
@@ -216,6 +235,7 @@ class CreateUrlServiceTest {
         verify(mapper).toModel(dto);
         verify(passwordEncoder).encode(dto.password());
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
@@ -223,6 +243,7 @@ class CreateUrlServiceTest {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
         when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
+
         when(repository.insert(any(UrlModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "duplicate key",
@@ -233,13 +254,13 @@ class CreateUrlServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage())
-                .contains("Database integrity error");
+        assertThat(result.getMessage()).contains("Database integrity error");
 
         verify(idGen).nextId();
         verify(mapper).toModel(dto);
         verify(passwordEncoder).encode(dto.password());
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
@@ -258,14 +279,14 @@ class CreateUrlServiceTest {
         verify(mapper).toModel(dto);
         verify(passwordEncoder).encode(dto.password());
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
     void shouldReturn404WhenUserForeignKeyDoesNotExist() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
@@ -277,21 +298,20 @@ class CreateUrlServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage())
-                .containsIgnoringCase("user not found");
+        assertThat(result.getMessage()).containsIgnoringCase("user not found");
 
         verify(idGen).nextId();
         verify(mapper).toModel(dto);
         verify(passwordEncoder).encode(dto.password());
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
     void shouldReturn400WhenRequiredFieldIsNull() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
@@ -304,17 +324,17 @@ class CreateUrlServiceTest {
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
         assertThat(result.getMessage())
-                .containsIgnoringCase("Required field is missing");
+                .containsIgnoringCase("Required field 'original_url' is missing");
 
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
     void shouldReturn400WhenDataTooLongOccurs() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
@@ -330,17 +350,16 @@ class CreateUrlServiceTest {
                 .containsIgnoringCase("exceeded the allowed size");
 
         verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
     void shouldReturn400WhenIntegrityMessageIsNull() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         RuntimeException root = mock(RuntimeException.class);
-
         when(root.getMessage()).thenReturn(null);
 
         when(repository.insert(any(UrlModel.class)))
@@ -353,52 +372,51 @@ class CreateUrlServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage())
-                .isEqualTo("Database integrity error");
+        assertThat(result.getMessage()).isEqualTo("Database integrity error");
+
+        verify(repository).insert(any(UrlModel.class));
+        verifyNoInteractions(outbox);
     }
 
     @Test
     void shouldGenerateShortCodeCorrectly() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
+
         service.execute(dto, userId);
 
-        ArgumentCaptor<UrlModel> captor =
-                ArgumentCaptor.forClass(UrlModel.class);
-
+        ArgumentCaptor<UrlModel> captor = ArgumentCaptor.forClass(UrlModel.class);
         verify(repository).insert(captor.capture());
 
         UrlModel inserted = captor.getValue();
-
-        assertThat(inserted.getShortCode())
-                .isEqualTo(expectedShortCode);
+        assertThat(inserted.getShortCode()).isEqualTo(expectedShortCode);
     }
 
     @Test
     void shouldSetCustomAliasAsFalse() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
+
         service.execute(dto, userId);
 
-        ArgumentCaptor<UrlModel> captor =
-                ArgumentCaptor.forClass(UrlModel.class);
-
+        ArgumentCaptor<UrlModel> captor = ArgumentCaptor.forClass(UrlModel.class);
         verify(repository).insert(captor.capture());
 
         UrlModel inserted = captor.getValue();
-
         assertThat(inserted.isCustomAlias()).isFalse();
     }
 
@@ -406,11 +424,13 @@ class CreateUrlServiceTest {
     void shouldMapDtoCorrectly() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
 
         service.execute(dto, userId);
 
@@ -421,23 +441,20 @@ class CreateUrlServiceTest {
     void shouldSetUserIdCorrectly() {
         when(idGen.nextId()).thenReturn(generatedId);
         when(mapper.toModel(dto)).thenReturn(mappedUrl);
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded-password");
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         when(repository.insert(any(UrlModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
+
         service.execute(dto, userId);
 
-        ArgumentCaptor<UrlModel> captor =
-                ArgumentCaptor.forClass(UrlModel.class);
-
+        ArgumentCaptor<UrlModel> captor = ArgumentCaptor.forClass(UrlModel.class);
         verify(repository).insert(captor.capture());
 
         UrlModel inserted = captor.getValue();
-
-        assertThat(inserted.getUserId())
-                .isEqualTo(userId);
+        assertThat(inserted.getUserId()).isEqualTo(userId);
     }
-
 }
