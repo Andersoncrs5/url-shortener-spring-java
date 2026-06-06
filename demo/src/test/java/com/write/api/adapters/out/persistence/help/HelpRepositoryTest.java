@@ -47,6 +47,7 @@ public class HelpRepositoryTest {
         event.setErrorMessage(null);
         event.setNextRetryAt(LocalDateTime.now().plusMinutes(5));
         event.setProcessedAt(null);
+        event.setTopic(TopicEnum.USER_CREATED);
 
         OutboxEventModel saved = outboxEventRepository.insert(event);
 
@@ -116,7 +117,8 @@ public class HelpRepositoryTest {
 
     public UrlModel createUrl(UserModel user) {
         UrlModel url = new UrlModel();
-        var key = String.valueOf(generator.nextId());
+        var key = (Base62.encode(this.generator.nextId()));
+
 
         url.setUserId(user.getId());
         url.setShortCode(key);
@@ -195,7 +197,7 @@ public class HelpRepositoryTest {
         rule.setBrowser(BrowserEnum.CHROME);
         rule.setMatchType(MatchTypeEnum.EXACT);
         rule.setRedirectUrl("https://example.com/br");
-        rule.setRuleHash("a".repeat(64));
+        rule.setRuleHash("a".repeat(32) + this.generator.nextId());
         rule.setPriority(1);
         rule.setActive(true);
         rule.setStartAt(LocalDateTime.now().minusDays(1));
