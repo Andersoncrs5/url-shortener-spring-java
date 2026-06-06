@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum AggregateTypeEnum {
 
     USER,
+    ADMINS,
     URL,
     URL_ACCESS_RULE,
     URL_TAG,
