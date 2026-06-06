@@ -46,6 +46,7 @@ class CreateApiKeyServiceTest {
     private ApiKeyModel mappedModel;
 
     private final Long userId = 10L;
+    private final Long ownerUserId = 111L;
     private final Long generatedId = 999L;
 
     @BeforeEach
@@ -53,13 +54,15 @@ class CreateApiKeyServiceTest {
         dto = new CreateApiKeyDTO(
                 "Production",
                 LocalDateTime.now().plusDays(30),
-                true
+                true,
+                ownerUserId
         );
 
         mappedModel = new ApiKeyModel();
         mappedModel.setName(dto.name());
         mappedModel.setExpiresAt(dto.expiresAt());
         mappedModel.setActive(true);
+        mappedModel.setOwnerUserId(ownerUserId);
     }
 
     @Test
@@ -173,6 +176,32 @@ class CreateApiKeyServiceTest {
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
         assertThat(result.getMessage()).isEqualTo("User not found");
+        assertThat(result.getValue()).isNull();
+
+        verify(mapper).toDomain(dto);
+        verify(idGen).nextId();
+        verify(repository).insert(any(ApiKeyModel.class));
+        verifyNoMoreInteractions(mapper, idGen, repository);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenOwnerUserDoesNotExist() {
+        when(mapper.toDomain(dto)).thenReturn(mappedModel);
+        when(idGen.nextId()).thenReturn(generatedId);
+        when(userRoleRepository.findRoleByUserId(userId))
+                .thenReturn(List.of("SUPER_ADMIN"));
+
+        when(repository.insert(any(ApiKeyModel.class)))
+                .thenThrow(new DataIntegrityViolationException(
+                        "fk violation",
+                        new RuntimeException("uk_api_keys_owner_name")
+                ));
+
+        Result<String> result = service.execute(dto, userId);
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(404);
+        assertThat(result.getMessage()).isEqualTo("Owner User not found");
         assertThat(result.getValue()).isNull();
 
         verify(mapper).toDomain(dto);
