@@ -1,19 +1,18 @@
 package com.write.api.adapters.in.web.controller.urlTag;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.in.web.controller.BaseControllerTest;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
-import com.write.api.adapters.in.web.controller.util.helps.HelperTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UrlTagResponseDTO;
+import com.write.api.help.RandomStringGenerator;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
@@ -24,12 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UrlTagControllerTest {
+@ActiveProfiles("test")
+public class UrlTagControllerTest extends BaseControllerTest {
     private final String URL = "/v1/url-tag";
-
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private HelperTest helper;
 
     @Test
     void shouldCreateUrlTag() throws Exception {
@@ -45,7 +41,7 @@ public class UrlTagControllerTest {
         CreateUrlTagDTO dto = new CreateUrlTagDTO(
                 "tag simple num: " + key,
                 "tag-slug-simple-num: " + key,
-                "#0000000",
+                "#6366F1",
                 "any desc",
                 null,
                 true
@@ -61,13 +57,16 @@ public class UrlTagControllerTest {
     @Test
     void shouldReturn409BecauseNameAlready() throws Exception {
         UserTest user = this.helper.createNewUser();
+
         UrlTagResponseDTO urlTag = this.helper.createUrlTag(user);
         var key = UUID.randomUUID().toString();
+        String slug = "tag-slug-" + RandomStringGenerator.random(10)
+                .toLowerCase().replaceAll("[^a-z0-9]", "");
 
         CreateUrlTagDTO dto = new CreateUrlTagDTO(
                 urlTag.name(),
-                "tag-slug-simple-num: " + key,
-                "#0000000",
+                slug,
+                "#6366F1",
                 "any desc",
                 null,
                 true
@@ -103,7 +102,7 @@ public class UrlTagControllerTest {
         CreateUrlTagDTO dto = new CreateUrlTagDTO(
                 urlTag.name() + key,
                 urlTag.slug(),
-                "#0000000",
+                "#6366F1",
                 "any desc",
                 null,
                 true
@@ -185,12 +184,14 @@ public class UrlTagControllerTest {
     void shouldUpdateUrlTag() throws Exception {
         UserTest user = this.helper.createNewUser();
         UrlTagResponseDTO created = this.helper.createUrlTag(user);
+        String slug = "tag-slug-" + RandomStringGenerator.random(10)
+                .toLowerCase().replaceAll("[^a-z0-9]", "");
 
         var key = UUID.randomUUID().toString();
 
         UpdateUrlTagDTO dto = new UpdateUrlTagDTO(
                 "updated-name-" + key,
-                "updated-slug-" + key,
+                slug,
                 "#FFFFFF",
                 "updated description",
                 null,
@@ -247,11 +248,13 @@ public class UrlTagControllerTest {
     void shouldReturn404WhenUpdateUrlTagNotFound() throws Exception {
         UserTest user = this.helper.createNewUser();
 
+        String slug = "tag-slug-" + RandomStringGenerator.random(10)
+                .toLowerCase().replaceAll("[^a-z0-9]", "");
         var key = UUID.randomUUID().toString();
 
         UpdateUrlTagDTO dto = new UpdateUrlTagDTO(
                 "updated-name",
-                "updated-slug",
+                slug,
                 "#FFFFFF",
                 "updated description",
                 null,

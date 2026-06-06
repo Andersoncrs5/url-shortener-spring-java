@@ -1,9 +1,8 @@
 package com.write.api.adapters.in.web.controller.urlRedirectRule;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.in.web.controller.BaseControllerTest;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
-import com.write.api.adapters.in.web.controller.util.helps.HelperTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
@@ -14,13 +13,11 @@ import com.write.api.core.domain.enums.BrowserEnum;
 import com.write.api.core.domain.enums.ContinentEnum;
 import com.write.api.core.domain.enums.MatchTypeEnum;
 import com.write.api.core.domain.enums.OperatingSystemEnum;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
@@ -32,13 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UrlRedirectRuleControllerTest {
+@ActiveProfiles("test")
+public class UrlRedirectRuleControllerTest extends BaseControllerTest {
     private final String URL = "/v1/url-redirect-rule";
-
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private HelperTest helper;
-    @Autowired private SnowflakeIdGenerator idGen;
 
     @Test
     void shouldCreateRule() throws Exception {

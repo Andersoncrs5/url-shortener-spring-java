@@ -1,22 +1,20 @@
 package com.write.api.adapters.in.web.controller.urlRole;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.in.web.controller.BaseControllerTest;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
-import com.write.api.adapters.in.web.controller.util.helps.HelperTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.dto.userRole.UserRoleDTO;
 import com.write.api.core.domain.model.RoleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.ports.out.repository.IRoleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
@@ -28,13 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserRoleControllerTest {
+@ActiveProfiles("test")
+public class UserRoleControllerTest extends BaseControllerTest {
     private final String URL = "/v1/user-role";
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private HelperTest helper;
-    @Autowired private SnowflakeIdGenerator idGen;
     @Autowired private IRoleRepository roleRepository;
 
     @Test

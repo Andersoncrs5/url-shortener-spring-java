@@ -1,21 +1,18 @@
 package com.write.api.adapters.in.web.controller.urlAccessRule;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.in.web.controller.BaseControllerTest;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
-import com.write.api.adapters.in.web.controller.util.helps.HelperTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
 import com.write.api.application.dto.urlAccessRule.UrlAccessRuleResponseDTO;
 import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
@@ -28,13 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UrlAccessRuleControllerTest {
+@ActiveProfiles("test")
+public class UrlAccessRuleControllerTest extends BaseControllerTest {
     private final String URL = "/v1/url-access-rule";
-
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private HelperTest helper;
-    @Autowired private SnowflakeIdGenerator idGen;
 
     @Test
     void shouldCreateNewAccessRule() throws Exception {
