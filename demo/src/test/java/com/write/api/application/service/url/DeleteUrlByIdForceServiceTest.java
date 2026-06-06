@@ -1,7 +1,10 @@
 package com.write.api.application.service.url;
 
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.model.UrlModel;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -9,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,94 +24,124 @@ class DeleteUrlByIdForceServiceTest {
     @Mock
     private IUrlRepository repository;
 
+    @Mock
+    private CreateOutboxEventUseCase outbox;
+
     @InjectMocks
     private DeleteUrlByIdForceService service;
+
+    private UrlModel url;
+
+    @BeforeEach
+    void setup() {
+        url = new UrlModel();
+        url.setId(1L);
+        url.setTitle("Google");
+        url.setShortCode("abc123");
+    }
 
     @Test
     void shouldDeleteUrlSuccessfully() {
 
-        Long id = 1L;
+        when(repository.findById(url.getId()))
+                .thenReturn(Optional.of(url));
 
-        when(repository.deleteById(id))
-                .thenReturn(1);
+        when(outbox.execute(any()))
+                .thenReturn(Result.success());
 
-        Result<Void> result = service.execute(id);
+        Result<Void> result = service.execute(url.getId());
 
-        assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.isFailure()).isFalse();
         assertThat(result.getStatusCode()).isEqualTo(200);
 
-        InOrder inOrder = inOrder(repository);
+        InOrder order = inOrder(repository, outbox);
 
-        inOrder.verify(repository, times(1))
-                .deleteById(id);
+        order.verify(repository).findById(url.getId());
+        order.verify(outbox).execute(any());
+        order.verify(repository).deleteById(url.getId());
 
-        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(repository, outbox);
     }
 
     @Test
     void shouldReturn404WhenUrlDoesNotExist() {
 
-        Long id = 999L;
+        when(repository.findById(999L))
+                .thenReturn(Optional.empty());
 
-        when(repository.deleteById(id))
-                .thenReturn(0);
+        Result<Void> result = service.execute(999L);
 
-        Result<Void> result = service.execute(id);
-
-        assertThat(result).isNotNull();
-        assertThat(result.isSuccess()).isFalse();
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage())
+        assertThat(result.getErrors().getFirst())
                 .isEqualTo("Url not found");
 
-        InOrder inOrder = inOrder(repository);
+        verify(repository).findById(999L);
 
-        inOrder.verify(repository, times(1))
-                .deleteById(id);
+        verifyNoInteractions(outbox);
+
+        verify(repository, never())
+                .deleteById(any());
 
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    void shouldCallDeleteOnlyOnce() {
+    void shouldNotDeleteWhenOutboxFails() {
 
-        Long id = 10L;
+        when(repository.findById(url.getId()))
+                .thenReturn(Optional.of(url));
 
-        when(repository.deleteById(id))
-                .thenReturn(1);
+        when(outbox.execute(any()))
+                .thenReturn(Result.failure(500, "Kafka unavailable"));
 
-        service.execute(id);
+        Result<Void> result = service.execute(url.getId());
 
-        verify(repository, only())
-                .deleteById(id);
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(500);
+
+        verify(repository).findById(url.getId());
+        verify(outbox).execute(any());
+
+        verify(repository, never())
+                .deleteById(any());
+
+        verifyNoMoreInteractions(repository, outbox);
     }
 
     @Test
-    void shouldPropagateException() {
-
-        Long id = 1L;
+    void shouldPropagateRepositoryException() {
 
         RuntimeException exception =
                 new RuntimeException("database error");
 
-        when(repository.deleteById(id))
+        when(repository.findById(url.getId()))
                 .thenThrow(exception);
 
-        try {
-            service.execute(id);
-        } catch (Exception ex) {
+        assertThatThrownBy(() -> service.execute(url.getId()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("database error");
 
-            assertThat(ex)
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("database error");
-        }
+        verify(repository).findById(url.getId());
 
-        verify(repository, times(1))
-                .deleteById(id);
+        verifyNoInteractions(outbox);
+    }
 
-        verifyNoMoreInteractions(repository);
+    @Test
+    void shouldCreateOutboxEventBeforeDelete() {
+
+        when(repository.findById(url.getId()))
+                .thenReturn(Optional.of(url));
+
+        when(outbox.execute(any()))
+                .thenReturn(Result.success());
+
+        service.execute(url.getId());
+
+        InOrder order = inOrder(repository, outbox);
+
+        order.verify(repository).findById(url.getId());
+        order.verify(outbox).execute(any());
+        order.verify(repository).deleteById(url.getId());
     }
 }
