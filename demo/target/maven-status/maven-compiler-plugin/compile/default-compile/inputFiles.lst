@@ -62,6 +62,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/auth/AuthTokenResponseDTO.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/messaging/OutboxEventMessage.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/CreateOutboxEventCommand.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/admin/NotifyAdmEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlCreatedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlDeleteEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlUpdatedEvent.java
@@ -125,6 +126,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/auth/RegisterUserService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/CreateOutboxEventService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/HandlerDlqService.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/PublishFailedOutboxEventsService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/PublishPendingOutboxEventsService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/CreateRoleService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/UpdateRoleService.java
@@ -211,6 +213,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/security/properties/JwtProperties.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/exception/GlobalExceptionHandler.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/messaging/kafka/KafkaOutboxEventPublisher.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/scheduler/OutboxFailJob.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/scheduler/OutboxPublisherJob.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/scheduler/UrlDeleteJob.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/apiKey/CreateApiKeyUseCase.java
@@ -225,6 +228,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/auth/VerifyEmailUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/CreateOutboxEventUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/HandlerDlqUseCase.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/PublishFailedOutboxEventsUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/PublishPendingOutboxEventsUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/CreateRoleUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/UpdateRoleUseCase.java

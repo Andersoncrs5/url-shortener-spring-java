@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.write.api.adapters.out.persistence.repository.JooqUrlAccessRuleRepositoryTest
 -------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.356 s -- in com.write.api.adapters.out.persistence.repository.JooqUrlAccessRuleRepositoryTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.318 s -- in com.write.api.adapters.out.persistence.repository.JooqUrlAccessRuleRepositoryTest

@@ -34,6 +34,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/auth/RegisterUserServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/CreateOutboxEventServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/HandlerDlqServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/PublishFailedOutboxEventsServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/PublishPendingOutboxEventsServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/CreateRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/UpdateRoleServiceTest.java
@@ -60,3 +61,5 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/userRole/CreateUserRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/userRole/DeleteUserRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/help/RandomStringGenerator.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/job/OutboxPublisherJobTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/job/UrlDeleteJobTest.java
