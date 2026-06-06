@@ -9,13 +9,11 @@ import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.application.shared.Result;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.core.domain.model.UrlModel;
-import com.write.api.ports.in.url.CreateUrlUseCase;
-import com.write.api.ports.in.url.DeleteUrlByIdForceUseCase;
-import com.write.api.ports.in.url.DeleteUrlByIdSoftUseCase;
-import com.write.api.ports.in.url.UpdateUrlUseCase;
+import com.write.api.ports.in.url.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +31,18 @@ public class UrlController implements UrlControllerDocs {
     DeleteUrlByIdSoftUseCase deleteUrlByIdSoft;
     DeleteUrlByIdForceUseCase deleteUrlByIdForce;
     UpdateUrlUseCase updateUrl;
+    CreateUrlFromApiKeyUseCase createUrlFromApiKey;
+
+    @Override
+    public ResponseEntity<ResponseHttp<UrlResponseDTO>> createInternal(
+            CreateUrlDTO dto,
+            String idempotencyKey,
+            String key
+    ) {
+        Result<UrlModel> result = createUrlFromApiKey.execute(key, dto);
+
+        return responseCreateUrl(idempotencyKey, result);
+    }
 
     @Override
     public ResponseEntity<ResponseHttp<UrlResponseDTO>> create(
@@ -42,6 +52,10 @@ public class UrlController implements UrlControllerDocs {
     ) {
         Result<UrlModel> result = createUrl.execute(dto, principal.getId());
 
+        return responseCreateUrl(idempotencyKey, result);
+    }
+
+    private @NonNull ResponseEntity<ResponseHttp<UrlResponseDTO>> responseCreateUrl(String idempotencyKey, Result<UrlModel> result) {
         if (result.isFailure()) {
             return ResponseEntity
                     .status(result.getStatusCode())
