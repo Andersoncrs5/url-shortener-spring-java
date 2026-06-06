@@ -41,6 +41,10 @@ public class Result<T> {
         return new Result<>(null, List.of(error), statusCode, false);
     }
 
+    public static <T> Result<T> failure(String error, int statusCode, T body) {
+        return new Result<>(body, List.of(error), statusCode, false);
+    }
+
     public static <T> Result<T> failure(List<String> errors, int statusCode) {
         return new Result<>(null, errors, statusCode, false);
     }
