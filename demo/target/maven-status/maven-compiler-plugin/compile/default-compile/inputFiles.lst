@@ -26,6 +26,16 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/in/web/mapper/UrlTagMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/in/web/mapper/UserRoleMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/in/web/shared/response/ResponseHttp.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/url/UrlCreatedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/url/UrlDeletedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/url/UrlUpdatedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/urlAccessRule/UrlAccessRuleCreatedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/user/UserBlockedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/user/UserCreatedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/user/UserDeletedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/user/UserLoginFailedDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/messaging/dlq/user/UserLoginSuccessDlqConsumer.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/persistence/base/JooqRepository.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/persistence/mapper/ApiKeyRepositoryMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/persistence/mapper/JooqOutboxEventRepositoryMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/adapters/out/persistence/mapper/RoleRepositoryMapper.java
@@ -54,6 +64,9 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/CreateOutboxEventCommand.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlCreatedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlDeleteEvent.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/url/UrlUpdatedEvent.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/urlAccessRule/UrlAccessRuleCreatedEvent.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/urlAccessRule/UrlAccessRuleDeletedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/user/UserCreatedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/user/UserDeletedEvent.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/dto/outbox/events/user/UserLoginBlockedEvent.java
@@ -111,6 +124,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/auth/RefreshTokenService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/auth/RegisterUserService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/CreateOutboxEventService.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/HandlerDlqService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/outbox/PublishPendingOutboxEventsService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/CreateRoleService.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/application/service/role/UpdateRoleService.java
@@ -156,9 +170,11 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/enums/UrlAccessTypeEnum.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/enums/UrlStatusEnum.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/BusinessRuleException.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/CircuitBreakerException.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/ConflictRuleException.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/HttpException.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/InternalServerErrorException.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/exception/TransientDatabaseException.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/model/ApiKeyModel.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/model/OutboxEventModel.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/core/domain/model/RoleModel.java
@@ -182,6 +198,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/cache/RedisCrudServiceImpl.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/jackson/JacksonConfig.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/kafka/KafkaConfig.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/kafka/TopicConfig.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/properties/SuperAdminProperties.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/security/classes/UserPrincipal.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/infrastructure/config/security/config/CustomAccessDeniedHandler.java
@@ -207,6 +224,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/auth/RegisterUserUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/auth/VerifyEmailUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/CreateOutboxEventUseCase.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/HandlerDlqUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/outbox/PublishPendingOutboxEventsUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/CreateRoleUseCase.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/ports/in/role/UpdateRoleUseCase.java
@@ -247,7 +265,11 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/db/DatabaseConstraintHandler.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/db/DatabaseErrorUtils.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/mapper/config/CentralMapperConfig.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/mapper/config/EnumMapper.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/mapper/config/JooqEnumMapper.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/mapper/config/MapperConfig.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/persistence/DatabaseRetryTranslator.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/persistence/RetryTranslation.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/tx/ResultTransaction.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/tx/ResultTransactionAspect.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/main/java/com/write/api/shared/utils/Base62.java

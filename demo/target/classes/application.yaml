@@ -1,3 +1,9 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+
 resilience4j:
   retry:
     instances:
@@ -12,6 +18,82 @@ resilience4j:
         ignore-exceptions:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
+
+      kafka:
+        timeout-duration: 5s
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 4
+        retry-exceptions:
+          - org.apache.kafka.common.errors.RetriableException
+          - org.springframework.kafka.KafkaException
+
+  circuitbreaker:
+    instances:
+      kafka:
+        sliding-window-size: 20
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  bulkhead:
+    instances:
+      kafka:
+        max-concurrent-calls: 10
+        max-wait-duration: 0
+
+      outbox:
+        max-concurrent-calls: 2
+        max-wait-duration: 0
+
+  timelimiter:
+    instances:
+      kafka:
+        timeout-duration: 2s
+
+  ratelimiter:
+    instances:
+      create:
+        limit-for-period: 100
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      create-internal:
+        limit-for-period: 120
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      login:
+        limit-for-period: 90
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      logout:
+        limit-for-period: 70
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      refresh-token:
+        limit-for-period: 120
+        limit-refresh-period: 2s
+        timeout-duration: 0
+
+      test:
+        limit-for-period: 30
+        limit-refresh-period: 10s
+        timeout-duration: 0
+
+      delete:
+        limit-for-period: 110
+        limit-refresh-period: 4s
+        timeout-duration: 0
+
+      update:
+        limit-for-period: 50
+        limit-refresh-period: 4s
+        timeout-duration: 0
 
 spring:
   super-adm:
@@ -34,6 +116,11 @@ spring:
     username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: UrlShortenerPool
+      minimum-idle: 5
+      maximum-pool-size: 30
+      connection-timeout: 30000
 
   flyway:
     enabled: true

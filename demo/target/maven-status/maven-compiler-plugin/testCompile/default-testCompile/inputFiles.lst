@@ -1,6 +1,6 @@
-/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/DemoApplicationTests.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/TestDemoApplication.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/TestcontainersConfiguration.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/BaseControllerTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/apiKey/ApiKeyControllerTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/auth/AuthControllerTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/url/UrlControllerTest.java
@@ -12,6 +12,7 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/user/UserControllerTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/util/classes/UserTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/in/web/controller/util/helps/HelperTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/out/persistence/help/BaseRepositoryTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/out/persistence/help/HelpRepositoryTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/out/persistence/repository/JooqApiKeyRepositoryTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/adapters/out/persistence/repository/JooqOutboxEventRepositoryTest.java
@@ -32,6 +33,8 @@
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/auth/RefreshTokenServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/auth/RegisterUserServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/CreateOutboxEventServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/HandlerDlqServiceTest.java
+/home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/outbox/PublishPendingOutboxEventsServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/CreateRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/role/UpdateRoleServiceTest.java
 /home/darkness/Área de trabalho/backend/projects/java/url-shortener/demo/src/test/java/com/write/api/application/service/url/CreateUrlFromApiKeyServiceTest.java

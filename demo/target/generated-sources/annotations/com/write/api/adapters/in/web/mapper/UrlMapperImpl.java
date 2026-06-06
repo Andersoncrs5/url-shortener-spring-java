@@ -4,14 +4,15 @@ import com.write.api.application.dto.url.UrlResponseDTO;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.model.UrlModel;
+import com.write.api.shared.mapper.config.EnumMapper;
 import java.time.LocalDateTime;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-04T09:04:20-0300",
-    comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (Eclipse Adoptium)"
+    date = "2026-06-06T10:42:15-0300",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.2 (GraalVM Community)"
 )
 @Component
 public class UrlMapperImpl implements UrlMapper {
