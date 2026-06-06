@@ -1,4 +1,4 @@
-package com.write.api.job;
+package com.write.api.infra.job;
 
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.UrlStatusEnum;

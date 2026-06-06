@@ -1,4 +1,4 @@
-package com.write.api.job;
+package com.write.api.infra.job;
 
 import com.write.api.infrastructure.scheduler.OutboxPublisherJob;
 import com.write.api.ports.in.outbox.PublishPendingOutboxEventsUseCase;

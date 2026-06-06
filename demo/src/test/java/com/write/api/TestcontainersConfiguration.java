@@ -26,17 +26,8 @@ public class TestcontainersConfiguration {
 
 	@Bean
 	@ServiceConnection
-	MySQLContainer mysqlContainer() {
-		return new MySQLContainer(DockerImageName.parse("mysql:latest"))
-				.withDatabaseName("url_shortener")
-				.withUsername("root")
-				.withPassword("");
-	}
-
-	@Bean
-	@ServiceConnection
-    RabbitMQContainer rabbitContainer() {
-		return new RabbitMQContainer(DockerImageName.parse("rabbitmq:latest"));
+	MySQLContainer<?> mysqlContainer() {
+		return new MySQLContainer<>("mysql:8.4");
 	}
 
 	@Bean
