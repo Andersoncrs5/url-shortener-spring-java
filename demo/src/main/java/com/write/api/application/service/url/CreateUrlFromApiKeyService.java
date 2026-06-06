@@ -30,23 +30,31 @@ public class CreateUrlFromApiKeyService implements CreateUrlFromApiKeyUseCase {
 
     @Override
     public Result<UrlModel> execute(String key, CreateUrlDTO dto) {
-        ApiKeyModel apiKey;
-
         Result<Boolean> booleanResult = validateApiKey.execute(key);
+
         if (booleanResult.isFailure()) {
             return Result.failure(booleanResult.getErrors(), booleanResult.getStatusCode());
         }
 
+        if (!Boolean.TRUE.equals(booleanResult.getValue())) {
+            return Result.failure(409, "Api key is invalid");
+        }
+
         Result<ApiKeyModel> apiKeyResult = findByKeyApiKey.execute(key);
+        if (apiKeyResult == null) {
+            return Result.failure(500, "Api key lookup returned null");
+        }
+
         if (apiKeyResult.isFailure()) {
             return Result.failure(apiKeyResult.getStatusCode(), apiKeyResult.getMessage());
         }
 
-        apiKey = apiKeyResult.getValue();
+        ApiKeyModel apiKey = apiKeyResult.getValue();
 
         if (!apiKey.isActive()) {
             return Result.failure(409, "Api key is disabled");
         }
+
         if (apiKey.getExpiresAt().isBefore(LocalDateTime.now())) {
             return Result.failure(409, "Api key is expired");
         }
