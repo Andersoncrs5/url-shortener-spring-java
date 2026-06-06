@@ -1,25 +1,35 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.url.UrlUpdatedEvent;
 import com.write.api.application.dto.url.UpdateUrlDTO;
 import com.write.api.application.mapper.url.UpdateUrlMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.in.url.UpdateUrlUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import com.write.api.shared.tx.ResultTransaction;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UpdateUrlService implements UpdateUrlUseCase {
 
-    private final IUrlRepository repository;
-    private final UpdateUrlMapper mapper;
-    private final PasswordEncoder passwordEncoder;
+    IUrlRepository repository;
+    UpdateUrlMapper mapper;
+    PasswordEncoder passwordEncoder;
+    CreateOutboxEventUseCase outbox;
 
     @Override
     @ResultTransaction
@@ -38,6 +48,25 @@ public class UpdateUrlService implements UpdateUrlUseCase {
 
         try {
             UrlModel save = repository.save(url);
+
+            var outboxResult = outbox.execute(
+                    new CreateOutboxEventCommand(
+                            AggregateTypeEnum.URL,
+                            save.getId(),
+                            EventTypeEnum.URL_UPDATED,
+                            TopicEnum.URL_UPDATED,
+                            UrlUpdatedEvent.create(
+                                    save.getId(),
+                                    save.getTitle(),
+                                    save.getShortCode(),
+                                    save.getStatus(),
+                                    save.getCreatedAt(),
+                                    save.getUpdatedAt()
+                            )
+                    )
+            );
+
+            if (outboxResult.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
 
             return Result.success(save, 200);
         } catch (DataIntegrityViolationException e) {

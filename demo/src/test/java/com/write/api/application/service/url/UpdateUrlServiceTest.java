@@ -1,5 +1,6 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.url.UpdateUrlDTO;
 import com.write.api.application.mapper.url.UpdateUrlMapper;
 import com.write.api.application.shared.Result;
@@ -7,6 +8,7 @@ import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,9 @@ class UpdateUrlServiceTest {
 
     @Mock
     private IUrlRepository repository;
+
+    @Mock
+    private CreateOutboxEventUseCase outbox;
 
     @Mock
     private UpdateUrlMapper mapper;
@@ -110,6 +115,9 @@ class UpdateUrlServiceTest {
         when(repository.save(any(UrlModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success(null, 201));
+
         Result<UrlModel> result = service.execute(id, dto);
 
         assertThat(result).isNotNull();
@@ -181,6 +189,7 @@ class UpdateUrlServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(url));
         when(repository.save(any(UrlModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(outbox.execute(any(CreateOutboxEventCommand.class))).thenReturn(Result.success(null, 201));
 
         Result<UrlModel> result = service.execute(id, dtoWithoutPassword);
 

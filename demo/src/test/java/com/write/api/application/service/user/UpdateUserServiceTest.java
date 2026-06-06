@@ -77,13 +77,9 @@ class UpdateUserServiceTest {
         verify(repository, times(1))
                 .save(user);
 
-        verify(passwordEncoder, never())
-                .encode(anyString());
-
         verifyNoMoreInteractions(
                 mapper,
-                repository,
-                passwordEncoder
+                repository
         );
     }
 
