@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.write.api.adapters.in.web.controller.urlTagLink.UrlTagLinkControllerTest
--------------------------------------------------------------------------------
-Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.046 s -- in com.write.api.adapters.in.web.controller.urlTagLink.UrlTagLinkControllerTest

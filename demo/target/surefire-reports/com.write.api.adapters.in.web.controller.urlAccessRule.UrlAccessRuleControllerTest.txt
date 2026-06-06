@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.write.api.adapters.in.web.controller.urlAccessRule.UrlAccessRuleControllerTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.529 s -- in com.write.api.adapters.in.web.controller.urlAccessRule.UrlAccessRuleControllerTest
