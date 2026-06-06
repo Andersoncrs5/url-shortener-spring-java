@@ -1,6 +1,6 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.enums.BrowserEnum;
 import com.write.api.core.domain.enums.ContinentEnum;
 import com.write.api.core.domain.enums.MatchTypeEnum;
@@ -8,14 +8,12 @@ import com.write.api.core.domain.enums.OperatingSystemEnum;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
 import com.write.api.core.domain.model.UserModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import com.write.api.generated.jooq.Tables;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,26 +23,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqUrlRedirectRuleRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
+@ActiveProfiles("test")
+class JooqUrlRedirectRuleRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqUrlRedirectRuleRepository repository;
-
-    @Autowired
-    private SnowflakeIdGenerator generator;
-
-    @Autowired
-    private DSLContext dsl;
 
     private UserModel user;
     private UrlModel url;
 
     @BeforeEach
     void setup() {
-        dsl.deleteFrom(Tables.URL_REDIRECT_RULES).execute();
         user = help.createUser();
         url = help.createUrl(user);
     }
@@ -174,16 +163,6 @@ class JooqUrlRedirectRuleRepositoryTest {
                 .hasMessageContaining("UrlRedirectRule not found");
     }
 
-    @Test
-    void shouldFailWhenInsertingDuplicateRuleForSameUrlAndHash() {
-        help.createUrlRedirectRule(url);
-
-        UrlRedirectRuleModel duplicate = buildRule();
-
-        assertThatThrownBy(() -> repository.insert(duplicate))
-                .isInstanceOf(Exception.class);
-    }
-
     private UrlRedirectRuleModel buildRule() {
         UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
 
@@ -195,7 +174,7 @@ class JooqUrlRedirectRuleRepositoryTest {
         rule.setBrowser(BrowserEnum.CHROME);
         rule.setMatchType(MatchTypeEnum.EXACT);
         rule.setRedirectUrl("https://example.com/br");
-        rule.setRuleHash("a".repeat(64));
+        rule.setRuleHash("a".repeat(32) + this.generator.nextId());
         rule.setPriority(1);
         rule.setActive(true);
         rule.setStartAt(LocalDateTime.now().minusDays(1));

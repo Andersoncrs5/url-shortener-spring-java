@@ -1,16 +1,17 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.model.OutboxEventModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,13 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqOutboxEventRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
-
-    @Autowired
-    private SnowflakeIdGenerator generator;
+@ActiveProfiles("test")
+class JooqOutboxEventRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqOutboxEventRepository repository;
@@ -51,6 +47,7 @@ class JooqOutboxEventRepositoryTest {
         event.setErrorMessage(null);
         event.setNextRetryAt(LocalDateTime.now().plusMinutes(5));
         event.setProcessedAt(null);
+        event.setTopic(TopicEnum.USER_CREATED);
     }
 
     @Test

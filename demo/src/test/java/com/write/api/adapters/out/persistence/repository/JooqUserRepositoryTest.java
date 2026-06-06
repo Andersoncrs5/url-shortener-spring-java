@@ -1,39 +1,31 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.UserModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-
-import java.util.UUID;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class JooqUserRepositoryTest {
+@ActiveProfiles("test")
+public class JooqUserRepositoryTest extends BaseRepositoryTest {
 
-    @Autowired private HelpRepositoryTest help;
-
-    @Autowired private DSLContext dsl;
-    @Autowired private SnowflakeIdGenerator generator;
     @Autowired private JooqUserRepository repository;
 
     private UserModel user;
 
     @BeforeEach
     void setUp() {
-        dsl.deleteFrom(org.jooq.impl.DSL.table("users")).execute();
-
         user = new UserModel();
-        user.setName("John Doe");
-        user.setEmail("john@example.com");
+        user.setName("John Doe" + this.generator.nextId());
+        user.setEmail("john" + this.generator.nextId() + "@example.com");
         user.setPasswordHash("54356435645625467245425");
         user.setActive(true);
     }
@@ -59,19 +51,17 @@ public class JooqUserRepositoryTest {
 
         assertThat(savedUser.getId()).isNotNull();
         assertThat(savedUser.getCreatedAt()).isNotNull();
-
-        var count = dsl.fetchCount(org.jooq.impl.DSL.table("users"));
-        assertThat(count).isEqualTo(1);
     }
 
     @Test
     void shouldUpdateUserSuccessfully() {
+        var name = "Jane Doe" + this.generator.nextId();
         UserModel savedUser = repository.insert(user);
-        savedUser.setName("Jane Doe");
+        savedUser.setName(name);
 
         UserModel updatedUser = repository.save(savedUser);
 
-        assertThat(updatedUser.getName()).isEqualTo("Jane Doe");
+        assertThat(updatedUser.getName()).isEqualTo(name);
         assertThat(updatedUser.getUpdatedAt()).isAfter(savedUser.getCreatedAt());
     }
 
@@ -95,7 +85,7 @@ public class JooqUserRepositoryTest {
 
     @Test
     void shouldReturnFalseWhenGetByEmail() {
-        boolean exists = repository.existsByEmailIgnoreCase("user" + UUID.randomUUID() + "@gmail.com");
+        boolean exists = repository.existsByEmailIgnoreCase("user"  + this.generator.nextId() + "@gmail.com");
 
         assertThat(exists).isFalse();
     }

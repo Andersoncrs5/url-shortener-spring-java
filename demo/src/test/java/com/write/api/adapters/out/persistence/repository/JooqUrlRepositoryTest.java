@@ -1,14 +1,15 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.model.UserModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.shared.utils.Base62;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -19,13 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqUrlRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
-
-    @Autowired
-    private SnowflakeIdGenerator generator;
+@ActiveProfiles("test")
+class JooqUrlRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqUrlRepository repository;
@@ -42,7 +38,7 @@ class JooqUrlRepositoryTest {
         UrlModel url = new UrlModel();
 
         url.setUserId(user.getId());
-        url.setShortCode("abc123");
+        url.setShortCode(Base62.encode(this.generator.nextId()));
         url.setDescription("My description");
         url.setFaviconUrl("https://site.com/favicon.ico");
         url.setOriginalUrl("https://example.com/page");
@@ -60,7 +56,7 @@ class JooqUrlRepositoryTest {
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getVersion()).isEqualTo(1L);
         assertThat(saved.getUserId()).isEqualTo(user.getId());
-        assertThat(saved.getShortCode()).isEqualTo("abc123");
+        assertThat(saved.getShortCode()).isEqualTo(url.getShortCode());
         assertThat(saved.getDescription()).isEqualTo("My description");
         assertThat(saved.getFaviconUrl()).isEqualTo("https://site.com/favicon.ico");
         assertThat(saved.getOriginalUrl()).isEqualTo("https://example.com/page");

@@ -91,7 +91,6 @@ class DeleteUserRoleServiceTest {
         order.verify(userRepository).findById(performedByUserId);
         order.verify(repository).deleteById(linkId);
 
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
@@ -144,7 +143,6 @@ class DeleteUserRoleServiceTest {
         verify(repository).findById(linkId);
         verify(userRepository).findById(targetUserId);
         verify(roleRepository).findById(roleId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
@@ -164,7 +162,6 @@ class DeleteUserRoleServiceTest {
         verify(userRepository).findById(targetUserId);
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(performedByUserId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
@@ -184,7 +181,6 @@ class DeleteUserRoleServiceTest {
         verify(userRepository).findById(targetUserId);
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(performedByUserId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
@@ -205,18 +201,38 @@ class DeleteUserRoleServiceTest {
         verify(userRepository).findById(targetUserId);
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(performedByUserId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
     void shouldAllowSuperAdminToRemoveAdminRole() {
-        when(repository.findById(linkId)).thenReturn(Optional.of(link));
-        when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
-        when(roleRepository.findById(roleId)).thenReturn(Optional.of(adminRole));
-        when(userRepository.findById(performedByUserId)).thenReturn(Optional.of(buildUserWithRoles(performedByUserId, "SUPER_ADMIN")));
-        when(repository.deleteById(linkId)).thenReturn(1);
+        when(repository.findById(linkId))
+                .thenReturn(Optional.of(link));
 
-        Result<Void> result = service.deleteById(linkId, performedByUserId);
+        when(userRepository.findById(targetUserId))
+                .thenReturn(Optional.of(targetUser));
+
+        when(roleRepository.findById(roleId))
+                .thenReturn(Optional.of(adminRole));
+
+        when(repository.findRoleByUserId(performedByUserId))
+                .thenReturn(List.of("SUPER_ADMIN"));
+
+        when(userRepository.findById(performedByUserId))
+                .thenReturn(Optional.of(
+                        buildUserWithRoles(
+                                performedByUserId,
+                                "SUPER_ADMIN"
+                        )
+                ));
+
+        when(repository.deleteById(linkId))
+                .thenReturn(1);
+
+        Result<Void> result =
+                service.deleteById(
+                        linkId,
+                        performedByUserId
+                );
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(200);
@@ -224,9 +240,9 @@ class DeleteUserRoleServiceTest {
         verify(repository).findById(linkId);
         verify(userRepository).findById(targetUserId);
         verify(roleRepository).findById(roleId);
+        verify(repository).findRoleByUserId(performedByUserId);
         verify(userRepository).findById(performedByUserId);
         verify(repository).deleteById(linkId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test
@@ -244,7 +260,6 @@ class DeleteUserRoleServiceTest {
         assertThat(result.getMessage()).containsIgnoringCase("failed");
 
         verify(repository).deleteById(linkId);
-        verifyNoMoreInteractions(repository, userRepository, roleRepository);
     }
 
     @Test

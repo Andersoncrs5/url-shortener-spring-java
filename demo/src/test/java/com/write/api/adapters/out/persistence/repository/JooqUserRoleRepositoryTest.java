@@ -1,16 +1,15 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
@@ -19,16 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqUserRoleRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
-
-    @Autowired
-    private DSLContext dsl;
-
-    @Autowired
-    private SnowflakeIdGenerator generator;
+@ActiveProfiles("test")
+class JooqUserRoleRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqUserRoleRepository repository;

@@ -93,7 +93,7 @@ class CreateUserServiceTest {
                 .thenReturn("encoded");
 
         when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("duplicate key ruleValue violates uk_user_email");
+                .thenReturn("duplicate key ruleValue violates uk_users_email");
 
         when(repository.insert(any()))
                 .thenThrow(ex);
@@ -122,7 +122,7 @@ class CreateUserServiceTest {
                 .thenReturn("encoded");
 
         when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("duplicate key uk_user_name");
+                .thenReturn("duplicate key uk_users_name");
 
         when(repository.insert(any()))
                 .thenThrow(ex);

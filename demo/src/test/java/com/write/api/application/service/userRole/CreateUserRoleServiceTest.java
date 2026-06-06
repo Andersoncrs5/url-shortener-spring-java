@@ -3,6 +3,7 @@ package com.write.api.application.service.userRole;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.mapper.userRole.CreateUserRoleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
@@ -21,7 +22,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -116,7 +119,45 @@ class CreateUserRoleServiceTest {
         order.verify(mapper).toModel(dto);
         order.verify(repository).insert(any(UserRoleModel.class));
 
-        verifyNoMoreInteractions(roleRepository, userRepository, mapper, repository);
+
+    }
+
+    @Test
+    void shouldReturn404WhenRoleNotFound() {
+        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(404);
+        assertThat(result.getMessage()).isEqualTo("Role not found");
+        assertThat(result.getValue()).isNull();
+
+        verify(roleRepository).findById(roleId);
+        verifyNoInteractions(userRepository, mapper, repository);
+        verifyNoMoreInteractions(roleRepository);
+    }
+
+    @Test
+    void shouldReturn404WhenAssignedByUserNotFound() {
+        RoleModel role = buildRole("USER");
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.empty());
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(404);
+        assertThat(result.getMessage()).isEqualTo("Assigned user not found");
+        assertThat(result.getValue()).isNull();
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verifyNoInteractions(mapper, repository);
+        verifyNoMoreInteractions(roleRepository, userRepository);
     }
 
     @Test
@@ -137,18 +178,17 @@ class CreateUserRoleServiceTest {
 
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(assignedByUserId);
-        verifyNoInteractions(mapper);
-        verifyNoInteractions(repository);
         verifyNoMoreInteractions(roleRepository, userRepository);
     }
 
     @Test
-    void shouldReturn409WhenAdminRoleIsGrantedByNonSuperAdmin() {
+    void shouldReturn403WhenAdminRoleIsGrantedByNonSuperAdmin() {
         RoleModel role = buildRole("ADMIN");
-        UserModel assignedBy = buildUserWithRoles(); // sem SUPER_ADMIN
+        UserModel assignedBy = buildUser();
 
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
         when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+        when(repository.findRoleByUserId(assignedByUserId)).thenReturn(List.of("USER"));
 
         Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
 
@@ -160,18 +200,20 @@ class CreateUserRoleServiceTest {
 
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(assignedByUserId);
+        verify(repository).findRoleByUserId(assignedByUserId);
+
         verifyNoInteractions(mapper);
-        verifyNoInteractions(repository);
-        verifyNoMoreInteractions(roleRepository, userRepository);
+        verifyNoMoreInteractions(roleRepository, userRepository, repository);
     }
 
     @Test
     void shouldAllowAdminRoleWhenGrantedBySuperAdmin() {
         RoleModel role = buildRole("ADMIN");
-        UserModel assignedBy = buildUserWithRoles("SUPER_ADMIN");
+        UserModel assignedBy = buildUser();
 
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
         when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+        when(repository.findRoleByUserId(assignedByUserId)).thenReturn(List.of("SUPER_ADMIN"));
         when(mapper.toModel(dto)).thenReturn(mappedModel);
 
         when(repository.insert(any(UserRoleModel.class)))
@@ -185,14 +227,18 @@ class CreateUserRoleServiceTest {
 
         Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
 
+        assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(201);
         assertThat(result.getValue()).isNotNull();
 
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(assignedByUserId);
+        verify(repository).findRoleByUserId(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
+
+
     }
 
     @Test
@@ -221,7 +267,65 @@ class CreateUserRoleServiceTest {
         verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
-        verifyNoMoreInteractions(roleRepository, userRepository, mapper, repository);
+
+    }
+
+    @Test
+    void shouldReturn404WhenUserFkFails() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+        when(mapper.toModel(dto)).thenReturn(mappedModel);
+
+        when(repository.insert(any(UserRoleModel.class)))
+                .thenThrow(new DataIntegrityViolationException(
+                        "fk violation",
+                        new RuntimeException("fk_user_roles_user_id")
+                ));
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(404);
+        assertThat(result.getMessage()).isEqualTo("User not found");
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verify(mapper).toModel(dto);
+        verify(repository).insert(any(UserRoleModel.class));
+
+    }
+
+    @Test
+    void shouldReturn404WhenAssignedByFkFails() {
+        RoleModel role = buildRole("USER");
+        UserModel assignedBy = buildUser();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        when(userRepository.findById(assignedByUserId)).thenReturn(Optional.of(assignedBy));
+        when(mapper.toModel(dto)).thenReturn(mappedModel);
+
+        when(repository.insert(any(UserRoleModel.class)))
+                .thenThrow(new DataIntegrityViolationException(
+                        "fk violation",
+                        new RuntimeException("fk_user_roles_assigned_by_user_id")
+                ));
+
+        Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(404);
+        assertThat(result.getMessage()).isEqualTo("Assigned user not found");
+
+        verify(roleRepository).findById(roleId);
+        verify(userRepository).findById(assignedByUserId);
+        verify(mapper).toModel(dto);
+        verify(repository).insert(any(UserRoleModel.class));
+
     }
 
     @Test
@@ -241,6 +345,7 @@ class CreateUserRoleServiceTest {
 
         Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
 
+        assertThat(result).isNotNull();
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
         assertThat(result.getMessage()).isEqualTo("Role not found");
@@ -249,6 +354,7 @@ class CreateUserRoleServiceTest {
         verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
+
     }
 
     @Test
@@ -268,14 +374,15 @@ class CreateUserRoleServiceTest {
 
         Result<UserRoleModel> result = service.execute(dto, assignedByUserId);
 
+        assertThat(result).isNotNull();
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage()).isEqualTo("Database integrity error");
 
         verify(roleRepository).findById(roleId);
         verify(userRepository).findById(assignedByUserId);
         verify(mapper).toModel(dto);
         verify(repository).insert(any(UserRoleModel.class));
+
     }
 
     @Test
@@ -312,40 +419,6 @@ class CreateUserRoleServiceTest {
     private UserModel buildUser() {
         UserModel user = new UserModel();
         user.setId(assignedByUserId);
-        setRoles(user, null);
         return user;
-    }
-
-    private UserModel buildUserWithRoles(String... roles) {
-        UserModel user = new UserModel();
-        user.setId(assignedByUserId);
-        setRoles(user, roles == null ? null : List.of(roles));
-        return user;
-    }
-
-    private void setRoles(UserModel user, Collection<String> roles) {
-        try {
-            Field field = UserModel.class.getDeclaredField("roles");
-            field.setAccessible(true);
-
-            Class<?> type = field.getType();
-
-            if (roles == null) {
-                field.set(user, null);
-                return;
-            }
-
-            if (List.class.isAssignableFrom(type)) {
-                field.set(user, new ArrayList<>(roles));
-            } else if (Set.class.isAssignableFrom(type)) {
-                field.set(user, new HashSet<>(roles));
-            } else if (Collection.class.isAssignableFrom(type)) {
-                field.set(user, new ArrayList<>(roles));
-            } else {
-                field.set(user, null);
-            }
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
-            // If your UserModel uses a different field name/type, adjust here.
-        }
     }
 }

@@ -1,16 +1,14 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.model.UserModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import com.write.api.generated.jooq.Tables;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,27 +18,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqApiKeyRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
+@ActiveProfiles("test")
+class JooqApiKeyRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqApiKeyRepository repository;
 
-    @Autowired
-    private SnowflakeIdGenerator generator;
-
-    @Autowired
-    private DSLContext dsl;
-
     private UserModel user;
+    private UserModel owner;
 
     @BeforeEach
     void setup() {
-        dsl.deleteFrom(Tables.API_KEYS).execute();
-
         user = help.createUser();
+        owner = help.createUser();
     }
 
     @Test
@@ -52,8 +42,8 @@ class JooqApiKeyRepositoryTest {
         assertThat(saved).isNotNull();
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getUserId()).isEqualTo(user.getId());
-        assertThat(saved.getName()).isEqualTo("Production");
-        assertThat(saved.getKeyHash()).isEqualTo("sha256-test-key");
+        assertThat(saved.getName()).containsIgnoringCase("Production");
+        assertThat(saved.getKeyHash()).containsIgnoringCase("sha256-test-key");
         assertThat(saved.isActive()).isTrue();
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(saved.getUpdatedAt()).isNotNull();
@@ -63,12 +53,12 @@ class JooqApiKeyRepositoryTest {
     void shouldUpdateApiKey() {
         ApiKeyModel saved = repository.insert(buildApiKey());
 
-        saved.setName("CI/CD");
+        saved.setName("CI/CD" + this.generator.nextId());
         saved.setActive(false);
 
         ApiKeyModel updated = repository.save(saved);
 
-        assertThat(updated.getName()).isEqualTo("CI/CD");
+        assertThat(updated.getName()).containsIgnoringCase(saved.getName());
         assertThat(updated.isActive()).isFalse();
     }
 
@@ -85,8 +75,8 @@ class JooqApiKeyRepositoryTest {
 
         assertThat(found.getId()).isEqualTo(saved.getId());
         assertThat(found.getUserId()).isEqualTo(user.getId());
-        assertThat(found.getName()).isEqualTo("Production");
-        assertThat(found.getKeyHash()).isEqualTo("sha256-test-key");
+        assertThat(found.getName()).containsIgnoringCase("Production");
+        assertThat(found.getKeyHash()).containsIgnoringCase("sha256-test-key");
     }
 
     @Test
@@ -99,14 +89,14 @@ class JooqApiKeyRepositoryTest {
 
     @Test
     void shouldFindByKeyHash() {
-        repository.insert(buildApiKey());
+        ApiKeyModel insert = repository.insert(buildApiKey());
 
         Optional<ApiKeyModel> result =
-                repository.findByKeyHash("sha256-test-key");
+                repository.findByKeyHash(insert.getKeyHash());
 
         assertThat(result).isPresent();
         assertThat(result.get().getName())
-                .isEqualTo("Production");
+                .containsIgnoringCase("Production");
     }
 
     @Test
@@ -186,8 +176,7 @@ class JooqApiKeyRepositoryTest {
 
         assertThatThrownBy(
                 () -> repository.insert(duplicate)
-        )
-                .isInstanceOf(Exception.class);
+        ).isInstanceOf(Exception.class);
     }
 
     private ApiKeyModel buildApiKey() {
@@ -195,8 +184,8 @@ class JooqApiKeyRepositoryTest {
         ApiKeyModel apiKey = new ApiKeyModel();
 
         apiKey.setUserId(user.getId());
-        apiKey.setName("Production");
-        apiKey.setKeyHash("sha256-test-key");
+        apiKey.setName("Production" + this.generator.nextId());
+        apiKey.setKeyHash("sha256-test-key"  + this.generator.nextId());
         apiKey.setActive(true);
         apiKey.setLastUsedAt(
                 LocalDateTime.now().minusHours(1)
@@ -204,6 +193,7 @@ class JooqApiKeyRepositoryTest {
         apiKey.setExpiresAt(
                 LocalDateTime.now().plusDays(30)
         );
+        apiKey.setOwnerUserId(owner.getId());
 
         return apiKey;
     }

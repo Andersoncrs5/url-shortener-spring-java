@@ -1,18 +1,16 @@
 package com.write.api.adapters.out.persistence.repository;
 
-import com.write.api.adapters.out.persistence.help.HelpRepositoryTest;
+import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.core.domain.model.UrlTagModel;
 import com.write.api.core.domain.model.UserModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import com.write.api.generated.jooq.Tables;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
@@ -21,19 +19,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class JooqUrlTagLinkRepositoryTest {
-
-    @Autowired
-    private HelpRepositoryTest help;
-
-    @Autowired
-    private SnowflakeIdGenerator generator;
+@ActiveProfiles("test")
+class JooqUrlTagLinkRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private JooqUrlTagLinkRepository repository;
-
-    @Autowired
-    private DSLContext dsl;
 
     private UserModel user;
     private UrlModel url;
@@ -41,7 +31,6 @@ class JooqUrlTagLinkRepositoryTest {
 
     @BeforeEach
     void setup() {
-        dsl.deleteFrom(Tables.URL_TAG_LINKS).execute();
         user = help.createUser();
         url = help.createUrl(user);
         tag = help.createUrlTag(user);
