@@ -27,5 +27,7 @@ public enum EventTypeEnum {
     URL_DELETED,
 
     API_KEY_CREATED,
-    API_KEY_REVOKED
+    API_KEY_REVOKED,
+
+    ADMINS_NOTIFICATION
 }
