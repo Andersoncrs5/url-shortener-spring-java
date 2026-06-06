@@ -2,6 +2,8 @@ package com.write.api.core.domain.enums;
 
 public enum TopicEnum {
 
+    NOTIFY_ADMINS("notify.admins"),
+
     URL_ACCESS_RULE_CREATED("url.access.rule.created"),
 
     URL_CREATED("url.created"),
