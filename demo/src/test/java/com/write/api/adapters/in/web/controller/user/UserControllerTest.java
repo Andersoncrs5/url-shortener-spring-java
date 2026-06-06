@@ -1,19 +1,17 @@
 package com.write.api.adapters.in.web.controller.user;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.write.api.adapters.in.web.controller.BaseControllerTest;
 import com.write.api.adapters.in.web.controller.util.classes.UserTest;
-import com.write.api.adapters.in.web.controller.util.helps.HelperTest;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.application.dto.user.UserResponseDTO;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
@@ -25,12 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+@ActiveProfiles("test")
+public class UserControllerTest extends BaseControllerTest {
     private final String URL = "/v1/user";
-
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private HelperTest helper;
 
     @Test
     void shouldFailDeleteBecauseTokenIsMissed() throws Exception {
