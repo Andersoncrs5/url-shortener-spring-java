@@ -34,25 +34,28 @@ public class ValidateApiKeyService implements ValidateApiKeyUseCase {
         if (key == null) {
             return Result.failure(
                     "Invalid API key",
-                    403
+                    403,
+                    false
             );
         }
 
         if (!key.isActive()) {
             return Result.failure(
                     "API key is inactive",
-                    403
+                    403,
+                    false
             );
         }
 
         if (key.getExpiresAt() != null && key.getExpiresAt().isBefore(LocalDateTime.now())) {
             return Result.failure(
                     "API key has expired",
-                    403
+                    403,
+                    false
             );
         }
 
-        return Result.success();
+        return Result.success(true);
     }
 
     private String sha256(String value) {
