@@ -8,6 +8,7 @@ import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
 import com.write.api.ports.out.repository.IUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,9 @@ class CreateUrlAccessRuleServiceTest {
 
     @Mock
     private IUrlAccessRuleRepository repository;
+
+    @Mock
+    private CreateOutboxEventUseCase outbox;
 
     @Mock
     private CreateUrlAccessRuleMapper mapper;
@@ -73,6 +77,7 @@ class CreateUrlAccessRuleServiceTest {
                 .thenReturn(true);
         when(mapper.toDomain(dto)).thenReturn(mappedModel);
         when(idGen.nextId()).thenReturn(generatedId);
+        when(outbox.execute(any())).thenReturn(Result.success());
 
         when(repository.insert(any(UrlAccessRuleModel.class)))
                 .thenAnswer(invocation -> {

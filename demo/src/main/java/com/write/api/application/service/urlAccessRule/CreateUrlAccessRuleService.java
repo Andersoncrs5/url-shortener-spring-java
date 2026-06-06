@@ -1,13 +1,19 @@
 package com.write.api.application.service.urlAccessRule;
 
 import com.google.common.net.InetAddresses;
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.urlAccessRule.UrlAccessRuleCreatedEvent;
 import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.mapper.urlAccessRule.CreateUrlAccessRuleMapper;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.in.urlAccessRule.CreateUrlAccessRuleUseCase;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
 import com.write.api.ports.out.repository.IUrlRepository;
@@ -30,6 +36,7 @@ public class CreateUrlAccessRuleService implements CreateUrlAccessRuleUseCase {
     IUrlAccessRuleRepository repository;
     IUrlRepository urlRepository;
     CreateUrlAccessRuleMapper mapper;
+    CreateOutboxEventUseCase outbox;
 
     @Override
     @ResultTransaction
@@ -139,6 +146,26 @@ public class CreateUrlAccessRuleService implements CreateUrlAccessRuleUseCase {
 
         try {
             UrlAccessRuleModel inserted = repository.insert(access);
+
+            var outboxResult = outbox.execute(
+                    new CreateOutboxEventCommand(
+                            AggregateTypeEnum.URL_ACCESS_RULE,
+                            inserted.getId(),
+                            EventTypeEnum.URL_ACCESS_RULE_CREATED,
+                            TopicEnum.URL_ACCESS_RULE_CREATED,
+                            UrlAccessRuleCreatedEvent.create(
+                                    inserted.getId(),
+                                    inserted.getUrlId(),
+                                    inserted.getAssignedByUserId(),
+                                    inserted.getRuleValue(),
+                                    inserted.getType(),
+                                    inserted.getCreatedAt()
+                            )
+                    )
+            );
+
+            if (outboxResult.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
+
             return Result.success(inserted, 201);
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
