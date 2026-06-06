@@ -7,11 +7,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum OutboxStatusEnum {
 
-    PENDING("Pendente"),
-    PROCESSING("Processando"),
-    PROCESSED("Processado"),
+    PENDING("Pending"),
+    PROCESSING("Processing"),
+    PROCESSED("Processed"),
     RETRYING("Retrying"),
-    FAILED("Falhou");
+    FAILED("Failed"),
+    FAILED_NOTIFICATION_SENT("Failed - Notification Sent");
 
     private final String description;
 }
