@@ -23,6 +23,7 @@ import com.write.api.application.dto.userRole.UserRoleDTO;
 import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.help.RandomStringGenerator;
 import com.write.api.ports.out.repository.IRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -47,7 +48,8 @@ public class HelperTest {
     private final IRoleRepository roleRepository;
 
     public String createApiKey(
-            AuthTokenResponseDTO superAdm
+            AuthTokenResponseDTO superAdm,
+            UserTest user
     ) throws Exception {
         var key = UUID.randomUUID().toString();
         String URL = "/v1/api-key";
@@ -55,7 +57,8 @@ public class HelperTest {
         CreateApiKeyDTO dto = new CreateApiKeyDTO(
                 "sei la 123" + key,
                 LocalDateTime.now().plusDays(23),
-                true
+                true,
+                user.tokens().user().getId()
         );
 
         MvcResult result = mockMvc.perform(post(URL)
@@ -238,11 +241,13 @@ public class HelperTest {
     public UrlTagResponseDTO createUrlTag(UserTest user) throws Exception {
         var key = UUID.randomUUID().toString();
         String URL = "/v1/url-tag";
+        String slug = "tag-slug-" + RandomStringGenerator.random(10)
+                .toLowerCase().replaceAll("[^a-z0-9]", "");
 
         CreateUrlTagDTO dto = new CreateUrlTagDTO(
                 "tag simple num: " + key,
-                "tag-slug-simple-num: " + key,
-                "#0000000",
+                slug,
+                "#6366F1",
                 "any desc",
                 null,
                 true
