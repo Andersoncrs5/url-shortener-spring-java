@@ -1,11 +1,29 @@
 management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: [ w3c, b3 ]
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
   metrics:
     enable:
       http: true
   endpoints:
+    health:
+      show-details: always
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: '*'
+logging:
+  pattern:
+    level: "%5p [demo,%X{traceId:-},%X{spanId:-}]"
+  level:
+    com.write.api: DEBUG
+    org.springframework.web: DEBUG
+    io.micrometer: DEBUG
 
 resilience4j:
   retry:
@@ -17,11 +35,9 @@ resilience4j:
         exponential-backoff-multiplier: 3
         retry-exceptions:
           - com.write.api.core.domain.exception.TransientDatabaseException
-
         ignore-exceptions:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
-
       kafka:
         timeout-duration: 5s
         max-attempts: 3
@@ -46,7 +62,6 @@ resilience4j:
       kafka:
         max-concurrent-calls: 10
         max-wait-duration: 0
-
       outbox:
         max-concurrent-calls: 2
         max-wait-duration: 0
@@ -62,58 +77,48 @@ resilience4j:
         limit-for-period: 100
         limit-refresh-period: 2s
         timeout-duration: 0
-
       create-internal:
         limit-for-period: 120
         limit-refresh-period: 2s
         timeout-duration: 0
-
       login:
         limit-for-period: 90
         limit-refresh-period: 2s
         timeout-duration: 0
-
       logout:
         limit-for-period: 70
         limit-refresh-period: 2s
         timeout-duration: 0
-
       refresh-token:
         limit-for-period: 120
         limit-refresh-period: 2s
         timeout-duration: 0
-
       test:
         limit-for-period: 30
         limit-refresh-period: 10s
         timeout-duration: 0
-
       delete:
         limit-for-period: 110
         limit-refresh-period: 4s
         timeout-duration: 0
-
       update:
         limit-for-period: 50
         limit-refresh-period: 4s
         timeout-duration: 0
 
 spring:
+  application:
+    name: demo
   super-adm:
     name: superadm
     email: superadm@gmail.com
     password: 12345678
-
-  application:
-    name: demo
-
   security:
     exp:
       token: 24
       refresh: 444444
     jwt:
       secret: 5438y43v734vb7t40yt7y7rft47r7tv43htf3ht40f7t430ft0ft3t4fh94t3r3653667586578784658467867846786667v
-
   datasource:
     url: jdbc:mysql://localhost:4000/url_shortener
     username: root
@@ -124,14 +129,11 @@ spring:
       minimum-idle: 5
       maximum-pool-size: 30
       connection-timeout: 30000
-
   flyway:
     enabled: true
-
   threads:
     virtual:
       enabled: true
-
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -142,7 +144,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
   data:
     redis:
       host: localhost
@@ -167,5 +168,3 @@ app:
 
 server:
   port: 8080
-
-kind: Application
