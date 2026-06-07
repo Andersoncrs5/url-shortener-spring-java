@@ -1,4 +1,29 @@
 services:
+  tempo:
+    image: grafana/tempo:2.8.2
+    container_name: tempo
+    command:
+        - -config.file=/etc/tempo.yaml
+    volumes:
+        - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+        - "3200:3200"
+    networks:
+        - url_shot_java
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    ports:
+        - "4317:4317"
+        - "4318:4318"
+    volumes:
+        - ./alloy/config.alloy:/etc/alloy/config.alloy
+    command:
+        - run
+        - /etc/alloy/config.alloy
+    networks:
+        - url_shot_java
 
   pd:
     image: pingcap/pd:latest
