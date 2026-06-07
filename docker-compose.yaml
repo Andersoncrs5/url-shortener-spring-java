@@ -1,4 +1,42 @@
 services:
+  demo:
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+      - OTEL_SERVICE_NAME=demo-spring-app
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_METRICS_EXPORTER=none
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+    container_name: demo
+    ports:
+      - "8080:8080"
+    networks:
+      - url_shot_java
+    depends_on:
+      - tidb-server
+      - redpanda
+      - dragonfly
+      - tempo
+      - alloy
+    volumes:
+      - ./demo/logs:/var/log/spring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+        - "9090:9090"
+    networks:
+        - url_shot_java
+
   loki:
     image: grafana/loki:3.0.0
     container_name: loki
