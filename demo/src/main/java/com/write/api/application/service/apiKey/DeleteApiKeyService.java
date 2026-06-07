@@ -44,6 +44,7 @@ public class DeleteApiKeyService implements DeleteApiKeyUseCase {
 
         if (deleted == 0)
             return Result.failure(404, "Api key not found");
+        log.info("Api key deleted with success");
 
         return Result.success();
     }

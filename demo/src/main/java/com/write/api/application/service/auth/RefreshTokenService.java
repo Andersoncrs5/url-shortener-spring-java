@@ -9,8 +9,10 @@ import com.write.api.ports.in.auth.RefreshTokenUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService implements RefreshTokenUseCase {
@@ -38,6 +40,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         user.setRefreshToken(tokens.refreshToken());
         repository.save(user);
 
+        log.info("User {} make refresh token", user.getEmail());
         return Result.success(tokens);
     }
 

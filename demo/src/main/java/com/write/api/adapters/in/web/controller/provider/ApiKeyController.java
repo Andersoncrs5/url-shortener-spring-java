@@ -13,14 +13,18 @@ import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.ports.in.apiKey.CreateApiKeyUseCase;
 import com.write.api.ports.in.apiKey.DeleteApiKeyUseCase;
 import com.write.api.ports.in.apiKey.UpdateApiKeyUseCase;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +36,15 @@ public class ApiKeyController implements ApiKeyControllerDocs {
     DeleteApiKeyUseCase deleteApiKey;
     UpdateApiKeyUseCase updateApiKey;
     ApiKeyMapper mapper;
+
+    @GetMapping("/test-logs")
+    @RateLimiter(name = "test")
+    public void create() {
+        log.info("Criando URL");
+        log.warn("Rate limit próximo do limite");
+        log.error("Falha ao criar URL");
+        log.trace("Um trace");
+    }
 
     public ResponseEntity<String> test(String key) {
         return ResponseEntity.ok(key);

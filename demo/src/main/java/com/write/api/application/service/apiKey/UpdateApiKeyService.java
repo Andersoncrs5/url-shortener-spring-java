@@ -104,6 +104,7 @@ public class UpdateApiKeyService implements UpdateApiKeyUseCase {
             );
         }
 
+        log.info("Api key updated with success");
         return Result.success(saved, 200);
     }
 }

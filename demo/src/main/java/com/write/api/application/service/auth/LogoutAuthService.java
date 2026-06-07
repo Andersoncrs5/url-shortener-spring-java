@@ -7,8 +7,10 @@ import com.write.api.ports.in.auth.LogoutAuthUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LogoutAuthService implements LogoutAuthUseCase {
@@ -25,6 +27,8 @@ public class LogoutAuthService implements LogoutAuthUseCase {
 
         user.setRefreshToken(null);
 
-        return Result.success(this.repository.save(user));
+        UserModel saved = this.repository.save(user);
+        log.info("User {} make logout", user.getEmail());
+        return Result.success(saved);
     }
 }

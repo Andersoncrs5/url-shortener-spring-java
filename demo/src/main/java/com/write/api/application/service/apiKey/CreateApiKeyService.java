@@ -79,7 +79,7 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
         try {
 
             repository.insert(apiKey);
-
+            log.info("Api key created with success");
             return Result.success(key, 201);
 
         } catch (DataIntegrityViolationException e) {
