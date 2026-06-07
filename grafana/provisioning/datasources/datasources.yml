@@ -1,0 +1,27 @@
+apiVersion: 1
+
+datasources:
+  # 1. Configuração do Prometheus
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      httpMethod: POST
+
+  # 2. Configuração do Loki
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+
+  # 3. Configuração do Tempo (Traces)
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      # Isola o mapeamento para facilitar pular do Log/Métrica direto pro Trace
+      lokiSearch:
+        datasourceUid: 'Loki'
