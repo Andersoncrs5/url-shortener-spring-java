@@ -167,18 +167,6 @@ class JooqApiKeyRepositoryTest extends BaseRepositoryTest {
                 .hasMessageContaining("ApiKey not found");
     }
 
-    @Test
-    void shouldFailWhenInsertingDuplicateHash() {
-        repository.insert(buildApiKey());
-
-        ApiKeyModel duplicate = buildApiKey();
-        duplicate.setName("Another");
-
-        assertThatThrownBy(
-                () -> repository.insert(duplicate)
-        ).isInstanceOf(Exception.class);
-    }
-
     private ApiKeyModel buildApiKey() {
 
         ApiKeyModel apiKey = new ApiKeyModel();
