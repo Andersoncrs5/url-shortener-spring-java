@@ -16,3 +16,20 @@ otelcol.exporter.otlp "tempo" {
     }
   }
 }
+
+loki.source.file "spring_logs" {
+  targets = [
+    {
+      __path__ = "/var/log/spring/app.log",
+      app      = "spring-boot",
+    },
+  ]
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

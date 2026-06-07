@@ -18,6 +18,8 @@ management:
       exposure:
         include: '*'
 logging:
+  file:
+    name: logs/app.log
   pattern:
     level: "%5p [demo,%X{traceId:-},%X{spanId:-}]"
   level:
