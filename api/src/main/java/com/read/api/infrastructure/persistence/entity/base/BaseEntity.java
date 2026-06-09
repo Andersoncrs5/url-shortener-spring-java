@@ -15,6 +15,7 @@ public abstract class BaseEntity {
 
     @Id
     Long id;
+    Long version;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
