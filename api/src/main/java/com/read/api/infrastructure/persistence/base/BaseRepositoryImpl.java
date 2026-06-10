@@ -3,6 +3,8 @@ package com.read.api.infrastructure.persistence.base;
 
 import com.mongodb.client.result.DeleteResult;
 import com.read.api.api.dto.base.BaseFilter;
+import com.read.api.domain.model.base.BaseModel;
+import com.read.api.infrastructure.persistence.entity.base.BaseEntity;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,8 +16,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.util.List;
 
 public abstract class BaseRepositoryImpl<
-        TModel,
-        TEntity,
+        TModel extends BaseModel,
+        TEntity extends BaseEntity,
         ID> {
 
     protected final MongoTemplate template;
@@ -30,7 +32,7 @@ public abstract class BaseRepositoryImpl<
 
     protected abstract TModel toModel(TEntity entity);
 
-    protected boolean existsById(ID id) {
+    public boolean existsById(ID id) {
 
         Query query = Query.query(
                 Criteria.where("id").is(id)
@@ -42,7 +44,7 @@ public abstract class BaseRepositoryImpl<
         );
     }
 
-    protected int deleteById(ID id) {
+    public int deleteById(ID id) {
 
         Query query = Query.query(
                 Criteria.where("id").is(id)
