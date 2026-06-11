@@ -1,12 +1,17 @@
 package com.read.api.application.usecase.base;
 
 import com.read.api.domain.model.UserModel;
+import com.read.api.domain.service.RedisCrudService;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseUseCaseTest {
+
+    @Mock
+    protected RedisCrudService redis;
 
     protected final SnowflakeIdGenerator generator =
             new SnowflakeIdGenerator(1);
