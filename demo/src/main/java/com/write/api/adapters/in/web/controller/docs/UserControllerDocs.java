@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUser;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
@@ -29,6 +31,18 @@ public interface UserControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "User deleted"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -60,7 +74,15 @@ public interface UserControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Invalid request"
+                    description = "Invalid request",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

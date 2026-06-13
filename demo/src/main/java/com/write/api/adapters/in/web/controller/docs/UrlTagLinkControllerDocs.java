@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUrlTagLink;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
 import com.write.api.application.dto.urlTagLink.UpdateUrlTagLinkDTO;
@@ -45,6 +47,25 @@ public interface UrlTagLinkControllerDocs {
                     content = @Content(
                             schema = @Schema(
                                     implementation = ResponseUrlTagLink.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = """
+                        Resource not found.
+
+                        Possible reasons:
+                        - Url not found.
+                        - Tag not found.
+                        - User not found.
+                        """,
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -126,6 +147,15 @@ public interface UrlTagLinkControllerDocs {
                     )
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,}
+                            )
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = """
                         Url Tag Link not found.
@@ -153,7 +183,7 @@ public interface UrlTagLinkControllerDocs {
                     example = "918273645"
             )
             @PathVariable @IsId Long id,
-             @Parameter(
+            @Parameter(
                     description = "Unique key used to guarantee idempotency and avoid duplicate API Key creation",
                     required = true,
                     example = "6f1a4d93-8d3d-4c4f-9f0a-3b8f4c0d1234"
@@ -185,6 +215,17 @@ public interface UrlTagLinkControllerDocs {
                     content = @Content(
                             schema = @Schema(
                                     implementation = ResponseUrlTagLink.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),

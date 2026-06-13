@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUrl;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.dto.url.UpdateUrlDTO;
@@ -73,7 +75,10 @@ public interface UrlControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -199,7 +204,10 @@ public interface UrlControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -300,6 +308,17 @@ public interface UrlControllerDocs {
                     )
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "URL not found",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                    }
+                            )
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "URL not found",
                     content = @Content(
@@ -368,6 +387,17 @@ public interface UrlControllerDocs {
                     content = @Content(
                             schema = @Schema(
                                     implementation = ResponseHttp.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "URL not found",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                    }
                             )
                     )
             ),
@@ -463,7 +493,10 @@ public interface UrlControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),

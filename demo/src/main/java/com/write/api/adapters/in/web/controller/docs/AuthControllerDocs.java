@@ -1,10 +1,13 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseAuthTokens;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.application.dto.user.LoginUserDTO;
+import com.write.api.application.shared.validation.ValidationErrorResponse;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -58,7 +61,10 @@ public interface AuthControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -163,7 +169,10 @@ public interface AuthControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),

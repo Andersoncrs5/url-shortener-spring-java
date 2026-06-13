@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUserRole;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
@@ -32,6 +34,18 @@ public interface UserRoleControllerDocs {
                             mediaType = "application/json",
                             schema = @Schema(
                                     implementation = ResponseUserRole.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -68,6 +82,17 @@ public interface UserRoleControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "Role removed successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

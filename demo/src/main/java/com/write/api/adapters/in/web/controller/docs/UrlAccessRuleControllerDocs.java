@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUrlAccessRule;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
@@ -75,7 +77,10 @@ public interface UrlAccessRuleControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -177,6 +182,18 @@ public interface UrlAccessRuleControllerDocs {
                     )
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "URL access rule not found",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "URL access rule not found",
                     content = @Content(
@@ -256,7 +273,10 @@ public interface UrlAccessRuleControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),

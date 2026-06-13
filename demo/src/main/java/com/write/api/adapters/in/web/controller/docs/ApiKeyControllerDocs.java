@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseApiKey;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.apiKey.ApiKeyDTO;
 import com.write.api.application.dto.apiKey.CreateApiKeyDTO;
@@ -81,7 +83,12 @@ public interface ApiKeyControllerDocs {
                         - Request body validation failed.
                         """,
                     content = @Content(
-                            schema = @Schema(implementation = ResponseHttp.class)
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
                     )
             ),
             @ApiResponse(
@@ -176,7 +183,12 @@ public interface ApiKeyControllerDocs {
                         - Request body validation failed.
                         """,
                     content = @Content(
-                            schema = @Schema(implementation = ResponseHttp.class)
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
                     )
             ),
             @ApiResponse(

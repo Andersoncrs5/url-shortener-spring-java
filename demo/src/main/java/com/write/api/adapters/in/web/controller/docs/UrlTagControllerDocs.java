@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUrlTag;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
@@ -50,7 +52,14 @@ public interface UrlTagControllerDocs {
                             - Validation errors.
                             - Database integrity error.
                             """,
-                    content = @Content(schema = @Schema(implementation = ResponseHttp.class))
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -107,6 +116,16 @@ public interface UrlTagControllerDocs {
                     responseCode = "200",
                     description = "Tag deleted successfully",
                     content = @Content(schema = @Schema(implementation = ResponseHttp.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -166,7 +185,14 @@ public interface UrlTagControllerDocs {
                             - Validation errors.
                             - Database integrity error.
                             """,
-                    content = @Content(schema = @Schema(implementation = ResponseHttp.class))
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
+                            )
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

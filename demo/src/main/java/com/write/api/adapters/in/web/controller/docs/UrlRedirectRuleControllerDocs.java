@@ -1,6 +1,8 @@
 package com.write.api.adapters.in.web.controller.docs;
 
 import com.write.api.adapters.in.web.controller.docs.swagger.ResponseUrlRedirectRule;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidString;
+import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationError;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.dto.urlRedirectRule.UpdateUrlRedirectRuleDTO;
@@ -70,7 +72,10 @@ public interface UrlRedirectRuleControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
@@ -158,6 +163,16 @@ public interface UrlRedirectRuleControllerDocs {
                     content = @Content(
                             schema = @Schema(
                                     implementation = ResponseHttp.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    content = @Content(
+                            schema = @Schema(
+                                    oneOf = {
+                                            ResponseValidString.class
+                                    }
                             )
                     )
             ),
@@ -254,7 +269,10 @@ public interface UrlRedirectRuleControllerDocs {
                         """,
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ResponseHttp.class
+                                    oneOf = {
+                                            ResponseValidString.class,
+                                            ResponseValidationError.class,
+                                    }
                             )
                     )
             ),
