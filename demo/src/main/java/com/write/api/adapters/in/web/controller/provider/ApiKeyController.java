@@ -40,10 +40,10 @@ public class ApiKeyController implements ApiKeyControllerDocs {
     @GetMapping("/test-logs")
     @RateLimiter(name = "test")
     public void create() {
-        log.info("Criando URL");
-        log.warn("Rate limit próximo do limite");
-        log.error("Falha ao criar URL");
-        log.trace("Um trace");
+        log.info("Test INFO");
+        log.warn("Test WARN");
+        log.debug("Test DEBUG");
+        log.trace("Test Trace");
     }
 
     public ResponseEntity<String> test(String key) {

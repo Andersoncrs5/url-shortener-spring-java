@@ -262,7 +262,7 @@ public class UrlTagControllerTest extends BaseControllerTest {
         );
 
         MvcResult result = mockMvc.perform(
-                        patch(URL + "/" + Long.MAX_VALUE)
+                        patch(URL + "/" + this.idGen.nextId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("X-Idempotency-Key", key)
                                 .header("Authorization", "Bearer " + user.tokens().token())

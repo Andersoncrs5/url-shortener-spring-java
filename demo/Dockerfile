@@ -37,6 +37,7 @@ ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/release
 # JVM + Agent
 ENTRYPOINT ["sh", "-c", "\
 java \
+-Dnet.bytebuddy.experimental=true \
 -javaagent:/opentelemetry-javaagent.jar \
 -jar app.jar \
 "]

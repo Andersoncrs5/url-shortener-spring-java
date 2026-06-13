@@ -13,7 +13,9 @@ import com.write.api.ports.in.auth.LoginUserUseCase;
 import com.write.api.ports.in.auth.LogoutAuthUseCase;
 import com.write.api.ports.in.auth.RefreshTokenUseCase;
 import com.write.api.ports.in.auth.RegisterUserUseCase;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("v1/auth")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController implements AuthControllerDocs {
 
-    private final LoginUserUseCase loginUserUseCase;
-    private final RegisterUserUseCase registerUserUseCase;
-    private final LogoutAuthUseCase logoutAuthService;
-    private final RefreshTokenUseCase refreshTokenUseCase;
+    LoginUserUseCase loginUserUseCase;
+    RegisterUserUseCase registerUserUseCase;
+    LogoutAuthUseCase logoutAuthService;
+    RefreshTokenUseCase refreshTokenUseCase;
 
     @Idempotent
     public ResponseEntity<ResponseHttp<?>> logout(

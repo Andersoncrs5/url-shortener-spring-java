@@ -12,7 +12,9 @@ import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @Service @RequiredArgsConstructor
 public class UpdateUrlTagService implements UpdateUrlTagUseCase {
 

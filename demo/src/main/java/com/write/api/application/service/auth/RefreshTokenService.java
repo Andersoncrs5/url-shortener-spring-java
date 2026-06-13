@@ -8,17 +8,20 @@ import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.RefreshTokenUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RefreshTokenService implements RefreshTokenUseCase {
 
-    private final IUserRepository repository;
-    private final TokenService service;
+    IUserRepository repository;
+    TokenService service;
 
     @Override
     @ResultTransaction

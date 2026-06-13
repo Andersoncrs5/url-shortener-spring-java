@@ -6,16 +6,19 @@ import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.LogoutAuthUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.shared.tx.ResultTransaction;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LogoutAuthService implements LogoutAuthUseCase {
 
-    private final IUserRepository repository;
+    IUserRepository repository;
 
     @Override
     @ResultTransaction

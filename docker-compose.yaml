@@ -5,6 +5,8 @@ services:
       - OTEL_SERVICE_NAME=demo-spring-app
       - OTEL_LOGS_EXPORTER=none
       - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_PROPAGATION_PROVIDERS=w3c,b3
     build:
       context: ./demo
       dockerfile: Dockerfile

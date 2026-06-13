@@ -7,8 +7,10 @@ import com.write.api.ports.out.repository.IUrlTagRepository;
 import com.write.api.shared.tx.ResultTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 @RequiredArgsConstructor
 public class DeleteByIdService implements DeleteByIdUseCase {
 

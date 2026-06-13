@@ -78,7 +78,7 @@ public class UrlTagController implements UrlTagControllerDocs {
     }
 
     @Override
-    public ResponseEntity<ResponseHttp<UrlTagResponseDTO>> create(
+    public ResponseEntity<ResponseHttp<UrlTagResponseDTO>> update(
             Long id,
             UpdateUrlTagDTO dto,
             String idempotencyKey

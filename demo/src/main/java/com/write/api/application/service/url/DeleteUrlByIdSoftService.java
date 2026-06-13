@@ -7,16 +7,19 @@ import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.in.url.DeleteUrlByIdSoftUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import com.write.api.shared.tx.ResultTransaction;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DeleteUrlByIdSoftService implements DeleteUrlByIdSoftUseCase {
 
-    private final IUrlRepository repository;
+    IUrlRepository repository;
 
     @Override
     @ResultTransaction

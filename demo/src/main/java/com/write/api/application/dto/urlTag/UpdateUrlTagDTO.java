@@ -1,5 +1,6 @@
 package com.write.api.application.dto.urlTag;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -8,6 +9,7 @@ public record UpdateUrlTagDTO(
                 max = 120,
                 message = "name exceeded 120 characters"
         )
+        @Schema(description = "Tag name", example = "marketing")
         String name,
 
         @Size(
@@ -18,6 +20,7 @@ public record UpdateUrlTagDTO(
                 regexp = "^[a-z0-9-]+$",
                 message = "slug must contain only lowercase letters, numbers and hyphens"
         )
+        @Schema(description = "Tag slug", example = "marketing")
         String slug,
 
         @Size(
@@ -36,6 +39,7 @@ public record UpdateUrlTagDTO(
         )
         String description,
 
+        @Schema(description = "Optional parent tag id", example = "918273645")
         Long parentId,
 
         Boolean active
