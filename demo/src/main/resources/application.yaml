@@ -170,4 +170,4 @@ app:
       allow-credentials: true
 
 server:
-  port: 8888
+  port: 8080
