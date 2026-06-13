@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 public @interface TrackExecutionTime {
 
     String value();
+    String description() default "";
 
 }
