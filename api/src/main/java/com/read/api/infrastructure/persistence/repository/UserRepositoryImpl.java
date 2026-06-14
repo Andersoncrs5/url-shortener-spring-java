@@ -156,4 +156,19 @@ public class UserRepositoryImpl implements UserRepository {
                 total
         );
     }
+
+    @Override
+    public Optional<UserModel> findByEmailIgnoreCase(String email) {
+        return this.repository.findByEmailIgnoreCase(email);
+    }
+
+    @Override
+    public boolean existsByEmailIgnoreCase(String email) {
+        return this.repository.existsByEmailIgnoreCase(email);
+    }
+
+    @Override
+    public boolean existsByNameIgnoreCase(String name) {
+        return this.repository.existsByNameIgnoreCase(name);
+    }
 }
