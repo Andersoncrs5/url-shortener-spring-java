@@ -1,6 +1,7 @@
 package com.read.api.infrastructure.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.read.api.api.dto.ResponseHTTP;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +12,14 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class CustomAccessDeniedHandler
+        implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
 
@@ -23,18 +27,29 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull AccessDeniedException accessDeniedException
+            @NonNull AccessDeniedException exception
     ) throws IOException {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        var body = Map.of(
-                "Access Denied",
-                "You do not have the required permissions to access this resource."
+        ResponseHTTP<Void> body = ResponseHTTP.error(
+                "You do not have permission to access this resource",
+                getTraceId(request)
         );
 
-        objectMapper.writeValue(response.getOutputStream(), body);
+        objectMapper.writeValue(
+                response.getOutputStream(),
+                body
+        );
+    }
+
+    private String getTraceId(HttpServletRequest request) {
+        Object traceId = request.getAttribute("traceId");
+
+        return traceId != null
+                ? traceId.toString()
+                : UUID.randomUUID().toString();
     }
 }
