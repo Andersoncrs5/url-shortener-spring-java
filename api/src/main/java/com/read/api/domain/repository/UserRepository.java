@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface UserRepository extends BaseRepository<UserModel, Long, UserFilter> {
     Optional<UserModel> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
+    boolean existsByNameIgnoreCase(String name);
 }
