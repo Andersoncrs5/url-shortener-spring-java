@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface BaseRepository<T extends BaseModel, ID, F extends BaseFilter> {
-    T save(T user);
-    T insert(T user);
+    T save(T model);
+    T insert(T model);
     Optional<T> findById(ID id);
     boolean existsById(ID id);
     int deleteById(ID id);
