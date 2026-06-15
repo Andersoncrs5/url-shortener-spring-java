@@ -1,9 +1,15 @@
 package com.read.api.infrastructure.config.security;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.KeyLengthException;
+import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.read.api.domain.exceptions.InternalServerErrorException;
+import com.read.api.domain.model.UserModel;
 import com.read.api.infrastructure.properties.JwtProperties;
 import com.read.api.utils.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,12 +24,39 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
     private final JwtProperties properties;
+
+    public String generateToken(UserModel user) {
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .claim("userId", user.getId())
+                .claim("name", user.getName())
+                .claim("email", user.getEmail())
+                .issueTime(Date.from(Instant.now()))
+                .expirationTime(Date.from(this.genExpirationDate()))
+                .claim("roles", user.getRoles())
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+        SignedJWT signedJWT = new SignedJWT(header, jwtClaimsSet);
+
+        try {
+            signedJWT.sign(new MACSigner(properties.getJwt().getSecret().getBytes()));
+            return signedJWT.serialize();
+        } catch (KeyLengthException e) {
+            log.error("Error signing token! Secret string might be too short. Error: {}", e.getMessage());
+            throw new RuntimeException(e);
+        } catch (JOSEException e) {
+            throw new InternalServerErrorException("Error processing security tokens: " + e.getMessage());
+        }
+    }
 
     public Result<String> validateToken(String token) {
         try {
@@ -39,7 +72,7 @@ public class TokenService {
                 return Result.failure(401 ,"Token expirado.");
             }
 
-            return Result.success(claimsSet.getClaimAsString("userId"));
+            return Result.success(claimsSet.getSubject());
         } catch (ParseException | JOSEException e) {
             log.debug("Erro ao parsear ou verificar o token: {}", e.getMessage());
             return Result.failure(401, "Token inválido.");
