@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BaseDTO {
     Long id;
+    Long version;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }
