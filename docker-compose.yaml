@@ -203,6 +203,58 @@ services:
       timeout: 5s
       retries: 10
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-url-spring
+    ports:
+      - "8085:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: redpanda
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: redpanda:9092
+    depends_on:
+      - redpanda
+    networks:
+      - url_shot_java
+
+  opensearch:
+    image: opensearchproject/opensearch:3.1.0
+    container_name: opensearch-url-spring
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - url_shot_java
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:3.1.0
+    container_name: opensearch-dashboards-url-spring
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+    ports:
+      - "5601:5601"
+    depends_on:
+      - opensearch
+    networks:
+      - url_shot_java
+
 networks:
   url_shot_java:
     driver: bridge
@@ -212,3 +264,4 @@ volumes:
   tikv_data:
   redpanda_data:
   dragonfly_data:
+  opensearch_data:
