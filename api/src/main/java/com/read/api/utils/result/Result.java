@@ -17,7 +17,9 @@ public class Result<T> {
     }
 
     public String getMessage() {
-        return this.errors.getFirst() != null? this.errors.getFirst() : null;
+        return errors.stream()
+                .findFirst()
+                .orElse(null);
     }
 
     public static <T> Result<T> success(T value) {
