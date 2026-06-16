@@ -35,7 +35,7 @@ resilience4j:
         enable-exponential-backoff: true
         exponential-backoff-multiplier: 3
         retry-exceptions:
-          - com.write.api.core.domain.exception.TransientDatabaseException
+          - com.read.api.domain.exceptions.TransientDatabaseException
         ignore-exceptions:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
