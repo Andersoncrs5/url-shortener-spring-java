@@ -1,3 +1,29 @@
 spring:
+  threads:
+    virtual:
+      enabled: true
+
+  security:
+    exp:
+      token: 24
+      refresh: 444444
+    jwt:
+      secret: 5438y43v734vb7t40yt7y7rft47r7tv43htf3ht40f7t430ft0ft3t4fh94t3r3653667586578784658467867846786667v
+
+  task:
+    scheduling:
+      enabled: false
   application:
     name: api
+
+resilience4j:
+  circuitbreaker:
+    enabled: false
+  retry:
+    enabled: false
+  bulkhead:
+    enabled: false
+  ratelimiter:
+    enabled: false
+  timelimiter:
+    enabled: false
