@@ -1,25 +1,25 @@
 package com.read.api.repository.base;
 
 import com.read.api.TestcontainersConfiguration;
-import com.read.api.domain.enums.AggregateTypeEnum;
-import com.read.api.domain.enums.EventTypeEnum;
-import com.read.api.domain.enums.OutboxStatusEnum;
-import com.read.api.domain.enums.TopicEnum;
+import com.read.api.domain.enums.*;
 import com.read.api.domain.model.OutboxEventModel;
 import com.read.api.domain.model.RoleModel;
+import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.OutboxEventRepository;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.domain.repository.UserRepository;
 import com.read.api.domain.utils.Base62;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,6 +35,35 @@ public abstract class BaseRepositoryTest {
     @Autowired protected OutboxEventRepository outboxEventRepository;
     @Autowired protected RoleRepository roleRepository;
     @Autowired protected UserRepository userRepository;
+    @Autowired protected UrlAccessRuleRepository urlAccessRuleRepository;
+
+    protected UrlAccessRuleModel createUrlAccessRule() {
+
+        UrlAccessRuleModel model =
+                new UrlAccessRuleModel();
+
+        model.setId(generator.nextId());
+        model.setUrlId(generator.nextId());
+        model.setAssignedByUserId(generator.nextId());
+
+        model.setType(
+                UrlAccessRuleTypeEnum.MAX_CLICKS
+        );
+
+        model.setRuleValue(
+                "user@gmail.com"
+        );
+
+        model.setActive(true);
+
+        model.setExpiresAt(
+                LocalDateTime.now().plusDays(30)
+        );
+
+        return urlAccessRuleRepository.insert(
+                model
+        );
+    }
 
     protected UserModel createUser() {
         UserModel user = new UserModel();
