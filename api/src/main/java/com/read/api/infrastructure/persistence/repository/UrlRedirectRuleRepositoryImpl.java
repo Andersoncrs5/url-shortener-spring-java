@@ -49,94 +49,25 @@ public class UrlRedirectRuleRepositoryImpl
 
         Query query = new Query();
 
-        query.addCriteria(
-                Criteria.where("urlId").is(urlId)
+        QueryUtils.addEquals(query, "urlId", urlId);
+        QueryUtils.addEquals(query, "active", true);
+
+        Criteria startAtCriteria = new Criteria().orOperator(
+                Criteria.where("startAt").exists(false),
+                Criteria.where("startAt").lte(now)
         );
 
-        query.addCriteria(
-                Criteria.where("active").is(true)
+        Criteria endAtCriteria = new Criteria().orOperator(
+                Criteria.where("endAt").exists(false),
+                Criteria.where("endAt").gte(now)
         );
 
-        query.addCriteria(
-                new Criteria().orOperator(
-                        Criteria.where("startAt").exists(false),
-                        Criteria.where("startAt").lte(now)
-                )
-        );
+        query.addCriteria(new Criteria().andOperator(startAtCriteria, endAtCriteria));
 
-        query.addCriteria(
-                new Criteria().orOperator(
-                        Criteria.where("endAt").exists(false),
-                        Criteria.where("endAt").gte(now)
-                )
-        );
-
-        return template.find(
-                        query,
-                        UrlRedirectRuleEntity.class
-                )
+        return template.find(query, UrlRedirectRuleEntity.class)
                 .stream()
                 .map(mapper::toModel)
                 .toList();
-    }
-
-    @Override
-    protected Class<UrlRedirectRuleEntity> entityClass() {
-        return UrlRedirectRuleEntity.class;
-    }
-
-    @Override
-    protected UrlRedirectRuleEntity toEntity(
-            UrlRedirectRuleModel model
-    ) {
-        return mapper.toEntity(model);
-    }
-
-    @Override
-    protected UrlRedirectRuleModel toModel(
-            UrlRedirectRuleEntity entity
-    ) {
-        return mapper.toModel(entity);
-    }
-
-    @Override
-    public UrlRedirectRuleModel save(
-            UrlRedirectRuleModel model
-    ) {
-        return mapper.toModel(
-                repository.save(
-                        mapper.toEntity(model)
-                )
-        );
-    }
-
-    @Override
-    public UrlRedirectRuleModel insert(
-            UrlRedirectRuleModel model
-    ) {
-        return mapper.toModel(
-                repository.insert(
-                        mapper.toEntity(model)
-                )
-        );
-    }
-
-    @Override
-    public Optional<UrlRedirectRuleModel> findById(
-            Long id
-    ) {
-        return repository.findById(id)
-                .map(mapper::toModel);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return super.existsById(id);
-    }
-
-    @Override
-    public int deleteById(Long id) {
-        return super.deleteById(id);
     }
 
     @Override
@@ -234,4 +165,54 @@ public class UrlRedirectRuleRepositoryImpl
                 pageable
         );
     }
+
+    @Override
+    protected Class<UrlRedirectRuleEntity> entityClass() {
+        return UrlRedirectRuleEntity.class;
+    }
+
+    @Override
+    protected UrlRedirectRuleEntity toEntity(UrlRedirectRuleModel model) {
+        return mapper.toEntity(model);
+    }
+
+    @Override
+    protected UrlRedirectRuleModel toModel(UrlRedirectRuleEntity entity) {
+        return mapper.toModel(entity);
+    }
+
+    @Override
+    public UrlRedirectRuleModel save(UrlRedirectRuleModel model) {
+        return mapper.toModel(
+                repository.save(
+                        mapper.toEntity(model)
+                )
+        );
+    }
+
+    @Override
+    public UrlRedirectRuleModel insert(UrlRedirectRuleModel model) {
+        return mapper.toModel(
+                repository.insert(
+                        mapper.toEntity(model)
+                )
+        );
+    }
+
+    @Override
+    public Optional<UrlRedirectRuleModel> findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toModel);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return super.existsById(id);
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return super.deleteById(id);
+    }
+
 }
