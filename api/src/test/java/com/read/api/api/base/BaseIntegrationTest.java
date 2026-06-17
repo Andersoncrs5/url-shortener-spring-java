@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.TestcontainersConfiguration;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.model.UrlAccessRuleModel;
+import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
+import com.read.api.domain.repository.UrlRedirectRuleRepository;
 import com.read.api.domain.repository.UserRepository;
 import com.read.api.domain.utils.Base62;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
@@ -37,6 +39,39 @@ public class BaseIntegrationTest {
 
     @Autowired UserRepository userRepository;
     @Autowired UrlAccessRuleRepository urlAccessRuleRepository;
+    @Autowired UrlRedirectRuleRepository urlRedirectRuleRepository;
+
+    protected UrlRedirectRuleModel createUrlRedirectRule() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        rule.setId(generator.nextId());
+        rule.setUrlId(generator.nextId());
+        rule.setCountryCode("BR");
+        rule.setRegion("PI");
+        rule.setRedirectUrl("https://google.com");
+        rule.setPriority(10);
+        rule.setActive(true);
+        rule.setStartAt(now.minusDays(1));
+        rule.setEndAt(now.plusDays(30));
+        rule.setCreatedAt(now);
+        rule.setUpdatedAt(now);
+
+        return urlRedirectRuleRepository.insert(rule);
+    }
+
+    protected ArrayList<UrlRedirectRuleModel> createManyUrlRedirectRule(int amount) {
+
+        ArrayList<UrlRedirectRuleModel> list =
+                new ArrayList<>();
+
+        for (int i = 0; i < amount; i++) {
+            list.add(createUrlRedirectRule());
+        }
+
+        return list;
+    }
 
     protected String createUser() {
 

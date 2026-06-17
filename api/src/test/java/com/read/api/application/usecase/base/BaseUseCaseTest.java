@@ -1,6 +1,7 @@
 package com.read.api.application.usecase.base;
 
 import com.read.api.domain.model.UrlAccessRuleModel;
+import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.service.RedisCrudService;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
@@ -18,6 +19,16 @@ public abstract class BaseUseCaseTest {
 
     protected final SnowflakeIdGenerator generator =
             new SnowflakeIdGenerator(1);
+
+    protected UrlModel createUrl() {
+        UrlModel url = new UrlModel();
+
+        url.setId(generator.nextId());
+        url.setShortCode("abc");
+        url.setOriginalUrl("https://example.com");
+
+        return url;
+    }
 
     public UserModel createUser() {
         UserModel user = new UserModel();

@@ -1,6 +1,21 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus,metrics"
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        mongodb.driver.commands: true
+        cache.gets: true
+        resilience4j.circuitbreaker: true
+    tags:
+      application: ${spring.application.name}
+
 spring:
   application:
-    name: api
+    name: read-api
   security:
     exp:
       token: 24
@@ -76,11 +91,11 @@ resilience4j:
     instances:
       read-low:
         limit-for-period: 150
-        limit-refresh-period: 2s
+        limit-refresh-period: 4s
         timeout-duration: 0
       read-middle:
         limit-for-period: 150
-        limit-refresh-period: 2s
+        limit-refresh-period: 3s
         timeout-duration: 0
       read-strong:
         limit-for-period: 150

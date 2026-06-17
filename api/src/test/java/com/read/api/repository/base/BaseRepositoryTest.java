@@ -2,14 +2,8 @@ package com.read.api.repository.base;
 
 import com.read.api.TestcontainersConfiguration;
 import com.read.api.domain.enums.*;
-import com.read.api.domain.model.OutboxEventModel;
-import com.read.api.domain.model.RoleModel;
-import com.read.api.domain.model.UrlAccessRuleModel;
-import com.read.api.domain.model.UserModel;
-import com.read.api.domain.repository.OutboxEventRepository;
-import com.read.api.domain.repository.RoleRepository;
-import com.read.api.domain.repository.UrlAccessRuleRepository;
-import com.read.api.domain.repository.UserRepository;
+import com.read.api.domain.model.*;
+import com.read.api.domain.repository.*;
 import com.read.api.domain.utils.Base62;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,6 +31,28 @@ public abstract class BaseRepositoryTest {
     @Autowired protected RoleRepository roleRepository;
     @Autowired protected UserRepository userRepository;
     @Autowired protected UrlAccessRuleRepository urlAccessRuleRepository;
+    @Autowired protected UrlRedirectRuleRepository urlRedirectRuleRepository;
+
+    protected UrlRedirectRuleModel createUrlRedirectRule() {
+        var entity = new UrlRedirectRuleModel();
+
+        entity.setId(generator.nextId());
+        entity.setUrlId(generator.nextId());
+        entity.setCountryCode("BR");
+        entity.setRegion("PI");
+        entity.setContinent(ContinentEnum.SOUTH_AMERICA);
+        entity.setOs(OperatingSystemEnum.LINUX);
+        entity.setBrowser(BrowserEnum.CHROME);
+        entity.setMatchType(MatchTypeEnum.EXACT);
+        entity.setRedirectUrl("https://google.com");
+        entity.setRuleHash(UUID.randomUUID().toString());
+        entity.setPriority(1);
+        entity.setActive(true);
+
+        return urlRedirectRuleRepository.insert(
+                entity
+        );
+    }
 
     protected UrlAccessRuleModel createUrlAccessRule() {
 
