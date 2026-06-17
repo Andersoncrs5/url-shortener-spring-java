@@ -2,13 +2,19 @@ management:
   tracing:
     enabled: true
     sampling:
-      probability: 0.1   # 🔥 produção: não 100% (evita overhead)
+      probability: 0.1
     propagation:
       type: [w3c, b3]
   otlp:
     tracing:
-      endpoint: http://alloy:4318/v1/traces  # 🔥 NUNCA localhost em Docker
+      endpoint: http://alloy:4318/v1/traces
   metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        jdbc.connections: true
+        cache.gets: true
+        resilience4j.circuitbreaker: true
     enable:
       http: true
   endpoints:
