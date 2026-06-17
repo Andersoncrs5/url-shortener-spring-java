@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.url;
 import com.read.api.api.dto.url.AccessContextDTO;
 import com.read.api.application.usecase.interfaces.url.FindUrlByShortCodeUseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindAllUrlAccessRuleByUrlIdUseCase;
+import com.read.api.domain.enums.UrlStatusEnum;
 import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.model.UrlRedirectRuleModel;
@@ -48,6 +49,10 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
                     "Url not found",
                     404
             );
+        }
+
+        if (!url.getStatus().equals(UrlStatusEnum.ACTIVE)) {
+            return Result.failure("Url is " + url.getStatus().name(), 400);
         }
 
         List<UrlAccessRuleModel> accessRules = findAllUrl.execute(url.getId());
@@ -260,7 +265,7 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
                 Duration.ofMinutes(10)
         );
 
-        return Result.success(url);
+        return Result.success(url, 301);
     }
 
     private boolean matches(
