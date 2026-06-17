@@ -3,14 +3,12 @@ package com.write.api.adapters.out.persistence.repository;
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlAccessRuleRepositoryMapper;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.UrlAccessRuleRecord;
 import com.write.api.ports.out.repository.IUrlAccessRuleRepository;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -113,6 +111,13 @@ public class JooqUrlAccessRuleRepository
                         dsl.selectFrom(URL_ACCESS_RULE)
                                 .where(URL_ACCESS_RULE.ID.eq(id))
                 )
+        );
+    }
+
+    @Override
+    public int countByUrlId(Long id) {
+        return execute(
+                () -> dsl.selectCount().where(URL_ACCESS_RULE.URL_ID.eq(id)).execute()
         );
     }
 }

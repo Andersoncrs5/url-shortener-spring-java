@@ -2,23 +2,13 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlRedirectRuleRepositoryMapper;
-import com.write.api.core.domain.enums.BrowserEnum;
-import com.write.api.core.domain.enums.ContinentEnum;
-import com.write.api.core.domain.enums.MatchTypeEnum;
-import com.write.api.core.domain.enums.OperatingSystemEnum;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import com.write.api.generated.jooq.enums.UrlRedirectRulesBrowser;
-import com.write.api.generated.jooq.enums.UrlRedirectRulesContinent;
-import com.write.api.generated.jooq.enums.UrlRedirectRulesMatchType;
-import com.write.api.generated.jooq.enums.UrlRedirectRulesOs;
 import com.write.api.generated.jooq.tables.records.UrlRedirectRulesRecord;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -116,5 +106,12 @@ public class JooqUrlRedirectRuleRepository
                                 .where(URL_REDIRECT_RULES.ID.eq(id))
                 )
         );
+    }
+
+    @Override
+    public int countByUrlId(Long urlId) {
+            return execute(
+                    () -> dsl.selectCount().where(URL_REDIRECT_RULES.URL_ID.eq(urlId)).execute()
+            );
     }
 }
