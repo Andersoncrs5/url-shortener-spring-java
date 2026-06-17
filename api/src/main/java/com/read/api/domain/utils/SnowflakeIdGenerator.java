@@ -10,6 +10,8 @@ public class SnowflakeIdGenerator {
     private static final long maxWorkerId = ~(-1L << WORKER_ID_BITS);
     private static final long maxSequence = ~(-1L << SEQUENCE_BITS);
 
+    private static final long TIMESTAMP_SHIFT = WORKER_ID_BITS + SEQUENCE_BITS;
+
     private final long workerId;
 
     private long sequence = 0L;
@@ -42,4 +44,18 @@ public class SnowflakeIdGenerator {
                 | (workerId << SEQUENCE_BITS)
                 | sequence;
     }
+
+    public static boolean isValid(Long id) {
+
+        if (id == null || id <= 0) {
+            return false;
+        }
+
+        long timestamp = (id >> TIMESTAMP_SHIFT) + EPOCH;
+
+        long now = System.currentTimeMillis();
+
+        return timestamp <= now + 60_000;
+    }
+
 }
