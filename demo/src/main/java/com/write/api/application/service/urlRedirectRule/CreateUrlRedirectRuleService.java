@@ -29,6 +29,12 @@ public class CreateUrlRedirectRuleService implements CreateUrlRedirectRuleUseCas
     @ResultTransaction
     @TrackExecutionTime("url.redirect.create")
     public Result<UrlRedirectRuleModel> execute(CreateUrlRedirectRuleDTO dto) {
+        int count = repository.countByUrlId(dto.urlId());
+
+        if (count >= 50) {
+            return Result.failure("Number max of rule is 50", 400);
+        }
+
         UrlRedirectRuleModel rule = mapper.toModel(dto);
         rule.setId(idGen.nextId());
 

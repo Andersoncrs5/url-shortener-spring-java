@@ -43,6 +43,12 @@ public class CreateUrlAccessRuleService implements CreateUrlAccessRuleUseCase {
     @ResultTransaction
     @TrackExecutionTime("url.access.create")
     public Result<UrlAccessRuleModel> execute(CreateUrlAccessRuleDTO dto, Long assignedByUserId) {
+        int count = repository.countByUrlId(dto.urlId());
+
+        if (count >= 50) {
+            return Result.failure("Number max of rule is 50", 400);
+        }
+
         if (dto.type() == UrlAccessRuleTypeEnum.MAX_CLICKS) {
             try {
                 long maxClicks = Long.parseLong(dto.ruleValue());
