@@ -118,4 +118,26 @@ public class RedisCrudServiceImpl implements RedisCrudService {
         Boolean ok = redisTemplate.expire(key, ttl);
         return Boolean.TRUE.equals(ok);
     }
+
+    @Override
+    @ObservedMetric("redis.increment")
+    public long increment(String key) {
+
+        Long value =
+                redisTemplate.opsForValue()
+                        .increment(key);
+
+        return value == null ? 0L : value;
+    }
+
+    @Override
+    @ObservedMetric("redis.increment.delta")
+    public long increment(String key, long delta) {
+
+        Long value =
+                redisTemplate.opsForValue()
+                        .increment(key, delta);
+
+        return value == null ? 0L : value;
+    }
 }

@@ -8,6 +8,10 @@ import java.util.Optional;
 
 public interface RedisCrudService {
 
+    long increment(String key);
+
+    long increment(String key, long delta);
+
     <T> void save(String key, T value, Duration ttl);
 
     <T> void save(String key, T value);
