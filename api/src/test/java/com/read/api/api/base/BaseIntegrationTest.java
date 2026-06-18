@@ -5,14 +5,8 @@ import com.read.api.TestcontainersConfiguration;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.enums.UrlAccessTypeEnum;
 import com.read.api.domain.enums.UrlStatusEnum;
-import com.read.api.domain.model.UrlAccessRuleModel;
-import com.read.api.domain.model.UrlModel;
-import com.read.api.domain.model.UrlRedirectRuleModel;
-import com.read.api.domain.model.UserModel;
-import com.read.api.domain.repository.UrlAccessRuleRepository;
-import com.read.api.domain.repository.UrlRedirectRuleRepository;
-import com.read.api.domain.repository.UrlRepository;
-import com.read.api.domain.repository.UserRepository;
+import com.read.api.domain.model.*;
+import com.read.api.domain.repository.*;
 import com.read.api.domain.utils.Base62;
 import com.read.api.domain.utils.SnowflakeIdGenerator;
 import com.read.api.infrastructure.config.security.TokenService;
@@ -27,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,6 +38,31 @@ public class BaseIntegrationTest {
     @Autowired UrlAccessRuleRepository urlAccessRuleRepository;
     @Autowired UrlRedirectRuleRepository urlRedirectRuleRepository;
     @Autowired UrlRepository urlRepository;
+    @Autowired UrlTagRepository urlTagRepository;
+
+    protected UrlTagModel createUrlTag() {
+        UrlTagModel model = new UrlTagModel();
+        model.setId(generator.nextId());
+        model.setUserId(generator.nextId());
+        model.setName("Desenvolvimento_" + generator.nextId());
+        model.setSlug("dev-" + generator.nextId());
+        model.setColor("#FF5733");
+        model.setDescription("Tag voltada para links de ambiente dev");
+        model.setParentId(null);
+        model.setActive(true);
+
+        return urlTagRepository.save(model);
+    }
+
+    protected ArrayList<UrlTagModel> createUrlTags(int amount) {
+        ArrayList<UrlTagModel> list = new ArrayList<>();
+
+        for (int i = 0; i < amount; i++) {
+            list.add(this.createUrlTag());
+        }
+
+        return list;
+    }
 
     protected UrlRedirectRuleModel createUrlRedirectRule() {
         UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
