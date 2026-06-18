@@ -32,6 +32,35 @@ public abstract class BaseRepositoryTest {
     @Autowired protected UserRepository userRepository;
     @Autowired protected UrlAccessRuleRepository urlAccessRuleRepository;
     @Autowired protected UrlRedirectRuleRepository urlRedirectRuleRepository;
+    @Autowired protected UrlTagRepository urlTagRepository;
+
+    protected UrlTagModel createUrlTag() {
+        UrlTagModel model = new UrlTagModel();
+        model.setId(generator.nextId());
+        model.setUserId(generator.nextId());
+        model.setName("Desenvolvimento_" + generator.nextId());
+        model.setSlug("dev-" + generator.nextId());
+        model.setColor("#FF5733");
+        model.setDescription("Tag voltada para links de ambiente dev");
+        model.setParentId(null);
+        model.setActive(true);
+
+        return urlTagRepository.save(model);
+    }
+
+    protected UrlTagModel createUrlTag(String name, String slug, Long userId) {
+        UrlTagModel model = new UrlTagModel();
+        model.setId(generator.nextId());
+        model.setUserId(userId);
+        model.setName(name);
+        model.setSlug(slug);
+        model.setColor("#33MN99");
+        model.setDescription("Tag customizada para testes");
+        model.setParentId(null);
+        model.setActive(true);
+
+        return urlTagRepository.save(model);
+    }
 
     protected UrlRedirectRuleModel createUrlRedirectRule() {
         var entity = new UrlRedirectRuleModel();
