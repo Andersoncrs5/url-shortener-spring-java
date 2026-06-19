@@ -9,11 +9,15 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UrlFilter extends BaseFilter {
+    boolean matchAllTags = false;
+
     Long userId;
     String shortCode;
     String description;
@@ -23,6 +27,7 @@ public class UrlFilter extends BaseFilter {
     String domain;
     UrlStatusEnum status;
     UrlAccessTypeEnum accessType;
+    Set<String> tags = new HashSet<>();
     String passwordHash;
     Boolean customAlias;
     LocalDateTime deletedAtMin;
