@@ -9,6 +9,9 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,9 +28,31 @@ public class UrlModel extends BaseModel {
     UrlStatusEnum status;
     UrlAccessTypeEnum accessType;
     String passwordHash;
+    @Getter(AccessLevel.NONE)
+    Set<String> tags = new HashSet<>();
     boolean customAlias;
     LocalDateTime deletedAt;
     LocalDateTime expiresAt;
     LocalDateTime lastAccessAt;
+
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public boolean addTag(String tag) {
+        if (tag == null || tag.isBlank()) {
+            return false;
+        }
+
+        return tags.add(tag);
+    }
+
+    public boolean removeTag(String tag) {
+        if (tag == null || tag.isBlank()) {
+            return false;
+        }
+
+        return tags.remove(tag);
+    }
 
 }

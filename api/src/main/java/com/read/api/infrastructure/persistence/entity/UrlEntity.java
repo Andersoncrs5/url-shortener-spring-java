@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,6 +26,7 @@ public class UrlEntity extends BaseEntity {
     UrlStatusEnum status;
     UrlAccessTypeEnum accessType;
     String passwordHash;
+    Set<String> tags = new HashSet<>();
     boolean customAlias;
     LocalDateTime deletedAt;
     LocalDateTime expiresAt;
