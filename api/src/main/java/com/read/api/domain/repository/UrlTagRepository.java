@@ -1,4 +1,10 @@
-package com.read.api.domain.repository.base;
+package com.read.api.domain.repository;
 
-public class UrlTagRepository {
+import com.read.api.api.dto.tag.UrlTagFilter;
+import com.read.api.domain.model.UrlTagModel;
+import com.read.api.domain.repository.base.BaseRepository;
+
+public interface UrlTagRepository extends BaseRepository<UrlTagModel, Long, UrlTagFilter> {
+    boolean existsByName(String name);
+    boolean existsBySlug(String slug);
 }
