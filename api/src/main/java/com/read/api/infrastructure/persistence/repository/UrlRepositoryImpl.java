@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -103,6 +104,23 @@ public class UrlRepositoryImpl
                 filter.getLastAccessAtMin(),
                 filter.getLastAccessAtMax()
         );
+
+        if (!filter.getTags().isEmpty()) {
+            if (filter.isMatchAllTags()) {
+
+                query.addCriteria(
+                        Criteria.where("tags")
+                                .all(filter.getTags())
+                );
+
+            } else {
+
+                query.addCriteria(
+                        Criteria.where("tags")
+                                .in(filter.getTags())
+                );
+            }
+        }
 
         return toPage(query, pageable);
     }
