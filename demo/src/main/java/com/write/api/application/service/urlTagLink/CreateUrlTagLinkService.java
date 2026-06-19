@@ -31,6 +31,12 @@ public class CreateUrlTagLinkService implements CreateUrlTagLinkUseCase {
         UrlTagLinkModel link = mapper.toModel(dto);
         link.setCreatedBy(userId);
 
+        int check = repository.countByUrlId(dto.urlId());
+
+        if (check >= 20) {
+            return  Result.failure("Limit of 20 per url", 409);
+        }
+
         try {
             UrlTagLinkModel saved = repository.insert(link);
 
