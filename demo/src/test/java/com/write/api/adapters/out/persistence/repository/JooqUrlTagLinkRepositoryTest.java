@@ -37,6 +37,27 @@ class JooqUrlTagLinkRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
+    void shouldReturnOneWhenLinkExists() {
+        UrlTagLinkModel link = new UrlTagLinkModel();
+
+        link.setUrlId(url.getId());
+        link.setTagId(tag.getId());
+
+        UrlTagLinkModel inserted = repository.insert(link);
+
+        int count = repository.countByUrlId(inserted.getId());
+
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void shouldReturnZeroWhenLinkDoesNotExist() {
+        int count = repository.countByUrlId(999999L);
+
+        assertThat(count).isZero();
+    }
+
+    @Test
     void shouldInsertTagToUrl() {
         UrlTagLinkModel link = new UrlTagLinkModel();
 

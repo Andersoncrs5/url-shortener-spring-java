@@ -107,4 +107,11 @@ public class JooqUrlTagLinkRepository extends JooqRepository implements IUrlTagL
                 )
         );
     }
+
+    @Override
+    public int countByUrlId(Long id) {
+        return execute(() ->
+                    dsl.selectCount().from(URL_TAG_LINKS).where(URL_TAG_LINKS.URL_ID.eq(id)).execute()
+        );
+    }
 }
