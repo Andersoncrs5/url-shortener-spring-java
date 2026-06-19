@@ -1,5 +1,6 @@
 package com.read.api.api.controller.url;
 
+import com.read.api.api.controller.base.RestApiController;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.url.AccessContextDTO;
 import com.read.api.api.dto.url.UrlDTO;
@@ -17,16 +18,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
-@Validated
-@RestController
+@RestApiController("v1/url")
 @RequiredArgsConstructor
-@RequestMapping("v1/url")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlController implements UrlControllerDocs {
 

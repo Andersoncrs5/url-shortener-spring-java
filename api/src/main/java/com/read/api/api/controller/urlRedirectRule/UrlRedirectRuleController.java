@@ -1,5 +1,6 @@
 package com.read.api.api.controller.urlRedirectRule;
 
+import com.read.api.api.controller.base.RestApiController;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.urlRedirectRule.UrlRedirectRuleDTO;
 import com.read.api.api.dto.urlRedirectRule.UrlRedirectRuleFilter;
@@ -12,14 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@Validated
-@RestController
+@RestApiController("v1/url-redirect-rule")
 @RequiredArgsConstructor
-@RequestMapping("v1/url-redirect-rule")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlRedirectRuleController implements UrlRedirectRuleControllerDocs {
     FindAllFilterUrlRedirectRuleUseCase findAll;
