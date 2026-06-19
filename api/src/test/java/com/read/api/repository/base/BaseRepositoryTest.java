@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +34,35 @@ public abstract class BaseRepositoryTest {
     @Autowired protected UrlAccessRuleRepository urlAccessRuleRepository;
     @Autowired protected UrlRedirectRuleRepository urlRedirectRuleRepository;
     @Autowired protected UrlTagRepository urlTagRepository;
+    @Autowired protected UrlRepository urlRepository;
+
+    protected UrlModel createUrl() {
+        UrlModel url = new UrlModel();
+
+        url.setId(generator.nextId());
+        url.setShortCode(Base62.encode(this.generator.nextId()));
+        url.setDescription("My description");
+        url.setFaviconUrl("https://site.com/favicon.ico");
+        url.setOriginalUrl("https://example.com/page");
+        url.setTitle("Example");
+        url.setDomain("example.com");
+        url.setStatus(UrlStatusEnum.ACTIVE);
+        url.setAccessType(UrlAccessTypeEnum.PUBLIC);
+        url.setPasswordHash("secret");
+        url.setCustomAlias(true);
+        url.setExpiresAt(LocalDateTime.now().plusDays(1));
+
+        return urlRepository.insert(url);
+    }
+
+    protected UrlModel addTagInUrl(UrlModel url, List<String> tags) {
+        for (String tag : tags) {
+            url.addTag(tag);
+        }
+
+        return urlRepository.save(url);
+    }
+
 
     protected UrlTagModel createUrlTag() {
         UrlTagModel model = new UrlTagModel();
