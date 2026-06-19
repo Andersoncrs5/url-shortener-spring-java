@@ -16,10 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +35,6 @@ class CreateUrlTagLinkServiceTest {
 
     private CreateUrlTagLinkDTO dto;
     private UrlTagLinkModel mappedLink;
-    private UrlTagLinkModel savedLink;
 
     private final Long userId = 1L;
     private final Long urlId = 655L;
@@ -58,27 +56,20 @@ class CreateUrlTagLinkServiceTest {
         mappedLink.setSortOrder((short) 1);
         mappedLink.setNote("Any note");
         mappedLink.setPrimaryTag(true);
-
-        savedLink = new UrlTagLinkModel();
-        savedLink.setId(999L);
-        savedLink.setUrlId(urlId);
-        savedLink.setTagId(tagId);
-        savedLink.setSortOrder((short) 1);
-        savedLink.setNote("Any note");
-        savedLink.setPrimaryTag(true);
-        savedLink.setCreatedBy(userId);
-        savedLink.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
     void shouldCreateUrlTagLinkSuccessfully() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
-        when(repository.insert(any(UrlTagLinkModel.class))).thenAnswer(invocation -> {
-            UrlTagLinkModel arg = invocation.getArgument(0);
-            arg.setId(999L);
-            arg.setCreatedAt(LocalDateTime.now());
-            return arg;
-        });
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
+        when(repository.insert(any(UrlTagLinkModel.class)))
+                .thenAnswer(invocation -> {
+                    UrlTagLinkModel arg = invocation.getArgument(0);
+                    arg.setId(999L);
+                    arg.setCreatedAt(java.time.LocalDateTime.now());
+                    return arg;
+                });
 
         Result<UrlTagLinkModel> result = service.execute(dto, userId);
 
@@ -86,19 +77,23 @@ class CreateUrlTagLinkServiceTest {
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(201);
         assertThat(result.getValue()).isNotNull();
-        assertThat(result.getValue().getId()).isEqualTo(999L);
-        assertThat(result.getValue().getUrlId()).isEqualTo(urlId);
-        assertThat(result.getValue().getTagId()).isEqualTo(tagId);
-        assertThat(result.getValue().getSortOrder()).isEqualTo((short) 1);
-        assertThat(result.getValue().getNote()).isEqualTo("Any note");
-        assertThat(result.getValue().isPrimaryTag()).isTrue();
-        assertThat(result.getValue().getCreatedBy()).isEqualTo(userId);
+
+        UrlTagLinkModel value = result.getValue();
+        assertThat(value.getId()).isEqualTo(999L);
+        assertThat(value.getUrlId()).isEqualTo(urlId);
+        assertThat(value.getTagId()).isEqualTo(tagId);
+        assertThat(value.getSortOrder()).isEqualTo((short) 1);
+        assertThat(value.getNote()).isEqualTo("Any note");
+        assertThat(value.isPrimaryTag()).isTrue();
+        assertThat(value.getCreatedBy()).isEqualTo(userId);
 
         ArgumentCaptor<UrlTagLinkModel> captor =
                 ArgumentCaptor.forClass(UrlTagLinkModel.class);
 
-        verify(mapper).toModel(dto);
-        verify(repository).insert(captor.capture());
+        InOrder order = inOrder(mapper, repository);
+        order.verify(mapper).toModel(dto);
+        order.verify(repository).countByUrlId(urlId);
+        order.verify(repository).insert(captor.capture());
 
         UrlTagLinkModel inserted = captor.getValue();
         assertThat(inserted.getCreatedBy()).isEqualTo(userId);
@@ -107,10 +102,6 @@ class CreateUrlTagLinkServiceTest {
         assertThat(inserted.getSortOrder()).isEqualTo((short) 1);
         assertThat(inserted.getNote()).isEqualTo("Any note");
         assertThat(inserted.isPrimaryTag()).isTrue();
-
-        InOrder order = inOrder(mapper, repository);
-        order.verify(mapper).toModel(dto);
-        order.verify(repository).insert(any(UrlTagLinkModel.class));
 
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -131,7 +122,9 @@ class CreateUrlTagLinkServiceTest {
         mappedWithoutOptional.setPrimaryTag(false);
 
         when(mapper.toModel(dtoWithoutOptional)).thenReturn(mappedWithoutOptional);
-        when(repository.insert(any(UrlTagLinkModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+        when(repository.insert(any(UrlTagLinkModel.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Result<UrlTagLinkModel> result = service.execute(dtoWithoutOptional, userId);
 
@@ -146,6 +139,8 @@ class CreateUrlTagLinkServiceTest {
         ArgumentCaptor<UrlTagLinkModel> captor =
                 ArgumentCaptor.forClass(UrlTagLinkModel.class);
 
+        verify(mapper).toModel(dtoWithoutOptional);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(captor.capture());
 
         UrlTagLinkModel inserted = captor.getValue();
@@ -160,8 +155,31 @@ class CreateUrlTagLinkServiceTest {
     }
 
     @Test
+    void shouldReturn409WhenUrlHasReachedLinkLimit() {
+        when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(20);
+
+        Result<UrlTagLinkModel> result = service.execute(dto, userId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getStatusCode()).isEqualTo(409);
+        assertThat(result.getMessage()).isEqualTo("Limit of 20 per url");
+        assertThat(result.getValue()).isNull();
+
+        InOrder order = inOrder(mapper, repository);
+        order.verify(mapper).toModel(dto);
+        order.verify(repository).countByUrlId(urlId);
+
+        verify(repository, never()).insert(any());
+        verifyNoMoreInteractions(mapper, repository);
+    }
+
+    @Test
     void shouldReturn409WhenTagAlreadyPresentInUrl() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "duplicate",
@@ -172,9 +190,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(409);
-        assertThat(result.getMessage()).contains("Tag already present in url");
+        assertThat(result.getMessage()).isEqualTo("Tag already present in url");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -182,6 +201,8 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn404WhenUrlDoesNotExist() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "fk violation",
@@ -192,9 +213,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage()).contains("Url not found");
+        assertThat(result.getMessage()).isEqualTo("Url not found");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -202,6 +224,8 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn404WhenTagDoesNotExist() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "fk violation",
@@ -212,9 +236,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage()).contains("Tag not found");
+        assertThat(result.getMessage()).isEqualTo("Tag not found");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -222,6 +247,8 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn404WhenCreatedByUserDoesNotExist() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "fk violation",
@@ -232,9 +259,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage()).contains("User not found");
+        assertThat(result.getMessage()).isEqualTo("User not found");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -242,6 +270,7 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn400WhenIntegrityMessageIsNull() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
 
         RuntimeException root = mock(RuntimeException.class);
         when(root.getMessage()).thenReturn(null);
@@ -256,6 +285,7 @@ class CreateUrlTagLinkServiceTest {
         assertThat(result.getMessage()).isEqualTo("Database integrity error");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -263,6 +293,8 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn400WhenNotNullViolationOccurs() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "cannot be null",
@@ -273,10 +305,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage())
-                .contains("Required field");
+        assertThat(result.getMessage()).contains("Required field");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -284,6 +316,8 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldReturn400WhenDataTooLongOccurs() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
+
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new DataIntegrityViolationException(
                         "Data too long",
@@ -294,10 +328,10 @@ class CreateUrlTagLinkServiceTest {
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage())
-                .contains("exceeded the allowed size");
+        assertThat(result.getMessage()).contains("exceeded the allowed size");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
@@ -305,6 +339,7 @@ class CreateUrlTagLinkServiceTest {
     @Test
     void shouldThrowInternalServerErrorWhenUnexpectedExceptionOccurs() {
         when(mapper.toModel(dto)).thenReturn(mappedLink);
+        when(repository.countByUrlId(urlId)).thenReturn(0);
         when(repository.insert(any(UrlTagLinkModel.class)))
                 .thenThrow(new RuntimeException("unexpected"));
 
@@ -313,6 +348,7 @@ class CreateUrlTagLinkServiceTest {
                 .hasMessage("unexpected");
 
         verify(mapper).toModel(dto);
+        verify(repository).countByUrlId(urlId);
         verify(repository).insert(any(UrlTagLinkModel.class));
         verifyNoMoreInteractions(mapper, repository);
     }
