@@ -1,6 +1,7 @@
 package com.read.api.application.usecase.impl.url;
 
 import com.read.api.api.dto.url.AccessContextDTO;
+import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindUrlByShortCodeUseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindAllUrlAccessRuleByUrlIdUseCase;
 import com.read.api.domain.enums.UrlStatusEnum;
@@ -14,16 +15,12 @@ import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-@Service
-@Validated
+@UseCase
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase {

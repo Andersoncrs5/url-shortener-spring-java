@@ -1,5 +1,6 @@
 package com.read.api.application.usecase.impl.url;
 
+import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.SaveUrlUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
@@ -8,13 +9,10 @@ import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 
-@Service
-@Validated
+@UseCase
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SaveUrlUseCaseImpl implements SaveUrlUseCase {

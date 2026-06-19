@@ -1,5 +1,6 @@
 package com.read.api.api.controller.urlAccessRule;
 
+import com.read.api.api.controller.base.RestApiController;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.urlAccessRule.UrlAccessRuleDTO;
 import com.read.api.api.dto.urlAccessRule.UrlAccessRuleFilter;
@@ -14,14 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
-@Validated
-@RestController
+@RestApiController("v1/url-access-rule")
 @RequiredArgsConstructor
-@RequestMapping("v1/url-access-rule")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
     UrlAccessRuleMapperController mapper;
@@ -55,7 +52,7 @@ public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
 
     @Override
     public ResponseEntity<Page<UrlAccessRuleDTO>> findAllFilter(
-            UrlAccessRuleFilter filter,
+            @ModelAttribute UrlAccessRuleFilter filter,
             UrlAccessRulePageRequestDTO page
     ) {
         Page<UrlAccessRuleModel> result = findAll.execute(filter, page.toPageable());
