@@ -7,6 +7,7 @@ import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
 
 @UseCase
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class DeleteUrlTagByIdUseCaseImpl implements DeleteUrlTagByIdUseCase {
     UrlTagRepository repository;
 
     @Override
+    @CacheEvict(value = "tag", key = "#id")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

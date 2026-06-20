@@ -53,8 +53,8 @@ public class RemoveUrlTagLinkUseCaseImpl implements RemoveUrlTagLinkUseCase {
 
         url.removeTag(tag.getName());
 
-        UrlModel saved =
-                urlRepository.save(url);
+        url.getMetric().decrementTagCount();
+        UrlModel saved = urlRepository.save(url);
 
         return Result.success(
                 saved,

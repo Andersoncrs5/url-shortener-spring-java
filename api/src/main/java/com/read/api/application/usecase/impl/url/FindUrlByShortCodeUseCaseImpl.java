@@ -4,6 +4,7 @@ import com.read.api.api.dto.url.AccessContextDTO;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindUrlByShortCodeUseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindAllUrlAccessRuleByUrlIdUseCase;
+import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.enums.UrlStatusEnum;
 import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.model.UrlModel;
@@ -42,10 +43,7 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
         UrlModel url = repository.findByShortCode(code).orElse(null);
 
         if (url == null) {
-            return Result.failure(
-                    "Url not found",
-                    404
-            );
+            return Result.failure("Url not found", 404);
         }
 
         if (!url.getStatus().equals(UrlStatusEnum.ACTIVE)) {
@@ -53,8 +51,7 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
         }
 
         List<UrlAccessRuleModel> accessRules = findAllUrl.execute(url.getId());
-        List<UrlRedirectRuleModel> redirectRules =
-                urlRedirectRuleRepository.findActiveRulesByUrlId(url.getId());
+        List<UrlRedirectRuleModel> redirectRules = urlRedirectRuleRepository.findActiveRulesByUrlId(url.getId());
 
         LocalDateTime now = LocalDateTime.now();
         for (UrlAccessRuleModel rule : accessRules) {
@@ -64,267 +61,139 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
             switch (rule.getType()) {
                 case EXPIRES_AT -> {
                     LocalDateTime expiresAt = LocalDateTime.parse(rule.getRuleValue());
-
                     if (now.isAfter(expiresAt)) {
-                        return Result.failure(
-                                "Link expired",
-                                403
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Link expired", 403);
                     }
                 }
 
                 case MAX_CLICKS -> {
-                    long currentClicks = 0L;
+                    long currentClicks = url.getMetric().getRedirects();
                     long maxClicks = Long.parseLong(rule.getRuleValue());
 
                     if (currentClicks >= maxClicks) {
-                        return Result.failure(
-                                "Maximum clicks reached",
-                                403
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Maximum clicks reached", 403);
                     }
                 }
 
                 case PASSWORD -> {
-                    return Result.failure(
-                            "Password required",
-                            401
-                    );
+                    return failAndLogMetric(url, rule.getType(), "Password required", 401);
                 }
 
                 case COUNTRY_BLOCK -> {
-
                     if (dto.countryCode().isEmpty()) {
-                        return Result.failure(
-                                "Country Code is required",
-                                400
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Country Code is required", 400);
                     }
-
-                    boolean blocked = rule.getRuleValue().equalsIgnoreCase(dto.countryCode().get());
-
-                    if (blocked) {
-                        return Result.failure(
-                                "This country is blocked",
-                                403
-                        );
+                    if (rule.getRuleValue().equalsIgnoreCase(dto.countryCode().get())) {
+                        return failAndLogMetric(url, rule.getType(), "This country is blocked", 403);
                     }
                 }
 
                 case IP_BLOCK -> {
-
                     if (dto.ip().isEmpty()) {
-                        return Result.failure(
-                                "Ip is required",
-                                400
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Ip is required", 400);
                     }
-
-                    boolean blocked = rule.getRuleValue().equalsIgnoreCase(dto.ip().get());
-
-                    if (blocked) {
-                        return Result.failure(
-                                "This IP is blocked",
-                                403
-                        );
+                    if (rule.getRuleValue().equalsIgnoreCase(dto.ip().get())) {
+                        return failAndLogMetric(url, rule.getType(), "This IP is blocked", 403);
                     }
                 }
 
                 case COUNTRY_ALLOW -> {
                     if (dto.countryCode().isEmpty()) {
-                        return Result.failure(
-                                "Country Code is required",
-                                400
-                        );
+                        return Result.failure("Country Code is required", 400);
                     }
-
-                    boolean allowed = rule.getRuleValue().equalsIgnoreCase(dto.countryCode().get());
-
-                    if (!allowed) {
-                        return Result.failure(
-                                "Country not allowed",
-                                403
-                        );
+                    if (!rule.getRuleValue().equalsIgnoreCase(dto.countryCode().get())) {
+                        return failAndLogMetric(url, rule.getType(), "Country not allowed", 403);
                     }
                 }
 
                 case IP_ALLOW -> {
                     if (dto.ip().isEmpty()) {
-                        return Result.failure(
-                                "Ip is required",
-                                400
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Ip is required", 400);
                     }
-
-                    boolean allowed = rule.getRuleValue().equalsIgnoreCase(dto.ip().get());
-
-                    if (!allowed) {
-                        return Result.failure(
-                                "IP not allowed",
-                                403
-                        );
+                    if (!rule.getRuleValue().equalsIgnoreCase(dto.ip().get())) {
+                        return failAndLogMetric(url, rule.getType(), "IP not allowed", 403);
                     }
                 }
 
                 case REQUIRE_AUTH -> {
-
                     boolean authenticated = dto.authenticated().orElse(false);
-
                     if (!authenticated) {
-                        return Result.failure(
-                                "Authentication required",
-                                401
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Authentication required", 401);
                     }
                 }
 
                 case USER_AGENT_BLOCK -> {
-
                     if (dto.browser().isEmpty()) {
-                        return Result.failure(
-                                "Browser is required",
-                                400
-                        );
+                        return Result.failure("Browser is required", 400);
                     }
-
-                    boolean blocked =
-                            rule.getRuleValue()
-                                    .equalsIgnoreCase(
-                                            dto.browser().get().name()
-                                    );
-
+                    boolean blocked = rule.getRuleValue().equalsIgnoreCase(dto.browser().get().name());
                     if (blocked) {
-                        return Result.failure(
-                                "Browser blocked",
-                                403
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Browser blocked", 403);
                     }
                 }
 
                 case RATE_LIMIT -> {
                     if (dto.ip().isEmpty()) {
-                        return Result.failure(
-                                "Ip is required",
-                                400
-                        );
+                        return Result.failure("Ip is required", 400);
                     }
-
                     String rateKey = "rate-limit:" + url.getId() + ":" + dto.ip().get();
-
                     long current = redis.increment(rateKey);
-
                     redis.expire(rateKey, Duration.ofMinutes(1));
 
                     long max = Long.parseLong(rule.getRuleValue());
-
                     if (current > max) {
-                        return Result.failure(
-                                "Too many requests",
-                                429
-                        );
+                        return failAndLogMetric(url, rule.getType(), "Too many requests", 429);
                     }
                 }
             }
         }
 
         UrlRedirectRuleModel selectedRule = null;
-
         for (UrlRedirectRuleModel rule : redirectRules) {
-            if (!rule.isActive()) { continue; }
-            if (rule.getStartAt() != null && now.isBefore(rule.getStartAt())) { continue; }
-            if (rule.getEndAt() != null && now.isAfter(rule.getEndAt())) { continue; }
-            if (!matches(rule, dto)) { continue; }
-            if (selectedRule == null || rule.getPriority() > selectedRule.getPriority()) { selectedRule = rule; }
+            if (!rule.isActive()) continue;
+            if (rule.getStartAt() != null && now.isBefore(rule.getStartAt())) continue;
+            if (rule.getEndAt() != null && now.isAfter(rule.getEndAt())) continue;
+            if (!matches(rule, dto)) continue;
+            if (selectedRule == null || rule.getPriority() > selectedRule.getPriority()) {
+                selectedRule = rule;
+            }
         }
 
+        url.getMetric().incrementRedirects();
+
         if (selectedRule != null) {
-
             UrlModel redirectUrl = new UrlModel();
-
             redirectUrl.setId(url.getId());
             redirectUrl.setShortCode(url.getShortCode());
-            redirectUrl.setOriginalUrl(
-                    selectedRule.getRedirectUrl()
-            );
+            redirectUrl.setOriginalUrl(selectedRule.getRedirectUrl());
 
-            redis.save(
-                    key,
-                    redirectUrl,
-                    Duration.ofMinutes(10)
-            );
+            repository.save(url);
 
             return Result.success(redirectUrl);
         }
 
-        redis.save(
-                key,
-                url,
-                Duration.ofMinutes(10)
-        );
+        dto.continent().ifPresent(c -> url.getMetric().incrementContinent(c));
+        dto.browser().ifPresent(b -> url.getMetric().incrementBrowser(b));
+        dto.os().ifPresent(o -> url.getMetric().incrementOperatingSystem(o));
+
+        repository.save(url);
+        redis.save(key, url, Duration.ofMinutes(10));
 
         return Result.success(url, 301);
     }
 
-    private boolean matches(
-            UrlRedirectRuleModel rule,
-            AccessContextDTO dto
-    ) {
+    private Result<UrlModel> failAndLogMetric(UrlModel url, UrlAccessRuleTypeEnum type, String message, int statusCode) {
+        url.getMetric().incrementBlocked(type);
+        repository.save(url);
+        return Result.failure(message, statusCode);
+    }
 
-        if (rule.getCountryCode() != null) {
-
-            if (dto.countryCode().isEmpty()) {
-                return false;
-            }
-
-            if (!rule.getCountryCode().equalsIgnoreCase(dto.countryCode().get())) {
-                return false;
-            }
-        }
-
-        if (rule.getRegion() != null) {
-
-            if (dto.region().isEmpty()) {
-                return false;
-            }
-
-            if (!rule.getRegion().equalsIgnoreCase(dto.region().get())) {
-                return false;
-            }
-        }
-
-        if (rule.getContinent() != null) {
-
-            if (dto.continent().isEmpty()) {
-                return false;
-            }
-
-            if (rule.getContinent() != dto.continent().get()) {
-                return false;
-            }
-        }
-
-        if (rule.getOs() != null) {
-
-            if (dto.os().isEmpty()) {
-                return false;
-            }
-
-            if (rule.getOs() != dto.os().get()) {
-                return false;
-            }
-        }
-
-        if (rule.getBrowser() != null) {
-
-            if (dto.browser().isEmpty()) {
-                return false;
-            }
-
-            if (rule.getBrowser() != dto.browser().get()) {
-                return false;
-            }
-        }
-
+    private boolean matches(UrlRedirectRuleModel rule, AccessContextDTO dto) {
+        if (rule.getCountryCode() != null && (dto.countryCode().isEmpty() || !rule.getCountryCode().equalsIgnoreCase(dto.countryCode().get()))) return false;
+        if (rule.getRegion() != null && (dto.region().isEmpty() || !rule.getRegion().equalsIgnoreCase(dto.region().get()))) return false;
+        if (rule.getContinent() != null && (dto.continent().isEmpty() || rule.getContinent() != dto.continent().get())) return false;
+        if (rule.getOs() != null && (dto.os().isEmpty() || rule.getOs() != dto.os().get())) return false;
+        if (rule.getBrowser() != null && (dto.browser().isEmpty() || rule.getBrowser() != dto.browser().get())) return false;
         return true;
     }
 }

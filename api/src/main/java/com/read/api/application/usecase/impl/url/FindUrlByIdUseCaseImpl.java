@@ -8,6 +8,7 @@ import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.Cacheable;
 
 @UseCase
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class FindUrlByIdUseCaseImpl implements FindUrlByIdUseCase {
     UrlRepository repository;
 
     @Override
+    @Cacheable(value = "url", key = "#id", unless = "!#result.isSuccess()")
     public Result<UrlModel> execute(Long id) {
         return repository.findById(id)
                 .map(Result::success)

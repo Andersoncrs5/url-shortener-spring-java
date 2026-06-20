@@ -47,8 +47,8 @@ public class AddUrlTagLinkUseCaseImpl implements AddUrlTagLinkUseCase {
 
         url.addTag(tag.getName());
 
-        UrlModel saved =
-                urlRepository.save(url);
+        url.getMetric().incrementTagCount();
+        UrlModel saved = urlRepository.save(url);
 
         return Result.success(saved, 201);
     }

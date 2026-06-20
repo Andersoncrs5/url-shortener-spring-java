@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -229,4 +231,58 @@ public class OutboxEventRepositoryImplTest extends BaseRepositoryTest {
                 page.getTotalElements()
         );
     }
+
+    @Test
+    void should_find_outbox_events_by_next_retry_at_range() {
+        OutboxEventModel saved = createOutboxEvent();
+
+        saved.setNextRetryAt(LocalDateTime.now().plusMinutes(10));
+        outboxEventRepository.save(saved);
+
+        OutboxEventFilter filter = new OutboxEventFilter();
+        filter.setNextRetryAtAfter(saved.getNextRetryAt().minusMinutes(1));
+        filter.setNextRetryAtBefore(saved.getNextRetryAt().plusMinutes(1));
+
+        var page = outboxEventRepository.findAll(
+                filter,
+                PageRequest.of(0, 10)
+        );
+
+        assertEquals(1, page.getTotalElements());
+    }
+
+    @Test
+    void should_find_outbox_events_by_processed_at_range() {
+        OutboxEventModel saved = createOutboxEvent();
+
+        saved.setProcessedAt(LocalDateTime.now().minusMinutes(5));
+        outboxEventRepository.save(saved);
+
+        OutboxEventFilter filter = new OutboxEventFilter();
+        filter.setProcessedAtAfter(saved.getProcessedAt().minusMinutes(1));
+        filter.setProcessedAtBefore(saved.getProcessedAt().plusMinutes(1));
+
+        var page = outboxEventRepository.findAll(
+                filter,
+                PageRequest.of(0, 10)
+        );
+
+        assertEquals(1, page.getTotalElements());
+    }
+
+    @Test
+    void should_find_outbox_events_by_aggregate_type_filter() {
+        OutboxEventModel saved = createOutboxEvent();
+
+        OutboxEventFilter filter = new OutboxEventFilter();
+        filter.setAggregateType(saved.getAggregateType());
+
+        var page = outboxEventRepository.findAll(
+                filter,
+                PageRequest.of(0, 10)
+        );
+
+        assertEquals(1, page.getTotalElements());
+    }
+
 }

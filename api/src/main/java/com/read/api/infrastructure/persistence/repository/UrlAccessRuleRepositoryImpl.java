@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -42,6 +43,26 @@ public class UrlAccessRuleRepositoryImpl
         super(template);
         this.mapper = mapper;
         this.repository = repository;
+    }
+
+    @Override
+    public Optional<Long> findUrlIdById(Long id) {
+
+        Query query = Query.query(
+                Criteria.where("id").is(id)
+        );
+
+        query.fields()
+                .include("urlId");
+
+        UrlAccessRuleEntity entity =
+                template.findOne(
+                        query,
+                        UrlAccessRuleEntity.class
+                );
+
+        return Optional.ofNullable(entity)
+                .map(UrlAccessRuleEntity::getUrlId);
     }
 
     @Override

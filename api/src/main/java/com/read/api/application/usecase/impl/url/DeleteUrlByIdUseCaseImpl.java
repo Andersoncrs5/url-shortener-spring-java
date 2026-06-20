@@ -9,6 +9,7 @@ import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
 
 @UseCase
 @RequiredArgsConstructor
@@ -18,10 +19,9 @@ public class DeleteUrlByIdUseCaseImpl implements DeleteUrlByIdUseCase {
     RedisCrudService redis;
 
     @Override
+    @CacheEvict(value = "url", key = "#id")
     public Result<Void> execute(Long id) {
-
-        UrlModel url = repository.findById(id)
-                .orElse(null);
+        UrlModel url = repository.findById(id).orElse(null);
 
         if (url == null) {
             return Result.failure(404, "Url not found");

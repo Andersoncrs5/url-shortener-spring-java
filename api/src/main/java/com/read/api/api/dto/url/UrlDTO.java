@@ -26,6 +26,7 @@ public class UrlDTO extends BaseDTO {
     UrlAccessTypeEnum accessType;
     String passwordHash;
     boolean customAlias;
+    UrlMetricDTO metric;
     LocalDateTime deletedAt;
     LocalDateTime expiresAt;
     LocalDateTime lastAccessAt;

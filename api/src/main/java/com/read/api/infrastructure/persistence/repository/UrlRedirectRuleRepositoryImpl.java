@@ -71,6 +71,25 @@ public class UrlRedirectRuleRepositoryImpl
     }
 
     @Override
+    public Optional<Long> findUrlIdById(Long id) {
+        Query query = Query.query(
+                Criteria.where("id").is(id)
+        );
+
+        query.fields()
+                .include("urlId");
+
+        UrlRedirectRuleEntity entity =
+                template.findOne(
+                        query,
+                        UrlRedirectRuleEntity.class
+                );
+
+        return Optional.ofNullable(entity)
+                .map(UrlRedirectRuleEntity::getUrlId);
+    }
+
+    @Override
     public Page<UrlRedirectRuleModel> findAll(
             UrlRedirectRuleFilter filter,
             Pageable pageable

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface MongoUserRepository extends MongoRepository<UserEntity, Long> {
-    Optional<UserModel> findByEmailIgnoreCase(String email);
+    Optional<UserEntity> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByNameIgnoreCase(String email);
 }

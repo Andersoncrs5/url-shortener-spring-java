@@ -114,7 +114,7 @@ public abstract class BaseRepositoryImpl<
         );
     }
 
-    protected List<TModel> saveAll(
+    public List<TModel> saveAll(
             List<TModel> models
     ) {
 
@@ -128,7 +128,7 @@ public abstract class BaseRepositoryImpl<
                 .toList();
     }
 
-    protected List<TModel> insertAll(
+    public List<TModel> insertAll(
             List<TModel> models
     ) {
 
@@ -142,7 +142,7 @@ public abstract class BaseRepositoryImpl<
                 .toList();
     }
 
-    protected long deleteAll() {
+    public long deleteAll() {
 
         DeleteResult result =
                 template.remove(

@@ -8,6 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -309,5 +313,95 @@ public class UrlRedirectRuleRepositoryImplTest extends BaseRepositoryTest {
                 );
 
         assertEquals(1, page.getTotalElements());
+    }
+
+    @Test
+    void should_find_active_rules_by_url_id_within_valid_date_range() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+        rule.setId(this.generator.nextId());
+        rule.setUrlId(555L);
+        rule.setActive(true);
+        rule.setStartAt(LocalDateTime.now().minusDays(1));
+        rule.setEndAt(LocalDateTime.now().plusDays(1));
+
+        urlRedirectRuleRepository.save(rule);
+
+        List<UrlRedirectRuleModel> activeRules = urlRedirectRuleRepository.findActiveRulesByUrlId(555L);
+
+        assertThat(activeRules).isNotEmpty();
+        assertThat(activeRules.get(0).getUrlId()).isEqualTo(555L);
+    }
+
+    @Test
+    void should_not_return_rule_when_it_is_inactive() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+        rule.setId(this.generator.nextId());
+        rule.setUrlId(777L);
+        rule.setActive(false);
+        rule.setStartAt(LocalDateTime.now().minusDays(1));
+        rule.setEndAt(LocalDateTime.now().plusDays(1));
+
+        urlRedirectRuleRepository.save(rule);
+
+        List<UrlRedirectRuleModel> activeRules = urlRedirectRuleRepository.findActiveRulesByUrlId(777L);
+
+        assertThat(activeRules).isEmpty();
+    }
+
+    @Test
+    void should_not_return_rule_when_expired() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+        rule.setId(this.generator.nextId());
+        rule.setUrlId(888L);
+        rule.setActive(true);
+        rule.setStartAt(LocalDateTime.now().minusDays(5));
+        rule.setEndAt(LocalDateTime.now().minusDays(1)); // Expirada há 1 dia
+
+        urlRedirectRuleRepository.save(rule);
+
+        List<UrlRedirectRuleModel> activeRules = urlRedirectRuleRepository.findActiveRulesByUrlId(888L);
+
+        assertThat(activeRules).isEmpty();
+    }
+
+    @Test
+    void should_find_active_rules_when_dates_are_null_or_missing() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+        rule.setId(this.generator.nextId());
+        rule.setUrlId(999L);
+        rule.setActive(true);
+        rule.setStartAt(null);
+        rule.setEndAt(null);
+
+        urlRedirectRuleRepository.save(rule);
+
+        List<UrlRedirectRuleModel> activeRules = urlRedirectRuleRepository.findActiveRulesByUrlId(999L);
+
+        assertThat(activeRules).isNotEmpty();
+        assertThat(activeRules.getFirst().getUrlId()).isEqualTo(999L);
+    }
+
+    @Test
+    void should_find_only_url_id_by_id_projection() {
+        UrlRedirectRuleModel rule = new UrlRedirectRuleModel();
+        Long ruleId = this.generator.nextId();
+        rule.setId(ruleId);
+        rule.setUrlId(12345L);
+        rule.setActive(true);
+        rule.setRedirectUrl("https://redirect-test.com");
+
+        urlRedirectRuleRepository.save(rule);
+
+        Optional<Long> projectedUrlId = urlRedirectRuleRepository.findUrlIdById(ruleId);
+
+        assertTrue(projectedUrlId.isPresent());
+        assertEquals(12345L, projectedUrlId.get());
+    }
+
+    @Test
+    void should_return_empty_optional_when_finding_url_id_by_non_existent_id() {
+        Optional<Long> projectedUrlId = urlRedirectRuleRepository.findUrlIdById(this.generator.nextId());
+
+        assertFalse(projectedUrlId.isPresent());
     }
 }
