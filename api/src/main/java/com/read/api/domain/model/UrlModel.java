@@ -3,6 +3,7 @@ package com.read.api.domain.model;
 import com.read.api.domain.enums.UrlAccessTypeEnum;
 import com.read.api.domain.enums.UrlStatusEnum;
 import com.read.api.domain.model.base.BaseModel;
+import com.read.api.domain.model.metrics.UrlMetricModel;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,11 @@ public class UrlModel extends BaseModel {
     String passwordHash;
     @Getter(AccessLevel.NONE)
     Set<String> tags = new HashSet<>();
+
+    @Getter
+    @Setter(AccessLevel.NONE)
+    final UrlMetricModel metric = new UrlMetricModel();
+
     boolean customAlias;
     LocalDateTime deletedAt;
     LocalDateTime expiresAt;
@@ -40,11 +46,18 @@ public class UrlModel extends BaseModel {
     }
 
     public boolean addTag(String tag) {
+
         if (tag == null || tag.isBlank()) {
             return false;
         }
 
-        return tags.add(tag);
+        boolean added = tags.add(tag);
+
+        if (added) {
+            metric.incrementTagCount();
+        }
+
+        return added;
     }
 
     public boolean removeTag(String tag) {
@@ -52,7 +65,13 @@ public class UrlModel extends BaseModel {
             return false;
         }
 
-        return tags.remove(tag);
+        boolean removed = tags.remove(tag);
+
+        if (removed) {
+            metric.decrementTagCount();
+        }
+
+        return removed;
     }
 
 }
