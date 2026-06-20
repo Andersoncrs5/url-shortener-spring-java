@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends BaseIntegrationTest {
-    private final String URL = "/v1/url-access-rule";
+    private final String URL = "/v1/user";
 
     @Test
     void shouldSearchUser() throws Exception {
