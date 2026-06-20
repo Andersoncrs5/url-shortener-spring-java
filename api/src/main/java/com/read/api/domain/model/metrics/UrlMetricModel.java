@@ -1,6 +1,7 @@
 package com.read.api.domain.model.metrics;
 
 import com.read.api.domain.enums.BrowserEnum;
+import com.read.api.domain.enums.ContinentEnum;
 import com.read.api.domain.enums.OperatingSystemEnum;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class UrlMetricModel {
 
     Map<BrowserEnum, Long> browsers = new EnumMap<>(BrowserEnum.class);
     Map<OperatingSystemEnum, Long> operatingSystems = new EnumMap<>(OperatingSystemEnum.class);
-    Map<String, Long> countries = new HashMap<>();
+    Map<ContinentEnum, Long> countries = new HashMap<>();
 
     public void incrementBrowser(
             BrowserEnum browser
@@ -38,7 +39,7 @@ public class UrlMetricModel {
     }
 
     public void incrementCountry(
-            String country
+            ContinentEnum country
     ) {
         countries.merge(country, 1L, Long::sum);
     }
