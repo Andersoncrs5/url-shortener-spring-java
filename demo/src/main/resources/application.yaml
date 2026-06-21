@@ -11,11 +11,23 @@ management:
   metrics:
     distribution:
       percentiles-histogram:
+        jvm.gc.pause: true
         http.server.requests: true
         jdbc.connections: true
         cache.gets: true
         resilience4j.circuitbreaker: true
+        resilience4j.retry: true
+        resilience4j.ratelimiter: true
     enable:
+      disk: true
+      file: true
+      kafka: true
+      jdbc: true
+      http.client: true
+      jvm: true
+      system: true
+      process: true
+      hikaricp: true
       http: true
   endpoints:
     web:

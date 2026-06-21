@@ -6,3 +6,19 @@ scrape_configs:
     metrics_path: "/actuator/prometheus"
     static_configs:
       - targets: ["demo:8080"]
+
+  - job_name: "redpanda"
+    static_configs:
+      - targets: ["redpanda:9644"]
+
+  - job_name: "tidb"
+    static_configs:
+      - targets: ["tidb-server:10080"]
+
+  - job_name: "tikv"
+    static_configs:
+      - targets: ["tikv:20180"]
+
+  - job_name: "pd"
+    static_configs:
+      - targets: ["pd:2379"]
