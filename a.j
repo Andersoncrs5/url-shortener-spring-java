@@ -32,24 +32,31 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+
     ports:
-      - "3000:3000"
+        - "3000:3000"
+
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
+        - ./grafana/provisioning:/etc/grafana/provisioning
+
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+        - "host.docker.internal:host-gateway"
+
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_AUTH_ANONYMOUS_ENABLED: true
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_DATABASE_TYPE: postgres
-      GF_DATABASE_HOST: host.docker.internal:5432
-      GF_DATABASE_NAME: grafana
-      GF_DATABASE_USER: grafana
-      GF_DATABASE_PASSWORD: grafana123
+        GF_SECURITY_ADMIN_USER: admin
+        GF_SECURITY_ADMIN_PASSWORD: admin
+
+        GF_AUTH_ANONYMOUS_ENABLED: true
+        GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+
+        GF_DATABASE_TYPE: postgres
+        GF_DATABASE_HOST: host.docker.internal:5432
+        GF_DATABASE_NAME: grafana
+        GF_DATABASE_USER: grafana
+        GF_DATABASE_PASSWORD: grafana123
+
     networks:
-      - url_shot_java
+        - url_shot_java
 
   prometheus:
     image: prom/prometheus:latest
@@ -202,61 +209,45 @@ services:
     image: mysql:8
     container_name: tidb-init
     depends_on:
-      - tidb-server
+        - tidb-server
     volumes:
-      - ./tidb/init:/scripts
+        - ./tidb/init:/scripts
     entrypoint: ["/bin/sh", "/scripts/init-db.sh"]
     networks:
-      - url_shot_java
+        - url_shot_java
 
   redpanda:
-    image: apache/kafka:4.3.0
+    image: docker.redpanda.com/redpandadata/redpanda:v25.1.2
     container_name: redpanda-url-spring
-    hostname: redpanda
     restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=PLAINTEXT://redpanda:8082
+      - --advertise-pandaproxy-addr=redpanda:8082
+      - --set auto_create_topics_enabled=true
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092
     ports:
       - "9092:9092"
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@redpanda:9093
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://redpanda:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_MIN_INSYNC_REPLICAS: 1
+      - "8082:8082"
+      - "9644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    networks:
+      - url_shot_java
     healthcheck:
-      test: ["CMD-SHELL", "bash -lc '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1'"]
+      test: ["CMD", "curl", "-f", "http://localhost:9644/v1/status/ready"]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 10
-    networks:
-      - url_shot_java
-
-  akhq:
-    image: tchiotludo/akhq:latest
-    container_name: akhq-url-spring
-    restart: unless-stopped
-    ports:
-      - "8081:8080"
-    environment:
-      AKHQ_CONFIGURATION: |
-        akhq:
-          connections:
-            docker-kafka:
-              properties:
-                bootstrap.servers: "redpanda:9092"
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    networks:
-      - url_shot_java
 
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly

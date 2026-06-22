@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS url_shortener;
+CREATE DATABASE IF NOT EXISTS url_shortener_test;

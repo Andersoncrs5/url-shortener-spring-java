@@ -63,7 +63,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
 
             response.setStatus(e.getStatusCode().value());
-            response.getWriter().write(e.getReason());
+            if (e.getReason() != null)
+                response.getWriter().write(e.getReason());
         } catch (Exception e) {
             log.warn("Fail in authentication JWT for a request: {}", e.getMessage());
             SecurityContextHolder.clearContext();
