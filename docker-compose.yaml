@@ -16,18 +16,20 @@ services:
     networks:
       - url_shot_java
     depends_on:
-      - tidb-server
-      - redpanda
-      - dragonfly
-      - tempo
-      - alloy
+      tidb-server:
+        condition: service_started
+      redpanda:
+        condition: service_started
+      dragonfly:
+        condition: service_started
+      tempo:
+        condition: service_started
+      alloy:
+        condition: service_started
+      ticdc-setup:
+        condition: service_completed_successfully
     volumes:
       - ./demo/logs:/var/log/spring
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   grafana:
     image: grafana/grafana:latest
@@ -36,18 +38,19 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      tidb-server:
+        condition: service_started
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_DATABASE_TYPE: postgres
-      GF_DATABASE_HOST: host.docker.internal:5432
+      GF_DATABASE_TYPE: mysql
+      GF_DATABASE_HOST: tidb-server-url-spring:4000
       GF_DATABASE_NAME: grafana
-      GF_DATABASE_USER: grafana
-      GF_DATABASE_PASSWORD: grafana123
+      GF_DATABASE_USER: root
+      GF_DATABASE_PASSWORD: ""
     networks:
       - url_shot_java
 
@@ -116,11 +119,6 @@ services:
       - pd_data:/data
     networks:
       - url_shot_java
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:2379/pd/api/v1/members"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   tikv:
     image: pingcap/tikv:latest
@@ -131,14 +129,9 @@ services:
       - --addr=0.0.0.0:20160
       - --advertise-addr=tikv:20160
       - --metrics-addr=0.0.0.0:20180
-    ports:
-      - "20160:20160"
-      - "20180:20180"
     depends_on:
       pd:
-        condition: service_healthy
-    volumes:
-      - tikv_data:/data
+        condition: service_started
     networks:
       - url_shot_java
 
@@ -150,19 +143,14 @@ services:
       - --store=tikv
       - --path=pd:2379
       - --status=10080
-    ports:
-      - "4000:4000"
-      - "10080:10080"
+      - --token-limit=1000
     depends_on:
+      pd:
+        condition: service_started
       tikv:
         condition: service_started
     networks:
       - url_shot_java
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-P", "4000"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   ticdc:
     image: pingcap/ticdc:latest
@@ -178,7 +166,7 @@ services:
       - "8300:8300"
     depends_on:
       pd:
-        condition: service_healthy
+        condition: service_started
     networks:
       - url_shot_java
 
@@ -194,7 +182,7 @@ services:
       ticdc:
         condition: service_started
       redpanda:
-        condition: service_healthy
+        condition: service_started
     networks:
       - url_shot_java
 
@@ -202,7 +190,8 @@ services:
     image: mysql:8
     container_name: tidb-init
     depends_on:
-      - tidb-server
+      tidb-server:
+        condition: service_started
     volumes:
       - ./tidb/init:/scripts
     entrypoint: ["/bin/sh", "/scripts/init-db.sh"]
@@ -231,11 +220,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
-    healthcheck:
-      test: ["CMD-SHELL", "bash -lc '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1'"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
     networks:
       - url_shot_java
 
@@ -254,7 +238,7 @@ services:
                 bootstrap.servers: "redpanda:9092"
     depends_on:
       redpanda:
-        condition: service_healthy
+        condition: service_started
     networks:
       - url_shot_java
 
@@ -271,11 +255,6 @@ services:
       - dragonfly_data:/data
     networks:
       - url_shot_java
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   mongodb:
     image: percona/percona-server-mongodb:latest
@@ -290,11 +269,6 @@ services:
       - mongodb_data:/data/db
     networks:
       - url_shot_java
-    healthcheck:
-      test: ["CMD", "mongosh", "--username", "root", "--password", "root", "--eval", "db.adminCommand('ping')"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
 
 networks:
   url_shot_java:
