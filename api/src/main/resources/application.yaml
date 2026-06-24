@@ -14,6 +14,13 @@ management:
       application: ${spring.application.name}
 
 spring:
+  mongodb:
+    host: localhost
+    port: 27017
+    database: url_shortener
+    username: root
+    password: root
+    authentication-database: admin
   application:
     name: read-api
   security:
@@ -26,7 +33,7 @@ spring:
     virtual:
       enabled: true
   kafka:
-    bootstrap-servers: redpanda:9092
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: url-shortener-group
       auto-offset-reset: earliest
@@ -37,7 +44,7 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   data:
     redis:
-      host: dragonfly
+      host: localhost
       port: 6379
       timeout: 2s
 
