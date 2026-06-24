@@ -50,23 +50,29 @@ services:
       - url_shot_java
 
   prometheus:
-    image: prom/prometheus:latest
+    image: victoriametrics/victoria-metrics:latest
     container_name: prometheus
+    command:
+        - --promscrape.config=/etc/prometheus/prometheus.yml
+        - --storageDataPath=/victoria-metrics-data
+        - --retentionPeriod=30d
+        - --httpListenAddr=:9090
     depends_on:
-      mongodb-exporter:
-        condition: service_started
-      demo:
-        condition: service_started
-      kafka-exporter:
-        condition: service_started
-      tikv:
-        condition: service_started
+        mongodb-exporter:
+            condition: service_started
+        demo:
+            condition: service_started
+        kafka-exporter:
+            condition: service_started
+        tikv:
+            condition: service_started
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - victoria_data:/victoria-metrics-data
     ports:
-      - "9090:9090"
+        - "9090:8428"
     networks:
-      - url_shot_java
+        - url_shot_java
 
   loki:
     image: grafana/loki:3.0.0
@@ -247,14 +253,54 @@ services:
       start_period: 30s
 
   kafka-exporter:
-    image: danielqsj/kafka-exporter
-    command:
-        - --kafka.server=redpanda:9092
+    image: redpandadata/kminion:latest
+    container_name: kafka-exporter
+    ports:
+        - "9308:8080"
+    environment:
+        KAFKA_BROKERS: redpanda:9092
+        KMINION_EXPORTER_ENABLED: "true"
+        KMINION_KAFKA_VERSION: "4.3.0"
+        KMINION_CONSUMERGROUPS_ENABLED: "true"
+        KMINION_TOPICS_GRANULARITY: per_topic
     depends_on:
       redpanda:
         condition: service_healthy
+    networks:
+        - url_shot_java
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+
+    privileged: true
+
     ports:
-        - "9308:9308"
+        - "8085:8080"
+    volumes:
+        - /:/rootfs:ro
+        - /var/run:/var/run:ro
+        - /sys:/sys:ro
+        - /var/lib/docker:/var/lib/docker:ro
+        - /dev/disk:/dev/disk:ro
+    devices:
+        - /dev/kmsg
+
+    networks:
+        - url_shot_java
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    ports:
+        - "9100:9100"
+    command:
+        - '--path.rootfs=/host'
+    volumes:
+        - '/:/host:ro,rslave'
     networks:
         - url_shot_java
 
@@ -336,3 +382,4 @@ volumes:
   redpanda_data:
   dragonfly_data:
   mongodb_data:
+  victoria_data:
