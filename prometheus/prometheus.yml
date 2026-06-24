@@ -7,11 +7,8 @@ scrape_configs:
     static_configs:
       - targets: ["demo:8080"]
 
-  - job_name: "redpanda"
-    static_configs:
-      - targets: ["redpanda:9644"]
-
   - job_name: "tidb"
+    metrics_path: /metrics
     static_configs:
       - targets: ["tidb-server:10080"]
 
@@ -22,3 +19,19 @@ scrape_configs:
   - job_name: "pd"
     static_configs:
       - targets: ["pd:2379"]
+
+  - job_name: "ticdc"
+    static_configs:
+      - targets: ["ticdc:8300"]
+
+  - job_name: "mongodb"
+    static_configs:
+      - targets: ["mongodb-exporter:9216"]
+
+  - job_name: "kafka"
+    static_configs:
+      - targets: ["kafka-exporter:9308"]
+
+  - job_name: "dragonfly"
+    static_configs:
+      - targets: ["redis-exporter:9121"]
