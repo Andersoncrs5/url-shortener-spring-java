@@ -40,23 +40,27 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       tidb-server:
-        condition: service_started
+        condition: service_healthy
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_DATABASE_TYPE: mysql
-      GF_DATABASE_HOST: tidb-server-url-spring:4000
-      GF_DATABASE_NAME: grafana
-      GF_DATABASE_USER: root
-      GF_DATABASE_PASSWORD: ""
     networks:
       - url_shot_java
 
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    depends_on:
+      mongodb-exporter:
+        condition: service_started
+      demo:
+        condition: service_started
+      kafka-exporter:
+        condition: service_started
+      tikv:
+        condition: service_started
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -124,11 +128,16 @@ services:
     image: pingcap/tikv:latest
     container_name: tikv-url-spring
     restart: unless-stopped
+    volumes:
+      - tikv_data:/data
     command:
       - --pd=pd:2379
       - --addr=0.0.0.0:20160
       - --advertise-addr=tikv:20160
-      - --metrics-addr=0.0.0.0:20180
+      - --status-addr=0.0.0.0:20180
+      - --data-dir=/data
+    ports:
+      - "20180:20180"
     depends_on:
       pd:
         condition: service_started
@@ -144,6 +153,9 @@ services:
       - --path=pd:2379
       - --status=10080
       - --token-limit=1000
+    ports:
+        - "4000:4000"
+        - "10080:10080"
     depends_on:
       pd:
         condition: service_started
@@ -151,6 +163,11 @@ services:
         condition: service_started
     networks:
       - url_shot_java
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:10080/status"]
+        interval: 10s
+        timeout: 5s
+        retries: 20
 
   ticdc:
     image: pingcap/ticdc:latest
@@ -222,6 +239,24 @@ services:
       KAFKA_MIN_INSYNC_REPLICAS: 1
     networks:
       - url_shot_java
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    command:
+        - --kafka.server=redpanda:9092
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    ports:
+        - "9308:9308"
+    networks:
+        - url_shot_java
 
   akhq:
     image: tchiotludo/akhq:latest
@@ -256,6 +291,15 @@ services:
     networks:
       - url_shot_java
 
+  redis-exporter:
+    image: oliver006/redis_exporter
+    environment:
+        REDIS_ADDR: redis://dragonfly:6379
+    ports:
+        - "9121:9121"
+    networks:
+        - url_shot_java
+
   mongodb:
     image: percona/percona-server-mongodb:latest
     container_name: mongodb-url-spring
@@ -269,6 +313,18 @@ services:
       - mongodb_data:/data/db
     networks:
       - url_shot_java
+
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.51.0
+    command:
+        - --mongodb.uri=mongodb://root:root@mongodb:27017/admin
+    ports:
+      - "9216:9216"
+    networks:
+        - url_shot_java
+    depends_on:
+      mongodb:
+        condition: service_started
 
 networks:
   url_shot_java:
