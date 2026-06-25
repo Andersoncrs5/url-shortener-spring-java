@@ -166,7 +166,7 @@ public abstract class BaseRepositoryTest {
         event.setAggregateId(generator.nextId());
         event.setAggregateType(AggregateTypeEnum.USER);
         event.setEventType(EventTypeEnum.CREATED);
-        event.setTopic(TopicEnum.USER_CREATED);
+        event.setTopic(TopicEnum.USERS);
         event.setStatus(OutboxStatusEnum.PENDING);
 
         event.setPayload("""
