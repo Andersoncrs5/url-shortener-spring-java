@@ -14,6 +14,8 @@ management:
       application: ${spring.application.name}
 
 spring:
+  swagger-ui:
+    customCssUrl: /swagger-ui/custom.css
   mongodb:
     host: localhost
     port: 27017
@@ -97,15 +99,15 @@ resilience4j:
   ratelimiter:
     instances:
       read-low:
-        limit-for-period: 150
+        limit-for-period: 100
         limit-refresh-period: 4s
         timeout-duration: 0
       read-middle:
-        limit-for-period: 150
+        limit-for-period: 120
         limit-refresh-period: 3s
         timeout-duration: 0
       read-strong:
-        limit-for-period: 150
+        limit-for-period: 180
         limit-refresh-period: 2s
         timeout-duration: 0
 
