@@ -2,19 +2,23 @@ package com.read.api.domain.enums;
 
 public enum TopicEnum {
 
-    NOTIFY_ADMINS("notify.admins"),
+    USERS("users"),
+    USERS_DLQ("users.dlq"),
 
-    URL_ACCESS_RULE_CREATED("url.access.rule.created"),
+    URL_TAG("url_tags"),
+    URL_TAG_DLQ("url_tags.dlq"),
 
-    URL_CREATED("url.created"),
-    URL_DELETED("url.deleted"),
-    URL_UPDATED("url.updated"),
+    URL_ACCESS_RULE("url_access_rule"),
+    URL_ACCESS_RULE_DLQ("url_access_rule.dlq"),
 
-    USER_CREATED("user.created"),
-    USER_DELETED("user.deleted"),
-    USER_BLOCKED("user.blocked"),
-    USER_LOGIN_SUCCESS("user.login_success"),
-    USER_LOGIN_FAILED("user.login_failed");
+    URL_REDIRECT_RULE("url_redirect_rules"),
+    URL_REDIRECT_RULE_DLQ("url_redirect_rules.dlq"),
+
+    URLS("urls"),
+    URLS_DLQ("urls.dlq"),
+
+    ROLES("roles"),
+    ROLES_DLQ("roles.dlq");
 
     private final String value;
 
@@ -24,10 +28,6 @@ public enum TopicEnum {
 
     public String value() {
         return value;
-    }
-
-    public String dlq() {
-        return value + ".dlq";
     }
 }
 
