@@ -35,6 +35,39 @@ public abstract class BaseRepositoryTest {
     @Autowired protected UrlRedirectRuleRepository urlRedirectRuleRepository;
     @Autowired protected UrlTagRepository urlTagRepository;
     @Autowired protected UrlRepository urlRepository;
+    @Autowired protected DeadLetterEventRepository deadLetterEventRepository;
+
+    protected DeadLetterEventModel createDeadLetterEvent() {
+
+        DeadLetterEventModel event =
+                new DeadLetterEventModel();
+
+        event.setId(generator.nextId());
+        event.setEventId(generator.nextId());
+
+        event.setSourceTopic("users");
+        event.setTargetDlqTopic("users-dlq");
+
+        event.setEventType("USER_CREATED");
+
+        event.setErrorMessage("Kafka timeout");
+        event.setStackTrace("java.lang.RuntimeException");
+
+        event.setPayload("""
+        {
+          "id": 1
+        }
+        """);
+
+        event.setRetryCount(0);
+        event.setMaxRetries(5);
+
+        event.setStatus(
+                DeadLetterStatus.PENDING
+        );
+
+        return deadLetterEventRepository.save(event);
+    }
 
     protected UrlModel createUrl() {
         UrlModel url = new UrlModel();
