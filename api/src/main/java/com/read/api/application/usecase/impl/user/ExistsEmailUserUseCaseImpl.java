@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.user;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.ExistsEmailUserUseCase;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +15,7 @@ public class ExistsEmailUserUseCaseImpl implements ExistsEmailUserUseCase {
     UserRepository repository;
 
     @Override
+    @ObservedMetric("user.exists.email")
     public boolean execute(String email) {
         return repository.existsByEmailIgnoreCase(email);
     }

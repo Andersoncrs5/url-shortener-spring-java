@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.FindAllRoleUseCaseUseCase;
 import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ public class FindAllRoleUseCaseImpl implements FindAllRoleUseCaseUseCase {
     RoleRepository repository;
 
     @Override
+    @ObservedMetric("role.find.all.filter")
     public Page<RoleModel> execute(RoleFilter filter, Pageable pageable) {
         return repository.findAll(filter, pageable);
     }

@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindAllUrlUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 public class FindAllUrlUseCaseImpl implements FindAllUrlUseCase {
     UrlRepository repository;
 
+    @Override
+    @ObservedMetric("url.find.all.filter")
     public Page<UrlModel> execute(UrlFilter filter, Pageable pageable) {
         return repository.findAll(filter, pageable);
     }

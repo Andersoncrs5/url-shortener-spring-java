@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.urlTag.SaveUrlTagUseCase;
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlTagCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,16 +27,12 @@ public class UrlTagCdcServiceUseCaseImpl implements UrlTagCdcServiceUseCase {
     UrlTagCdcMapper mapper;
 
     @Override
+    @ObservedMetric("url.tag.service.cdc")
     public void process(
             TiCdcEvent<UrlTagCdcEvent> event
     ) {
 
-        String eventId =
-                event.table()
-                        + ":"
-                        + event.ts()
-                        + ":"
-                        + event.es();
+        String eventId = event.table() + ":" + event.ts() + ":" + event.es();
 
         if (redis.exists(eventId)) {
 

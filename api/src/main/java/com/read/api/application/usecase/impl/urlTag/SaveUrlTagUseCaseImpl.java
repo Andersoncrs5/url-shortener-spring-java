@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlTag.SaveUrlTagUseCase;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class SaveUrlTagUseCaseImpl implements SaveUrlTagUseCase {
     UrlTagRepository repository;
 
     @Override
+    @ObservedMetric("url.tag.save")
     public Result<UrlTagModel> execute(UrlTagModel model) {
         UrlTagModel save = repository.save(model);
 

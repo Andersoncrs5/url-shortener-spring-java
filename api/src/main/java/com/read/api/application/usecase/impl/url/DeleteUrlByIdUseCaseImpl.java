@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.url.DeleteUrlByIdUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class DeleteUrlByIdUseCaseImpl implements DeleteUrlByIdUseCase {
 
     @Override
     @CacheEvict(value = "url", key = "#id")
+    @ObservedMetric("url.delete.id")
     public Result<Void> execute(Long id) {
         UrlModel url = repository.findById(id).orElse(null);
 

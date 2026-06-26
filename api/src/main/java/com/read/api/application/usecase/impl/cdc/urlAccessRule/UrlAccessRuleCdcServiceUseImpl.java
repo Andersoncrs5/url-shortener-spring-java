@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.urlAccessRule.SaveUrlAccessRu
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlAccessRuleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +27,7 @@ public class UrlAccessRuleCdcServiceUseImpl implements UrlAccessRuleCdcServiceUs
     UrlAccessRuleCdcMapper mapper;
 
     @Override
+    @ObservedMetric("url.access.rule.service.cdc")
     public void process(
             TiCdcEvent<UrlAccessRuleCdcEvent> event
     ) {

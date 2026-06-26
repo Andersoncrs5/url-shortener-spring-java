@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.urlAccessRule.DeleteUrlAccess
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,10 @@ public class DeleteUrlAccessRuleByIdUseCaseImpl implements DeleteUrlAccessRuleBy
     UrlRepository urlRepository;
 
     @Override
+    @ObservedMetric("url.access.rule.delete.id")
     public Result<Void> execute(Long id) {
 
-        Long urlId = repository
-                .findUrlIdById(id)
-                .orElse(null);
+        Long urlId = repository.findUrlIdById(id).orElse(null);
 
         if (urlId == null) {
             return Result.failure(
@@ -40,13 +40,10 @@ public class DeleteUrlAccessRuleByIdUseCaseImpl implements DeleteUrlAccessRuleBy
             );
         }
 
-        UrlModel url = urlRepository
-                .findById(urlId)
-                .orElse(null);
+        UrlModel url = urlRepository.findById(urlId).orElse(null);
 
         if (url != null) {
-            url.getMetric()
-                    .decrementAccessRuleCount();
+            url.getMetric().decrementAccessRuleCount();
 
             urlRepository.save(url);
         }

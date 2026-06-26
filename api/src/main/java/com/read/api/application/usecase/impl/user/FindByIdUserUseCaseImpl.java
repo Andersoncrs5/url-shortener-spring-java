@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.FindByIdUserUseCase;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class FindByIdUserUseCaseImpl implements FindByIdUserUseCase {
     UserRepository repository;
 
     @Override
+    @ObservedMetric("user.find.id")
     @Cacheable(value = "users", key = "#id")
     public Result<UserModel> execute(Long id) {
         var opt = repository.findById(id);

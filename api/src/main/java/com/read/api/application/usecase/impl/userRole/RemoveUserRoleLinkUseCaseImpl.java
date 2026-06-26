@@ -6,6 +6,7 @@ import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.RoleRepository;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,9 @@ public class RemoveUserRoleLinkUseCaseImpl implements RemoveUserRoleLinkUseCase 
     RoleRepository roleRepository;
 
     @Override
+    @ObservedMetric("user.role.link.remove")
     public Result<UserModel> execute(Long userId, Long roleId) {
 
-        // 1. Valida se o Usuário existe
         UserModel user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return Result.failure(
@@ -31,7 +32,6 @@ public class RemoveUserRoleLinkUseCaseImpl implements RemoveUserRoleLinkUseCase 
             );
         }
 
-        // 2. Valida se a Role existe
         RoleModel role = roleRepository.findById(roleId).orElse(null);
         if (role == null) {
             return Result.failure(
@@ -40,15 +40,12 @@ public class RemoveUserRoleLinkUseCaseImpl implements RemoveUserRoleLinkUseCase 
             );
         }
 
-        // 3. Se o usuário NÃO tiver essa Role, retorna sucesso imediatamente (Idempotência)
         if (!user.getRoles().contains(role.getName())) {
             return Result.success(user, 200);
         }
 
-        // 4. Remove a Role do Usuário
         user.getRoles().remove(role.getName());
 
-        // 5. Salva as alterações no banco de dados
         UserModel saved = userRepository.save(user);
 
         return Result.success(saved, 200);

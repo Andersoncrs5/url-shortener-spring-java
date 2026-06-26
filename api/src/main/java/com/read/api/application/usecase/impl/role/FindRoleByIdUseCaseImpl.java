@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.FindRoleByIdUseCase;
 import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class FindRoleByIdUseCaseImpl implements FindRoleByIdUseCase {
     RoleRepository repository;
 
     @Override
+    @ObservedMetric("role.find.id")
     @Cacheable(value = "roles", key = "#id")
     public Result<RoleModel> execute(Long id) {
         var opt = repository.findById(id);

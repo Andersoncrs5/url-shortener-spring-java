@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,10 @@ public class RemoveUrlTagLinkUseCaseImpl implements RemoveUrlTagLinkUseCase {
     UrlTagRepository tagRepository;
 
     @Override
+    @ObservedMetric("url.tag.link.remove")
     public Result<UrlModel> execute(Long urlId, Long tagId) {
 
-        UrlModel url =
-                urlRepository.findById(urlId)
-                        .orElse(null);
+        UrlModel url = urlRepository.findById(urlId).orElse(null);
 
         if (url == null) {
             return Result.failure(

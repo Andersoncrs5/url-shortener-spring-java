@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindUrlByIdUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class FindUrlByIdUseCaseImpl implements FindUrlByIdUseCase {
 
     @Override
     @Cacheable(value = "url", key = "#id", unless = "!#result.isSuccess()")
+    @ObservedMetric("url.find.id")
     public Result<UrlModel> execute(Long id) {
         return repository.findById(id)
                 .map(Result::success)

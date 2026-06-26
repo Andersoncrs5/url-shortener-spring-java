@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.role;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.DeleteRoleByIdUseCase;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ public class DeleteRoleByIdUseCaseImpl implements DeleteRoleByIdUseCase {
     RoleRepository repository;
 
     @Override
+    @ObservedMetric("role.delete.id")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

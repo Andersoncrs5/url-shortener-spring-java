@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlTag.FindUrlTagByIdUseCase;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class FindUrlTagByIdUseCaseImpl implements FindUrlTagByIdUseCase {
 
     @Override
     @Cacheable(value = "tag", key = "#id", unless = "!#result.isSuccess()")
+    @ObservedMetric("url.tag.find.id")
     public Result<UrlTagModel> execute(Long id) {
         return repository.findById(id)
                 .map(Result::success)

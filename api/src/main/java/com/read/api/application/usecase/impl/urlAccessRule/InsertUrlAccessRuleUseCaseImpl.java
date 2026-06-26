@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class InsertUrlAccessRuleUseCaseImpl implements InsertUrlAccessRuleUseCas
     UrlRepository urlRepository;
 
     @Override
+    @ObservedMetric("url.access.rule.insert")
     public Result<UrlAccessRuleModel> execute(UrlAccessRuleModel model) {
         UrlModel url = urlRepository.findById(model.getUrlId()).orElse(null);
 

@@ -11,6 +11,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.read.api.domain.exceptions.InternalServerErrorException;
 import com.read.api.domain.model.UserModel;
 import com.read.api.infrastructure.properties.JwtProperties;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import java.util.UUID;
 public class TokenService {
     private final JwtProperties properties;
 
+    @ObservedMetric("token.generate.token")
     public String generateToken(UserModel user) {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
@@ -58,6 +60,7 @@ public class TokenService {
         }
     }
 
+    @ObservedMetric("token.validate.token")
     public Result<String> validateToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
@@ -79,6 +82,7 @@ public class TokenService {
         }
     }
 
+    @ObservedMetric("token.extract.all.claims")
     public Map<String, Object> extractAllClaims(String token) {
         log.debug("Extraindo todas as claims do token.");
         try {
@@ -90,11 +94,13 @@ public class TokenService {
         }
     }
 
+    @ObservedMetric("token.extract.subject.from.request")
     public String extractSubjectFromRequest(HttpServletRequest request) {
         String token = extractTokenFromRequest(request);
         return getClaimsFromToken(token).getSubject();
     }
 
+    @ObservedMetric("token.extract.user.id.from.request")
     public Long extractUserIdFromRequest(HttpServletRequest request) {
         log.debug("Extracting id of token...");
         String token = extractTokenFromRequest(request);
@@ -108,6 +114,7 @@ public class TokenService {
         }
     }
 
+    @ObservedMetric("token.extract.token.from.request")
     private String extractTokenFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -117,6 +124,7 @@ public class TokenService {
         return authHeader.substring(7);
     }
 
+    @ObservedMetric("token.get.claims.from.token")
     private JWTClaimsSet getClaimsFromToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
@@ -127,11 +135,9 @@ public class TokenService {
         }
     }
 
+    @ObservedMetric("token.get.expiration.date")
     private Instant genExpirationDate() {
         return Instant.now().plus(properties.getExp().getToken(), ChronoUnit.HOURS);
     }
 
-    private Instant genExpirationDateRefreshToken() {
-        return Instant.now().plus(properties.getExp().getRefresh(), ChronoUnit.HOURS);
-    }
 }

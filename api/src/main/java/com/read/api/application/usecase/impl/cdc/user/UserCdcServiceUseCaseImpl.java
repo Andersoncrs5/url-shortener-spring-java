@@ -9,6 +9,7 @@ import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UserCdcEvent;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class UserCdcServiceUseCaseImpl implements UserCdcServiceUseCase {
     UserCdcMapper mapper;
 
     @Override
+    @ObservedMetric("user.service.cdc")
     public void process(
             TiCdcEvent<UserCdcEvent> event
     ) {

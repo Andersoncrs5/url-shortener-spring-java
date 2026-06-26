@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.urlRedirectRule.SaveUrlRedire
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlRedirectRuleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,16 +28,12 @@ public class UrlRedirectRuleCdcServiceUseCaseImpl
     UrlRedirectRuleCdcMapper mapper;
 
     @Override
+    @ObservedMetric("url.redirect.rule.service.cdc")
     public void process(
             TiCdcEvent<UrlRedirectRuleCdcEvent> event
     ) {
 
-        String eventId =
-                event.table()
-                        + ":"
-                        + event.ts()
-                        + ":"
-                        + event.es();
+        String eventId = event.table() + ":" + event.ts() + ":" + event.es();
 
         if (redis.exists(eventId)) {
 

@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class InsertUrlRedirectRuleUseCaseImpl implements InsertUrlRedirectRuleUs
     UrlRepository urlRepository;
 
     @Override
+    @ObservedMetric("url.access.rule.insert")
     public Result<UrlRedirectRuleModel> execute(UrlRedirectRuleModel model) {
 
         UrlModel url = urlRepository.findById(model.getUrlId()).orElse(null);

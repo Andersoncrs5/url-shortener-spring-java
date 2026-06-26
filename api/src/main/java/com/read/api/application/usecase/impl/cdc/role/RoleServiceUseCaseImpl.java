@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.role.SaveRoleUseCase;
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.RoleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +27,7 @@ public class RoleServiceUseCaseImpl implements RoleCdcServiceUseCase {
     RoleCdcMapper mapper;
 
     @Override
+    @ObservedMetric("role.service.cdc")
     public void process(
             TiCdcEvent<RoleCdcEvent> event
     ) {

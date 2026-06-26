@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.SaveUrlAccessRuleUseCase;
 import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class SaveUrlAccessRuleUseCaseImpl implements SaveUrlAccessRuleUseCase {
     UrlAccessRuleRepository repository;
 
     @Override
+    @ObservedMetric("url.access.rule.save")
     public Result<UrlAccessRuleModel> execute(UrlAccessRuleModel model) {
         UrlAccessRuleModel save = repository.save(model);
 

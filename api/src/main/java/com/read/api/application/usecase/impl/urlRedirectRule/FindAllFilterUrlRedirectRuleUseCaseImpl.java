@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlRedirectRule.FindAllFilterUrlRedirectRuleUseCase;
 import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ public class FindAllFilterUrlRedirectRuleUseCaseImpl implements FindAllFilterUrl
     UrlRedirectRuleRepository repository;
 
     @Override
+    @ObservedMetric("url.access.rule.find.all.filter")
     public Page<UrlRedirectRuleModel> execute(UrlRedirectRuleFilter filer, Pageable pageable) {
         return repository.findAll(filer, pageable);
     }

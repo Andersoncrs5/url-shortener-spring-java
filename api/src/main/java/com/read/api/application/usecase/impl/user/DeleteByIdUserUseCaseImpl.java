@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.user;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.DeleteByIdUserUseCase;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class DeleteByIdUserUseCaseImpl implements DeleteByIdUserUseCase {
 
     @Override
     @CacheEvict(value = "users", key = "#id")
+    @ObservedMetric("user.delete.id")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
 

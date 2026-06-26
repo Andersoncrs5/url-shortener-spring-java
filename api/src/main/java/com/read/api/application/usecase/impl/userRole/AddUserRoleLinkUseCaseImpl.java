@@ -6,6 +6,7 @@ import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.RoleRepository;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AddUserRoleLinkUseCaseImpl implements AddUserRoleLinkUseCase {
     RoleRepository roleRepository;
 
     @Override
+    @ObservedMetric("user.role.link.add")
     public Result<UserModel> execute(Long userId, Long roleId) {
 
         UserModel user = userRepository.findById(userId).orElse(null);

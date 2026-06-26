@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.InsertRoleUseCase;
 import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class InsertRoleUseCaseImpl implements InsertRoleUseCase {
     RoleRepository repository;
 
     @Override
+    @ObservedMetric("role.insert")
     public Result<RoleModel> execute(RoleModel role) {
         RoleModel saved = repository.insert(role);
 

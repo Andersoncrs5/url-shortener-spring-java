@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.SaveUserUseCase;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class SaveUserUseCaseImpl implements SaveUserUseCase {
     UserRepository repository;
 
     @Override
+    @ObservedMetric("user.save")
     public Result<UserModel> execute(UserModel user) {
         UserModel saved = repository.save(user);
 

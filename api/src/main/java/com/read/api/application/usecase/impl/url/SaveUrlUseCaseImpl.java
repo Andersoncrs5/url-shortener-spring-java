@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.url.SaveUrlUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class SaveUrlUseCaseImpl implements SaveUrlUseCase {
     RedisCrudService redis;
 
     @Override
+    @ObservedMetric("url.save")
     public Result<UrlModel> execute(UrlModel url) {
         UrlModel saved = repository.save(url);
         String key = "url:" + saved.getShortCode();
