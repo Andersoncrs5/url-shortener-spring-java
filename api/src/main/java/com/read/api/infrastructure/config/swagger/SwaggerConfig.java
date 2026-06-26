@@ -101,7 +101,7 @@ public class SwaggerConfig {
                 .externalDocs(
                         new ExternalDocumentation()
                                 .description("GitHub Repository")
-                                .url("https://github.com/andersoncrs5/url-shortener")
+                                .url("https://github.com/Andersoncrs5/url-shortener-spring-java")
                 );
     }
 }
