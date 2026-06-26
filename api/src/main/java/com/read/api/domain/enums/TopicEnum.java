@@ -1,6 +1,8 @@
 package com.read.api.domain.enums;
 
 public enum TopicEnum {
+    NOTIFY_EVENT_FAILED("notify.event.failed"),
+    NOTIFY_EVENT_FAILED_DLQ("notify.event.failed.dlq"),
 
     USERS("users"),
     USERS_DLQ("users.dlq"),
