@@ -11,6 +11,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 @Slf4j
@@ -56,6 +57,26 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(
+                        ResponseHTTP.error(
+                                exception.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(
+            ResponseStatusException.class
+    )
+    public ResponseEntity<ResponseHTTP<String>> handleResponseStatusException(
+            ResponseStatusException exception
+    ) {
+
+        log.warn(
+                exception.getMessage()
+        );
+
+        return ResponseEntity
+                .status(exception.getStatusCode())
                 .body(
                         ResponseHTTP.error(
                                 exception.getMessage()
