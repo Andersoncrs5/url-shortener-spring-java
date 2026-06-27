@@ -1,7 +1,13 @@
 package com.read.api.domain.exceptions;
 
+import lombok.Getter;
+
+@Getter
 public class TransientDatabaseException extends RuntimeException {
-    public TransientDatabaseException(String message) {
+    private final Throwable throwable;
+
+    public TransientDatabaseException(String message, Throwable throwable1) {
         super(message);
+        throwable = throwable1;
     }
 }
