@@ -9,31 +9,18 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TiCdcEvent<T>(
         Long id,
-
         String database,
-
         String table,
-
         List<String> pkNames,
-
         Boolean isDdl,
-
         TiCdcEventTypeEnum type,
-
         Long es,
-
         Long ts,
-
         String sql,
-
         Map<String, Integer> sqlType,
-
         Map<String, String> mysqlType,
-
         List<T> data,
-
         List<T> old
-
 ) {
     public boolean isInsert() {
         return TiCdcEventTypeEnum.INSERT.equals(type);
@@ -49,5 +36,9 @@ public record TiCdcEvent<T>(
 
     public T firstData() {
         return data == null || data.isEmpty() ? null : data.getFirst();
+    }
+
+    public T firstOld() {
+        return old == null || old.isEmpty() ? null : old.getFirst();
     }
 }
