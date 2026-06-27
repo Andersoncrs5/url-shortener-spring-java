@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -48,8 +47,6 @@ public class CustomAccessDeniedHandler
     private String getTraceId(HttpServletRequest request) {
         Object traceId = request.getAttribute("traceId");
 
-        return traceId != null
-                ? traceId.toString()
-                : UUID.randomUUID().toString();
+        return traceId != null ? traceId.toString() : UUID.randomUUID().toString();
     }
 }
