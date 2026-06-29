@@ -1,11 +1,12 @@
 package com.read.api.infrastructure.persistence.base;
 
-
 import com.mongodb.client.result.DeleteResult;
 import com.read.api.api.dto.base.BaseFilter;
 import com.read.api.domain.model.base.BaseModel;
 import com.read.api.infrastructure.persistence.entity.base.BaseEntity;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +22,11 @@ public abstract class BaseRepositoryImpl<
         ID> {
 
     protected final MongoTemplate template;
+    protected final MongoRetryTranslation retryTranslator;
 
-    protected BaseRepositoryImpl(MongoTemplate template) {
+    protected BaseRepositoryImpl(MongoTemplate template, MongoRetryTranslation retryTranslator) {
         this.template = template;
+        this.retryTranslator = retryTranslator;
     }
 
     protected abstract Class<TEntity> entityClass();
@@ -32,124 +35,77 @@ public abstract class BaseRepositoryImpl<
 
     protected abstract TModel toModel(TEntity entity);
 
+    @Retry(name = "database")
     public boolean existsById(ID id) {
-
-        Query query = Query.query(
-                Criteria.where("id").is(id)
-        );
-
-        return template.exists(
-                query,
-                entityClass()
-        );
+        return retryTranslator.execute(() -> {
+            Query query = Query.query(Criteria.where("id").is(id));
+            return template.exists(query, entityClass());
+        });
     }
 
+    @Retry(name = "database")
     public int deleteById(ID id) {
-
-        Query query = Query.query(
-                Criteria.where("id").is(id)
-        );
-
-        DeleteResult result =
-                template.remove(
-                        query,
-                        entityClass()
-                );
-
-        return (int) result.getDeletedCount();
+        return retryTranslator.execute(() -> {
+            Query query = Query.query(Criteria.where("id").is(id));
+            DeleteResult result = template.remove(query, entityClass());
+            return (int) result.getDeletedCount();
+        });
     }
 
-    protected Page<TModel> toPage(
-            Query query,
-            Pageable pageable
-    ) {
+    protected Page<TModel> toPage(Query query, Pageable pageable) {
+        return retryTranslator.execute(() -> {
+            long total = template.count(query, entityClass());
 
-        long total =
-                template.count(
-                        query,
-                        entityClass()
-                );
+            query.with(pageable);
 
-        query.with(pageable);
+            List<TModel> content = template.find(query, entityClass())
+                    .stream()
+                    .map(this::toModel)
+                    .toList();
 
-        List<TModel> content =
-                template.find(
-                                query,
-                                entityClass()
-                        )
-                        .stream()
-                        .map(this::toModel)
-                        .toList();
-
-        return new PageImpl<>(
-                content,
-                pageable,
-                total
-        );
+            return new PageImpl<>(content, pageable, total);
+        });
     }
 
-    protected void applyBaseFilter(
-            Query query,
-            BaseFilter filter
-    ) {
-
-        QueryUtils.addEquals(
-                query,
-                "id",
-                filter.getId()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "createdAt",
-                filter.getCreatedAtAfter(),
-                filter.getCreatedAtBefore()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "updatedAt",
-                filter.getUpdatedAtAfter(),
-                filter.getUpdatedAtBefore()
-        );
+    protected void applyBaseFilter(Query query, BaseFilter filter) {
+        QueryUtils.addEquals(query, "id", filter.getId());
+        QueryUtils.addRange(query, "createdAt", filter.getCreatedAtAfter(), filter.getCreatedAtBefore());
+        QueryUtils.addRange(query, "updatedAt", filter.getUpdatedAtAfter(), filter.getUpdatedAtBefore());
     }
 
-    public List<TModel> saveAll(
-            List<TModel> models
-    ) {
+    @Retry(name = "database")
+    public List<TModel> saveAll(List<TModel> models) {
+        return retryTranslator.execute(() -> {
+            List<TEntity> entities = models.stream()
+                    .map(this::toEntity)
+                    .toList();
 
-        List<TEntity> entities = models.stream()
-                .map(this::toEntity)
-                .toList();
-
-        return template.insert(entities, entityClass())
-                .stream()
-                .map(this::toModel)
-                .toList();
+            return template.insert(entities, entityClass())
+                    .stream()
+                    .map(this::toModel)
+                    .toList();
+        });
     }
 
-    public List<TModel> insertAll(
-            List<TModel> models
-    ) {
+    @Retry(name = "database")
+    public List<TModel> insertAll(List<TModel> models) {
+        return retryTranslator.execute(() -> {
+            List<TEntity> entities = models.stream()
+                    .map(this::toEntity)
+                    .toList();
 
-        List<TEntity> entities = models.stream()
-                .map(this::toEntity)
-                .toList();
-
-        return template.insert(entities, entityClass())
-                .stream()
-                .map(this::toModel)
-                .toList();
+            return template.insert(entities, entityClass())
+                    .stream()
+                    .map(this::toModel)
+                    .toList();
+        });
     }
 
+    @Retry(name = "database")
     public long deleteAll() {
-
-        DeleteResult result =
-                template.remove(
-                        new Query(),
-                        entityClass()
-                );
-
-        return result.getDeletedCount();
+        return retryTranslator.execute(() -> {
+            DeleteResult result = template.remove(new Query(), entityClass());
+            return result.getDeletedCount();
+        });
     }
 }
