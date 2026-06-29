@@ -53,6 +53,99 @@ spring:
 resilience4j:
   retry:
     instances:
+      insert:
+        max-attempts: 4
+        wait-duration: 150ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.DataAccessResourceFailureException
+          - com.mongodb.MongoSocketException
+          - com.mongodb.MongoTimeoutException
+        ignore-exceptions:
+          - org.springframework.dao.DuplicateKeyException
+          - org.springframework.dao.DataIntegrityViolationException
+          - java.lang.IllegalArgumentException
+
+      save:
+        max-attempts: 4
+        wait-duration: 150ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.DataAccessResourceFailureException
+          - com.mongodb.MongoSocketException
+          - com.mongodb.MongoTimeoutException
+        ignore-exceptions:
+          - org.springframework.dao.OptimisticLockingFailureException
+          - java.lang.IllegalArgumentException
+      delete:
+        max-attempts: 3
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.DataAccessResourceFailureException
+          - com.mongodb.MongoSocketException
+          - com.mongodb.MongoTimeoutException
+        ignore-exceptions:
+          - org.springframework.dao.EmptyResultDataAccessException
+          - java.lang.IllegalArgumentException
+      read:
+        max-attempts: 3
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.DataAccessResourceFailureException
+          - com.mongodb.MongoSocketException
+          - com.mongodb.MongoTimeoutException
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+
+      scheduler:
+        max-attempts: 3
+        wait-duration: 2s
+      mongo-read:
+        max-attempts: 3
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.DataAccessResourceFailureException
+          - com.mongodb.MongoSocketException
+          - com.mongodb.MongoTimeoutException
+
+        ignore-exceptions:
+          - org.springframework.dao.DuplicateKeyException
+          - java.lang.IllegalArgumentException
+
+      cdc-action:
+        max-attempts: 5
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+      mongo-write:
+        max-attempts: 5
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+      redis:
+        max-attempts: 4
+        wait-duration: 100ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - io.lettuce.core.RedisException
+
       database:
         max-attempts: 4
         wait-duration: 300ms
@@ -72,6 +165,32 @@ resilience4j:
         retry-exceptions:
           - org.apache.kafka.common.errors.RetriableException
           - org.springframework.kafka.KafkaException
+
+      kafka-producer:
+        max-attempts: 5
+        wait-duration: 250ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.kafka.KafkaException
+          - org.apache.kafka.common.errors.TimeoutException
+          - org.apache.kafka.common.errors.NetworkException
+
+      kafka-consumer:
+        max-attempts: 4
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 3
+
+      http:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+          - org.springframework.web.client.ResourceAccessException
 
   circuitbreaker:
     instances:
