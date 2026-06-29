@@ -61,6 +61,12 @@ public class CacheConfig {
 
         Map<String, RedisCacheConfiguration> configs = new HashMap<>();
 
+        configs.put("auth",
+                defaultConfig.entryTtl(Duration.ofMinutes(10)));
+
+        configs.put("dlq",
+                defaultConfig.entryTtl(Duration.ofMinutes(30)));
+
         configs.put("url",
                 defaultConfig.entryTtl(Duration.ofMinutes(15)));
 
