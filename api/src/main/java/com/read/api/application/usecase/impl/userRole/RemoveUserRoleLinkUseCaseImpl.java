@@ -8,6 +8,7 @@ import com.read.api.domain.repository.RoleRepository;
 import com.read.api.domain.repository.UserRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class RemoveUserRoleLinkUseCaseImpl implements RemoveUserRoleLinkUseCase 
     RoleRepository roleRepository;
 
     @Override
+    @Retry(name = "delete")
     @ObservedMetric("user.role.link.remove")
     public Result<UserModel> execute(Long userId, Long roleId) {
 

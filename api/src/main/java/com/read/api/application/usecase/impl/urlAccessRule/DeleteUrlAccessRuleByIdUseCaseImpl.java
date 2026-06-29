@@ -7,6 +7,7 @@ import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ public class DeleteUrlAccessRuleByIdUseCaseImpl implements DeleteUrlAccessRuleBy
     UrlRepository urlRepository;
 
     @Override
+    @Retry(name = "delete")
     @ObservedMetric("url.access.rule.delete.id")
     public Result<Void> execute(Long id) {
 

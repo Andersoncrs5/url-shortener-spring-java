@@ -8,6 +8,7 @@ import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.repository.UrlTagRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class RemoveUrlTagLinkUseCaseImpl implements RemoveUrlTagLinkUseCase {
     UrlTagRepository tagRepository;
 
     @Override
+    @Retry(name = "remove")
     @ObservedMetric("url.tag.link.remove")
     public Result<UrlModel> execute(Long urlId, Long tagId) {
 

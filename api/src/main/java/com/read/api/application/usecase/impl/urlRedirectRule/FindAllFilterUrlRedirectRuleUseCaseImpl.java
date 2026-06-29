@@ -6,6 +6,7 @@ import com.read.api.application.usecase.interfaces.urlRedirectRule.FindAllFilter
 import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ public class FindAllFilterUrlRedirectRuleUseCaseImpl implements FindAllFilterUrl
     UrlRedirectRuleRepository repository;
 
     @Override
+    @Retry(name = "read")
     @ObservedMetric("url.access.rule.find.all.filter")
     public Page<UrlRedirectRuleModel> execute(UrlRedirectRuleFilter filer, Pageable pageable) {
         return repository.findAll(filer, pageable);

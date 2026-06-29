@@ -11,6 +11,7 @@ import com.read.api.domain.model.UserModel;
 import com.read.api.domain.service.RedisCrudService;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +30,7 @@ public class UserCdcServiceUseCaseImpl implements UserCdcServiceUseCase {
     UserCdcMapper mapper;
 
     @Override
+    @Retry(name = "cdc-action")
     @ObservedMetric("user.service.cdc")
     public void process(
             TiCdcEvent<UserCdcEvent> event

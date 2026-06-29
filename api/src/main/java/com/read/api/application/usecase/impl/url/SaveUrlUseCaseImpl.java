@@ -7,6 +7,7 @@ import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class SaveUrlUseCaseImpl implements SaveUrlUseCase {
     RedisCrudService redis;
 
     @Override
+    @Retry(name = "save")
     @ObservedMetric("url.save")
     public Result<UrlModel> execute(UrlModel url) {
         UrlModel saved = repository.save(url);

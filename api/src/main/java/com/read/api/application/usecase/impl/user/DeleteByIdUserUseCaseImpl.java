@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.user.DeleteByIdUserUseCase;
 import com.read.api.domain.repository.UserRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ public class DeleteByIdUserUseCaseImpl implements DeleteByIdUserUseCase {
     UserRepository repository;
 
     @Override
+    @Retry(name = "delete")
     @CacheEvict(value = "users", key = "#id")
     @ObservedMetric("user.delete.id")
     public Result<Void> execute(Long id) {

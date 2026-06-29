@@ -8,7 +8,9 @@ import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.UrlAccessRuleEntity;
 import com.read.api.infrastructure.persistence.mapper.UrlAccessRuleMapperRepository;
 import com.read.api.infrastructure.persistence.mongo.MongoUrlAccessRuleRepository;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -25,11 +27,7 @@ import java.util.Optional;
 @Repository
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlAccessRuleRepositoryImpl
-        extends BaseRepositoryImpl<
-        UrlAccessRuleModel,
-        UrlAccessRuleEntity,
-        Long
-        >
+        extends BaseRepositoryImpl<UrlAccessRuleModel, UrlAccessRuleEntity, Long>
         implements UrlAccessRuleRepository {
 
     UrlAccessRuleMapperRepository mapper;
@@ -38,31 +36,25 @@ public class UrlAccessRuleRepositoryImpl
     public UrlAccessRuleRepositoryImpl(
             MongoTemplate template,
             UrlAccessRuleMapperRepository mapper,
-            MongoUrlAccessRuleRepository repository
+            MongoUrlAccessRuleRepository repository,
+            MongoRetryTranslation retryTranslator
     ) {
-        super(template);
+        super(template, retryTranslator);
         this.mapper = mapper;
         this.repository = repository;
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<Long> findUrlIdById(Long id) {
+        return retryTranslator.execute(() -> {
+            Query query = Query.query(Criteria.where("id").is(id));
+            query.fields().include("urlId");
 
-        Query query = Query.query(
-                Criteria.where("id").is(id)
-        );
+            UrlAccessRuleEntity entity = template.findOne(query, UrlAccessRuleEntity.class);
 
-        query.fields()
-                .include("urlId");
-
-        UrlAccessRuleEntity entity =
-                template.findOne(
-                        query,
-                        UrlAccessRuleEntity.class
-                );
-
-        return Optional.ofNullable(entity)
-                .map(UrlAccessRuleEntity::getUrlId);
+            return Optional.ofNullable(entity).map(UrlAccessRuleEntity::getUrlId);
+        });
     }
 
     @Override
@@ -71,138 +63,81 @@ public class UrlAccessRuleRepositoryImpl
     }
 
     @Override
-    protected UrlAccessRuleEntity toEntity(
-            UrlAccessRuleModel model
-    ) {
+    protected UrlAccessRuleEntity toEntity(UrlAccessRuleModel model) {
         return mapper.toEntity(model);
     }
 
     @Override
-    protected UrlAccessRuleModel toModel(
-            UrlAccessRuleEntity entity
-    ) {
+    protected UrlAccessRuleModel toModel(UrlAccessRuleEntity entity) {
         return mapper.toModel(entity);
     }
 
     @Override
-    public UrlAccessRuleModel save(
-            UrlAccessRuleModel model
-    ) {
-        return mapper.toModel(
-                repository.save(
-                        mapper.toEntity(model)
-                )
-        );
+    @Retry(name = "database")
+    public UrlAccessRuleModel save(UrlAccessRuleModel model) {
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.save(mapper.toEntity(model))
+        ));
     }
 
     @Override
-    public UrlAccessRuleModel insert(
-            UrlAccessRuleModel model
-    ) {
-        return mapper.toModel(
-                repository.insert(
-                        mapper.toEntity(model)
-                )
-        );
+    @Retry(name = "database")
+    public UrlAccessRuleModel insert(UrlAccessRuleModel model) {
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.insert(mapper.toEntity(model))
+        ));
     }
 
     @Override
-    public Optional<UrlAccessRuleModel> findById(
-            Long id
-    ) {
-        return repository.findById(id)
-                .map(mapper::toModel);
+    @Retry(name = "database")
+    public Optional<UrlAccessRuleModel> findById(Long id) {
+        return retryTranslator.execute(() -> repository.findById(id).map(mapper::toModel));
     }
 
     @Override
-    public Page<UrlAccessRuleModel> findAll(
-            UrlAccessRuleFilter filter,
-            Pageable pageable
-    ) {
+    @Retry(name = "database")
+    public Page<UrlAccessRuleModel> findAll(UrlAccessRuleFilter filter, Pageable pageable) {
+        return retryTranslator.execute(() -> {
+            Query query = new Query();
 
-        Query query = new Query();
+            applyBaseFilter(query, filter);
 
-        applyBaseFilter(query, filter);
+            QueryUtils.addEquals(query, "urlId", filter.getUrlId());
+            QueryUtils.addEquals(query, "type", filter.getType());
+            QueryUtils.addLike(query, "ruleValue", filter.getRuleValue());
+            QueryUtils.addEquals(query, "active", filter.getActive());
+            QueryUtils.addEquals(query, "assignedByUserId", filter.getAssignedByUserId());
+            QueryUtils.addRange(query, "expiresAt", filter.getExpiresAtAfter(), filter.getExpiresAtBefore());
 
-        QueryUtils.addEquals(
-                query,
-                "urlId",
-                filter.getUrlId()
-        );
-
-        QueryUtils.addEquals(
-                query,
-                "type",
-                filter.getType()
-        );
-
-        QueryUtils.addLike(
-                query,
-                "ruleValue",
-                filter.getRuleValue()
-        );
-
-        QueryUtils.addEquals(
-                query,
-                "active",
-                filter.getActive()
-        );
-
-        QueryUtils.addEquals(
-                query,
-                "assignedByUserId",
-                filter.getAssignedByUserId()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "expiresAt",
-                filter.getExpiresAtAfter(),
-                filter.getExpiresAtBefore()
-        );
-
-        return toPage(
-                query,
-                pageable
-        );
+            return toPage(query, pageable);
+        });
     }
 
     @Override
-    public boolean existsById(
-            Long id
-    ) {
-        return super.existsById(id);
+    @Retry(name = "database")
+    public boolean existsById(Long id) {
+        return retryTranslator.execute(() -> super.existsById(id));
     }
 
     @Override
-    public int deleteById(
-            Long id
-    ) {
-        return super.deleteById(id);
+    @Retry(name = "database")
+    public int deleteById(Long id) {
+        return retryTranslator.execute(() -> super.deleteById(id));
     }
 
     @Override
+    @Retry(name = "database")
     public List<UrlAccessRuleModel> findAllByUrlId(Long urlId) {
-        return repository
-                .findAllByUrlIdAndActiveTrueAndExpiresAtAfter(
-                        urlId,
-                        LocalDateTime.now()
-                )
+        return retryTranslator.execute(() -> repository
+                .findAllByUrlIdAndActiveTrueAndExpiresAtAfter(urlId, LocalDateTime.now())
                 .stream()
                 .map(mapper::toModel)
-                .toList();
+                .toList());
     }
 
     @Override
-    public boolean existsUnique(
-            Long urlId,
-            UrlAccessRuleTypeEnum type,
-            String ruleValue
-    ) {
-        return repository.existsByUrlIdAndTypeAndRuleValue(
-                urlId,
-                type,
-                ruleValue
-        );
+    @Retry(name = "database")
+    public boolean existsUnique(Long urlId, UrlAccessRuleTypeEnum type, String ruleValue) {
+        return retryTranslator.execute(() -> repository.existsByUrlIdAndTypeAndRuleValue(urlId, type, ruleValue));
     }
 }

@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ public class SaveUrlAccessRuleUseCaseImpl implements SaveUrlAccessRuleUseCase {
     UrlAccessRuleRepository repository;
 
     @Override
+    @Retry(name = "save")
     @ObservedMetric("url.access.rule.save")
     public Result<UrlAccessRuleModel> execute(UrlAccessRuleModel model) {
         UrlAccessRuleModel save = repository.save(model);

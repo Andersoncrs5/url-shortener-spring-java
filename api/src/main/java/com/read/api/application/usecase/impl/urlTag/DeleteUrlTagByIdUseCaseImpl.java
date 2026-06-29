@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.urlTag.DeleteUrlTagByIdUseCas
 import com.read.api.domain.repository.UrlTagRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ public class DeleteUrlTagByIdUseCaseImpl implements DeleteUrlTagByIdUseCase {
     UrlTagRepository repository;
 
     @Override
+    @Retry(name = "delete")
     @CacheEvict(value = "tag", key = "#id")
     @ObservedMetric("url.tag.delete.id")
     public Result<Void> execute(Long id) {

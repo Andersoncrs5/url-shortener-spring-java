@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ public class FindUrlByIdUseCaseImpl implements FindUrlByIdUseCase {
     UrlRepository repository;
 
     @Override
+    @Retry(name = "read")
     @Cacheable(value = "url", key = "#id", unless = "!#result.isSuccess()")
     @ObservedMetric("url.find.id")
     public Result<UrlModel> execute(Long id) {

@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.role.DeleteRoleByIdUseCase;
 import com.read.api.domain.repository.RoleRepository;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +17,7 @@ public class DeleteRoleByIdUseCaseImpl implements DeleteRoleByIdUseCase {
     RoleRepository repository;
 
     @Override
+    @Retry(name = "delete")
     @ObservedMetric("role.delete.id")
     public Result<Void> execute(Long id) {
         int deleted = repository.deleteById(id);
