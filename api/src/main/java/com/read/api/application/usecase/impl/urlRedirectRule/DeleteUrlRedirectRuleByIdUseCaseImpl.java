@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.urlRedirectRule.DeleteUrlRedi
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,6 +22,7 @@ public class DeleteUrlRedirectRuleByIdUseCaseImpl implements DeleteUrlRedirectRu
     UrlRepository urlRepository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "delete")
     @ObservedMetric("url.access.rule.delete.id")
     public Result<Void> execute(Long id) {

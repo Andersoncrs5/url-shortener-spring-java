@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.InsertRoleUseCase;
 import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class InsertRoleUseCaseImpl implements InsertRoleUseCase {
     RoleRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "insert")
     @ObservedMetric("role.insert")
     public Result<RoleModel> execute(RoleModel role) {

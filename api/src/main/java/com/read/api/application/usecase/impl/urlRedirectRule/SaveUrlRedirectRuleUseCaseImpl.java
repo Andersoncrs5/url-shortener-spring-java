@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlRedirectRule.SaveUrlRedirectRuleUseCase;
 import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class SaveUrlRedirectRuleUseCaseImpl implements SaveUrlRedirectRuleUseCas
     UrlRedirectRuleRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "save")
     @ObservedMetric("url.access.rule.save")
     public Result<UrlRedirectRuleModel> execute(UrlRedirectRuleModel model) {

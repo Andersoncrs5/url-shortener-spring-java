@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.urlTag;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlTag.ExistsUrlTagBySlugUseCase;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class ExistsUrlTagBySlugUseCaseImpl implements ExistsUrlTagBySlugUseCase 
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.tag.exists.slug")
     public Result<Boolean> execute(String slug) {
         return Result.success(repository.existsBySlug(slug));

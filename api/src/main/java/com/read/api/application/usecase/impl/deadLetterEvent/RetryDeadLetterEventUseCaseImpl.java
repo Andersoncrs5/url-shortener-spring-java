@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.deadLetterEvent;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.RetryDeadLetterEventUseCase;
 import com.read.api.domain.repository.DeadLetterEventRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class RetryDeadLetterEventUseCaseImpl implements RetryDeadLetterEventUseC
     DeadLetterEventRepository repository;
 
     @Override
+    @ResultTransaction
     public @NotNull Result<Void> execute(Long id) {
 
 

@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.role.SaveRoleUseCase;
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.RoleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -30,6 +31,7 @@ public class RoleServiceUseCaseImpl implements RoleCdcServiceUseCase {
     @Override
     @ObservedMetric("role.service.cdc")
     @Retry(name = "cdc-action")
+    @ResultTransaction
     public void process(
             TiCdcEvent<RoleCdcEvent> event
     ) {

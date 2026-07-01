@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.deadLetterEvent;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.DeleteDeadLetterEventByIdUseCase;
 import com.read.api.domain.repository.DeadLetterEventRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class DeleteDeadLetterEventByIdUseCaseImpl implements DeleteDeadLetterEve
     DeadLetterEventRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "delete")
     @ObservedMetric("dead.letter.event.delete")
     public @NotNull Result<Void> execute(Long id) {

@@ -6,6 +6,7 @@ import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.RoleRepository;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -22,6 +23,7 @@ public class AddUserRoleLinkUseCaseImpl implements AddUserRoleLinkUseCase {
     RoleRepository roleRepository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "insert")
     @ObservedMetric("user.role.link.add")
     public Result<UserModel> execute(Long userId, Long roleId) {

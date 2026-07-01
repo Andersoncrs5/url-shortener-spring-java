@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -22,6 +23,7 @@ public class RemoveUrlTagLinkUseCaseImpl implements RemoveUrlTagLinkUseCase {
     UrlTagRepository tagRepository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "remove")
     @ObservedMetric("url.tag.link.remove")
     public Result<UrlModel> execute(Long urlId, Long tagId) {

@@ -1,6 +1,8 @@
 package com.read.api.api.exception;
 
 import com.read.api.api.dto.ResponseHTTP;
+import com.read.api.domain.utils.ValidationErrorItem;
+import com.read.api.domain.utils.ValidationErrorResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -169,4 +177,38 @@ public class GlobalExceptionHandler {
                         )
                 );
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseHTTP<ValidationErrorResponse>> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex
+    ) {
+
+        Map<String, List<ValidationErrorItem>> errors =
+                ex.getBindingResult()
+                        .getFieldErrors()
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                FieldError::getField,
+                                Collectors.mapping(
+                                        fieldError -> new ValidationErrorItem(
+                                                fieldError.getCode(),
+                                                fieldError.getDefaultMessage()
+                                        ),
+                                        Collectors.toList()
+                                )
+                        ));
+
+        ValidationErrorResponse response =
+                new ValidationErrorResponse(
+                        false,
+                        "Validation error",
+                        errors,
+                        null
+                );
+
+        return ResponseEntity
+                .badRequest()
+                .body(ResponseHTTP.error(response, "Input error", null));
+    }
+
 }

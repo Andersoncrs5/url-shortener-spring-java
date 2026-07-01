@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.user;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.ExistsEmailUserUseCase;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -16,6 +17,7 @@ public class ExistsEmailUserUseCaseImpl implements ExistsEmailUserUseCase {
     UserRepository repository;
 
     @Override
+    @ResultTransaction(readOnly = true)
     @Retry(name = "read")
     @ObservedMetric("user.exists.email")
     public boolean execute(String email) {

@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.FindByIdUserUseCase;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -20,6 +21,7 @@ public class FindByIdUserUseCaseImpl implements FindByIdUserUseCase {
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("user.find.id")
     @Cacheable(value = "users", key = "#id")
     public Result<UserModel> execute(Long id) {

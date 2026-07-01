@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindUrlAccessRuleByIdUseCase;
 import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -19,6 +20,7 @@ public class FindUrlAccessRuleByIdUseCaseImpl implements FindUrlAccessRuleByIdUs
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.access.rule.find.id")
     public Result<UrlAccessRuleModel> execute(Long id) {
         return repository.findById(id)

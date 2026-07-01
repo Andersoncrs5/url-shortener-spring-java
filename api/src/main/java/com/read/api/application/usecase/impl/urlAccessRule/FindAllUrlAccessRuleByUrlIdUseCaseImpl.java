@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindAllUrlAccessRuleByUrlIdUseCase;
 import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -20,6 +21,7 @@ public class FindAllUrlAccessRuleByUrlIdUseCaseImpl implements FindAllUrlAccessR
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.access.rule.find.all.urlid")
     public List<UrlAccessRuleModel> execute(Long urlId) {
         return repository.findAllByUrlId(urlId);

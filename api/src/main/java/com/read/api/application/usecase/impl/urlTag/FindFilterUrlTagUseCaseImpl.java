@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlTag.FindFilterUrlTagUseCase;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -21,6 +22,7 @@ public class FindFilterUrlTagUseCaseImpl implements FindFilterUrlTagUseCase {
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.tag.find.all.filter")
     public Page<UrlTagModel> execute(UrlTagFilter filter, Pageable pageable) {
         return repository.findAll(filter, pageable);

@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.url.DeleteUrlByIdUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,6 +22,7 @@ public class DeleteUrlByIdUseCaseImpl implements DeleteUrlByIdUseCase {
     RedisCrudService redis;
 
     @Override
+    @ResultTransaction
     @Retry(name = "delete")
     @CacheEvict(value = "url", key = "#id")
     @ObservedMetric("url.delete.id")

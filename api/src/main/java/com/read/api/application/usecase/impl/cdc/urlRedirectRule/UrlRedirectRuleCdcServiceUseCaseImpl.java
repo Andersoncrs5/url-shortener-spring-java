@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.urlRedirectRule.SaveUrlRedire
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlRedirectRuleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ public class UrlRedirectRuleCdcServiceUseCaseImpl
     UrlRedirectRuleCdcMapper mapper;
 
     @Override
+    @ResultTransaction
     @Retry(name = "cdc-action")
     @ObservedMetric("url.redirect.rule.service.cdc")
     public void process(

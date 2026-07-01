@@ -6,6 +6,7 @@ import com.read.api.domain.model.UrlAccessRuleModel;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,6 +22,7 @@ public class InsertUrlAccessRuleUseCaseImpl implements InsertUrlAccessRuleUseCas
     UrlRepository urlRepository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "insert")
     @ObservedMetric("url.access.rule.insert")
     public Result<UrlAccessRuleModel> execute(UrlAccessRuleModel model) {

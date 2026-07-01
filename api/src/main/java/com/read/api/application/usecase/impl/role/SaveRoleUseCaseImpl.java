@@ -1,5 +1,6 @@
 package com.read.api.application.usecase.impl.role;
 
+import com.read.api.infrastructure.tx.ResultTransaction;
 import io.github.resilience4j.retry.annotation.Retry;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.SaveRoleUseCase;
@@ -18,6 +19,7 @@ public class SaveRoleUseCaseImpl implements SaveRoleUseCase {
     RoleRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "save")
     @ObservedMetric("role.save")
     public Result<RoleModel> execute(RoleModel role) {

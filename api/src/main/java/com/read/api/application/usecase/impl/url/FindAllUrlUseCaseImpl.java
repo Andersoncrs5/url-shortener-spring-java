@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindAllUrlUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -21,6 +22,7 @@ public class FindAllUrlUseCaseImpl implements FindAllUrlUseCase {
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.find.all.filter")
     public Page<UrlModel> execute(UrlFilter filter, Pageable pageable) {
         return repository.findAll(filter, pageable);

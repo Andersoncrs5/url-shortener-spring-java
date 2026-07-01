@@ -9,6 +9,7 @@ import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UserCdcEvent;
 import com.read.api.domain.model.UserModel;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -30,6 +31,7 @@ public class UserCdcServiceUseCaseImpl implements UserCdcServiceUseCase {
     UserCdcMapper mapper;
 
     @Override
+    @ResultTransaction
     @Retry(name = "cdc-action")
     @ObservedMetric("user.service.cdc")
     public void process(

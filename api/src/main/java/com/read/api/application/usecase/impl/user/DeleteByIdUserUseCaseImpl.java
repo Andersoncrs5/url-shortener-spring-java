@@ -3,6 +3,7 @@ package com.read.api.application.usecase.impl.user;
 import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.user.DeleteByIdUserUseCase;
 import com.read.api.domain.repository.UserRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class DeleteByIdUserUseCaseImpl implements DeleteByIdUserUseCase {
     UserRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "delete")
     @CacheEvict(value = "users", key = "#id")
     @ObservedMetric("user.delete.id")

@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlAccessRule.ExistsByUrlIdAndTypeAndRuleValueUrlAccessRuleUseCase;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.repository.UrlAccessRuleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ public class ExistsByUrlIdAndTypeAndRuleValueUrlAccessRuleUseCaseImpl
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.access.rule.exists.url.id.type.value")
     public boolean execute(Long urlId, UrlAccessRuleTypeEnum type, String ruleValue) {
         return repository.existsUnique(urlId, type, ruleValue);

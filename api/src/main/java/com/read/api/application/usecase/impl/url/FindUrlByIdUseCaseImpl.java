@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.url.FindUrlByIdUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -20,6 +21,7 @@ public class FindUrlByIdUseCaseImpl implements FindUrlByIdUseCase {
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @Cacheable(value = "url", key = "#id", unless = "!#result.isSuccess()")
     @ObservedMetric("url.find.id")
     public Result<UrlModel> execute(Long id) {

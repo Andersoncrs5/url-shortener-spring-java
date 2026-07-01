@@ -5,6 +5,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.role.FindAllRoleUseCaseUseCase;
 import com.read.api.domain.model.RoleModel;
 import com.read.api.domain.repository.RoleRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -20,6 +21,7 @@ public class FindAllRoleUseCaseImpl implements FindAllRoleUseCaseUseCase {
     RoleRepository repository;
 
     @Override
+    @ResultTransaction(readOnly = true)
     @Retry(name = "read")
     @ObservedMetric("role.find.all.filter")
     public Page<RoleModel> execute(RoleFilter filter, Pageable pageable) {

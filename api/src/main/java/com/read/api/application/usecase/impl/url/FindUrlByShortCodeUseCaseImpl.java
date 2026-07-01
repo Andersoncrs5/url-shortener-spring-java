@@ -12,6 +12,7 @@ import com.read.api.domain.model.UrlRedirectRuleModel;
 import com.read.api.domain.repository.UrlRedirectRuleRepository;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -35,6 +36,7 @@ public class FindUrlByShortCodeUseCaseImpl implements FindUrlByShortCodeUseCase 
 
     @Override
     @Retry(name = "read")
+    @ResultTransaction(readOnly = true)
     @ObservedMetric("url.find.code")
     public Result<UrlModel> execute(String code, AccessContextDTO dto) {
         String key = "url:" + code;

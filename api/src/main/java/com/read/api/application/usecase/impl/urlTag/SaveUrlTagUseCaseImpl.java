@@ -4,6 +4,7 @@ import com.read.api.application.usecase.base.UseCase;
 import com.read.api.application.usecase.interfaces.urlTag.SaveUrlTagUseCase;
 import com.read.api.domain.model.UrlTagModel;
 import com.read.api.domain.repository.UrlTagRepository;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,6 +19,7 @@ public class SaveUrlTagUseCaseImpl implements SaveUrlTagUseCase {
     UrlTagRepository repository;
 
     @Override
+    @ResultTransaction
     @Retry(name = "save")
     @ObservedMetric("url.tag.save")
     public Result<UrlTagModel> execute(UrlTagModel model) {

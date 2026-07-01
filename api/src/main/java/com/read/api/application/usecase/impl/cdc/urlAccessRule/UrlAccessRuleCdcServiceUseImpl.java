@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.urlAccessRule.SaveUrlAccessRu
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlAccessRuleCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -28,6 +29,7 @@ public class UrlAccessRuleCdcServiceUseImpl implements UrlAccessRuleCdcServiceUs
     UrlAccessRuleCdcMapper mapper;
 
     @Override
+    @ResultTransaction
     @Retry(name = "cdc-action")
     @ObservedMetric("url.access.rule.service.cdc")
     public void process(

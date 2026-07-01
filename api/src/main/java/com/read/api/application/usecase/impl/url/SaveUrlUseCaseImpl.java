@@ -5,6 +5,7 @@ import com.read.api.application.usecase.interfaces.url.SaveUrlUseCase;
 import com.read.api.domain.model.UrlModel;
 import com.read.api.domain.repository.UrlRepository;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import com.read.api.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -22,6 +23,7 @@ public class SaveUrlUseCaseImpl implements SaveUrlUseCase {
     RedisCrudService redis;
 
     @Override
+    @ResultTransaction
     @Retry(name = "save")
     @ObservedMetric("url.save")
     public Result<UrlModel> execute(UrlModel url) {

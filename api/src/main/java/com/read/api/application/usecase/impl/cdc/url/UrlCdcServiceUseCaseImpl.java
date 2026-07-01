@@ -8,6 +8,7 @@ import com.read.api.application.usecase.interfaces.url.SaveUrlUseCase;
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.UrlCdcEvent;
 import com.read.api.domain.service.RedisCrudService;
+import com.read.api.infrastructure.tx.ResultTransaction;
 import com.read.api.utils.metrics.observed.ObservedMetric;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
@@ -28,6 +29,7 @@ public class UrlCdcServiceUseCaseImpl implements UrlCdcServiceUseCase {
     UrlCdcMapper mapper;
 
     @Override
+    @ResultTransaction
     @Retry(name = "cdc-action")
     @ObservedMetric("url.service.cdc")
     public void process(
