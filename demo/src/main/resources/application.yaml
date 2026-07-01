@@ -28,11 +28,11 @@ management:
 
 logging:
   file:
-    name: /var/log/spring/app.log   # 🔥 caminho container-friendly
+    name: /var/log/spring/app.log
   pattern:
     level: "%5p [demo,%X{traceId:-},%X{spanId:-}]"
   level:
-    com.write.api: INFO             # 🔥 produção não DEBUG
+    com.write.api: INFO
     org.springframework.web: INFO
     io.micrometer: WARN
 
@@ -118,6 +118,8 @@ resilience4j:
         timeout-duration: 0
 
 spring:
+  swagger-ui:
+    customCssUrl: /swagger-ui/custom.css
   application:
     name: demo
   super-adm:
@@ -131,7 +133,7 @@ spring:
     jwt:
       secret: 5438y43v734vb7t40yt7y7rft47r7tv43htf3ht40f7t430ft0ft3t4fh94t3r3653667586578784658467867846786667v
   datasource:
-    url: jdbc:mysql://tidb-server:4000/url_shortener  # 🔥 container DNS
+    url: jdbc:mysql://tidb-server:4000/url_shortener
     username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -160,7 +162,7 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   data:
     redis:
-      host: dragonfly   # 🔥 container DNS
+      host: dragonfly
       port: 6379
       timeout: 2s
 
