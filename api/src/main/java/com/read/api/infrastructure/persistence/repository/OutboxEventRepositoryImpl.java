@@ -7,7 +7,9 @@ import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.OutboxEventEntity;
 import com.read.api.infrastructure.persistence.mapper.OutboxMapperRepository;
 import com.read.api.infrastructure.persistence.mongo.MongoOutboxEventRepository;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -21,10 +23,7 @@ import java.util.Optional;
 @Repository
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OutboxEventRepositoryImpl
-        extends BaseRepositoryImpl<
-                OutboxEventModel,
-                OutboxEventEntity,
-                Long>
+        extends BaseRepositoryImpl<OutboxEventModel, OutboxEventEntity, Long>
         implements OutboxEventRepository {
 
     OutboxMapperRepository mapper;
@@ -33,9 +32,10 @@ public class OutboxEventRepositoryImpl
     public OutboxEventRepositoryImpl(
             MongoTemplate template,
             OutboxMapperRepository mapper,
-            MongoOutboxEventRepository repository
+            MongoOutboxEventRepository repository,
+            MongoRetryTranslation retryTranslator
     ) {
-        super(template);
+        super(template, retryTranslator);
         this.mapper = mapper;
         this.repository = repository;
     }
@@ -46,8 +46,7 @@ public class OutboxEventRepositoryImpl
     }
 
     @Override
-    protected OutboxEventEntity toEntity(
-            OutboxEventModel model) {
+    protected OutboxEventEntity toEntity(OutboxEventModel model) {
         return mapper.toEntity(model);
     }
 
@@ -57,106 +56,61 @@ public class OutboxEventRepositoryImpl
     }
 
     @Override
+    @Retry(name = "database")
     public OutboxEventModel save(OutboxEventModel event) {
-        return mapper.toModel(repository.save(mapper.toEntity(event)));
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.save(mapper.toEntity(event))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public OutboxEventModel insert(OutboxEventModel event) {
-        return mapper.toModel(repository.insert(mapper.toEntity(event)));
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.insert(mapper.toEntity(event))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<OutboxEventModel> findById(Long id) {
-        return repository.findById(id).map(mapper::toModel);
+        return retryTranslator.execute(() -> repository.findById(id).map(mapper::toModel));
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsById(Long id) {
-        return super.existsById(id);
+        return retryTranslator.execute(() -> super.existsById(id));
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
-        return super.deleteById(id);
+        return retryTranslator.execute(() -> super.deleteById(id));
     }
 
     @Override
-    public Page<OutboxEventModel> findAll(
-            OutboxEventFilter filter,
-            Pageable pageable
-    ) {
+    @Retry(name = "database")
+    public Page<OutboxEventModel> findAll(OutboxEventFilter filter, Pageable pageable) {
+        return retryTranslator.execute(() -> {
+            Query query = new Query();
 
-        Query query = new Query();
+            applyBaseFilter(query, filter);
 
-        applyBaseFilter(query, filter);
+            QueryUtils.addEquals(query, "aggregateType", filter.getAggregateType());
+            QueryUtils.addEquals(query, "aggregateId", filter.getAggregateId());
+            QueryUtils.addEquals(query, "eventType", filter.getEventType());
+            QueryUtils.addEquals(query, "topic", filter.getTopic());
+            QueryUtils.addEquals(query, "status", filter.getStatus());
 
-        QueryUtils.addEquals(
-                query,
-                "aggregateType",
-                filter.getAggregateType()
-        );
+            QueryUtils.addLike(query, "payload", filter.getPayload());
+            QueryUtils.addLike(query, "errorMessage", filter.getErrorMessage());
 
-        QueryUtils.addEquals(
-                query,
-                "aggregateId",
-                filter.getAggregateId()
-        );
+            QueryUtils.addRange(query, "retryCount", filter.getRetryCountMin(), filter.getRetryCountMax());
+            QueryUtils.addRange(query, "nextRetryAt", filter.getNextRetryAtAfter(), filter.getNextRetryAtBefore());
+            QueryUtils.addRange(query, "processedAt", filter.getProcessedAtAfter(), filter.getProcessedAtBefore());
 
-        QueryUtils.addEquals(
-                query,
-                "eventType",
-                filter.getEventType()
-        );
-
-        QueryUtils.addEquals(
-                query,
-                "topic",
-                filter.getTopic()
-        );
-
-        QueryUtils.addEquals(
-                query,
-                "status",
-                filter.getStatus()
-        );
-
-        QueryUtils.addLike(
-                query,
-                "payload",
-                filter.getPayload()
-        );
-
-        QueryUtils.addLike(
-                query,
-                "errorMessage",
-                filter.getErrorMessage()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "retryCount",
-                filter.getRetryCountMin(),
-                filter.getRetryCountMax()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "nextRetryAt",
-                filter.getNextRetryAtAfter(),
-                filter.getNextRetryAtBefore()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "processedAt",
-                filter.getProcessedAtAfter(),
-                filter.getProcessedAtBefore()
-        );
-
-        return toPage(
-                query,
-                pageable
-        );
+            return toPage(query, pageable);
+        });
     }
 }

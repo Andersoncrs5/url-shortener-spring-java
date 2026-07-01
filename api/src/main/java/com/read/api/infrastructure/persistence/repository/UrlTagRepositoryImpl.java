@@ -7,7 +7,9 @@ import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.UrlTagEntity;
 import com.read.api.infrastructure.persistence.mapper.UrlTagMapperRepository;
 import com.read.api.infrastructure.persistence.mongo.MongoUrlTagRepository;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -30,9 +32,10 @@ public class UrlTagRepositoryImpl
     public UrlTagRepositoryImpl(
             MongoTemplate template,
             UrlTagMapperRepository mapper,
-            MongoUrlTagRepository repository
+            MongoUrlTagRepository repository,
+            MongoRetryTranslation retryTranslator
     ) {
-        super(template);
+        super(template, retryTranslator);
         this.mapper = mapper;
         this.repository = repository;
     }
@@ -53,53 +56,56 @@ public class UrlTagRepositoryImpl
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsByName(String name) {
-        return repository.existsByName(name);
+        return retryTranslator.execute(() -> repository.existsByName(name));
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsBySlug(String slug) {
-        return repository.existsBySlug(slug);
+        return retryTranslator.execute(() -> repository.existsBySlug(slug));
     }
 
     @Override
+    @Retry(name = "database")
     public UrlTagModel save(UrlTagModel model) {
-        return mapper.toModel(repository.save(mapper.toEntity(model)));
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.save(mapper.toEntity(model))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public UrlTagModel insert(UrlTagModel model) {
-        return mapper.toModel(repository.insert(mapper.toEntity(model)));
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.insert(mapper.toEntity(model))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<UrlTagModel> findById(Long id) {
-        return repository.findById(id).map(mapper::toModel);
+        return retryTranslator.execute(() -> repository.findById(id).map(mapper::toModel));
     }
 
     @Override
+    @Retry(name = "database")
     public Page<UrlTagModel> findAll(UrlTagFilter filter, Pageable pageable) {
-        Query query = new Query();
+        return retryTranslator.execute(() -> {
+            Query query = new Query();
 
-        applyBaseFilter(query, filter);
+            applyBaseFilter(query, filter);
 
-        QueryUtils.addEquals(query, "userId", filter.getUserId());
+            QueryUtils.addEquals(query, "userId", filter.getUserId());
+            QueryUtils.addLike(query, "name", filter.getName());
+            QueryUtils.addLike(query, "slug", filter.getSlug());
+            QueryUtils.addEquals(query, "color", filter.getColor());
+            QueryUtils.addLike(query, "description", filter.getDescription());
+            QueryUtils.addEquals(query, "parentId", filter.getParentId());
+            QueryUtils.addEquals(query, "active", filter.getActive());
 
-        QueryUtils.addLike(query, "name", filter.getName());
-
-        QueryUtils.addLike(query, "slug", filter.getSlug());
-
-        QueryUtils.addEquals(query, "color", filter.getColor());
-
-        QueryUtils.addLike(query, "description", filter.getDescription());
-
-        QueryUtils.addEquals(query, "parentId", filter.getParentId());
-
-        QueryUtils.addEquals(query, "active", filter.getActive());
-
-        return toPage(
-                query,
-                pageable
-        );
+            return toPage(query, pageable);
+        });
     }
 }

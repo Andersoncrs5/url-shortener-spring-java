@@ -7,7 +7,9 @@ import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.UrlEntity;
 import com.read.api.infrastructure.persistence.mapper.UrlMapperRepository;
 import com.read.api.infrastructure.persistence.mongo.MongoUrlRepository;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -31,98 +33,71 @@ public class UrlRepositoryImpl
     public UrlRepositoryImpl(
             MongoTemplate template,
             UrlMapperRepository mapper,
-            MongoUrlRepository repository
+            MongoUrlRepository repository,
+            MongoRetryTranslation retryTranslator
     ) {
-        super(template);
+        super(template, retryTranslator);
         this.repository = repository;
         this.mapper = mapper;
     }
 
     @Override
+    @Retry(name = "database")
     public UrlModel save(UrlModel url) {
-        return mapper.toModel(
-                repository.save(
-                        mapper.toEntity(url)
-                )
-        );
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.save(mapper.toEntity(url))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public UrlModel insert(UrlModel url) {
-        return mapper.toModel(
-                repository.insert(
-                        mapper.toEntity(url)
-                )
-        );
+        return retryTranslator.execute(() -> mapper.toModel(
+                repository.insert(mapper.toEntity(url))
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<UrlModel> findById(Long id) {
-        return repository.findById(id)
-                .map(mapper::toModel);
+        return retryTranslator.execute(() -> repository.findById(id).map(mapper::toModel));
     }
 
     @Override
+    @Retry(name = "database")
     public Page<UrlModel> findAll(UrlFilter filter, Pageable pageable) {
+        return retryTranslator.execute(() -> {
+            Query query = new Query();
 
-        Query query = new Query();
+            applyBaseFilter(query, filter);
 
-        applyBaseFilter(query, filter);
+            QueryUtils.addEquals(query, "userId", filter.getUserId());
+            QueryUtils.addEquals(query, "shortCode", filter.getShortCode());
+            QueryUtils.addLike(query, "description", filter.getDescription());
+            QueryUtils.addLike(query, "faviconUrl", filter.getFaviconUrl());
+            QueryUtils.addLike(query, "originalUrl", filter.getOriginalUrl());
+            QueryUtils.addLike(query, "title", filter.getTitle());
+            QueryUtils.addLike(query, "domain", filter.getDomain());
 
-        QueryUtils.addEquals(query, "userId", filter.getUserId());
-        QueryUtils.addEquals(query, "shortCode", filter.getShortCode());
-        QueryUtils.addLike(query, "description", filter.getDescription());
-        QueryUtils.addLike(query, "faviconUrl", filter.getFaviconUrl());
-        QueryUtils.addLike(query, "originalUrl", filter.getOriginalUrl());
-        QueryUtils.addLike(query, "title", filter.getTitle());
-        QueryUtils.addLike(query, "domain", filter.getDomain());
+            QueryUtils.addEquals(query, "status", filter.getStatus());
+            QueryUtils.addEquals(query, "accessType", filter.getAccessType());
+            QueryUtils.addEquals(query, "passwordHash", filter.getPasswordHash());
+            QueryUtils.addEquals(query, "customAlias", filter.getCustomAlias());
 
-        QueryUtils.addEquals(query, "status", filter.getStatus());
-        QueryUtils.addEquals(query, "accessType", filter.getAccessType());
+            QueryUtils.addRange(query, "deletedAt", filter.getDeletedAtMin(), filter.getDeletedAtMax());
+            QueryUtils.addRange(query, "expiresAt", filter.getExpiresAtMin(), filter.getExpiresAtMax());
+            QueryUtils.addRange(query, "lastAccessAt", filter.getLastAccessAtMin(), filter.getLastAccessAtMax());
 
-        QueryUtils.addEquals(query, "passwordHash", filter.getPasswordHash());
-
-        QueryUtils.addEquals(query, "customAlias", filter.getCustomAlias());
-
-        QueryUtils.addRange(
-                query,
-                "deletedAt",
-                filter.getDeletedAtMin(),
-                filter.getDeletedAtMax()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "expiresAt",
-                filter.getExpiresAtMin(),
-                filter.getExpiresAtMax()
-        );
-
-        QueryUtils.addRange(
-                query,
-                "lastAccessAt",
-                filter.getLastAccessAtMin(),
-                filter.getLastAccessAtMax()
-        );
-
-        if (!filter.getTags().isEmpty()) {
-            if (filter.isMatchAllTags()) {
-
-                query.addCriteria(
-                        Criteria.where("tags")
-                                .all(filter.getTags())
-                );
-
-            } else {
-
-                query.addCriteria(
-                        Criteria.where("tags")
-                                .in(filter.getTags())
-                );
+            if (filter.getTags() != null && !filter.getTags().isEmpty()) {
+                if (filter.isMatchAllTags()) {
+                    query.addCriteria(Criteria.where("tags").all(filter.getTags()));
+                } else {
+                    query.addCriteria(Criteria.where("tags").in(filter.getTags()));
+                }
             }
-        }
 
-        return toPage(query, pageable);
+            return toPage(query, pageable);
+        });
     }
 
     @Override
@@ -141,8 +116,8 @@ public class UrlRepositoryImpl
     }
 
     @Override
+    @Retry(name = "database")
     public Optional<UrlModel> findByShortCode(String code) {
-        return repository.findByShortCode(code)
-                .map(this::toModel);
+        return retryTranslator.execute(() -> repository.findByShortCode(code).map(this::toModel));
     }
 }

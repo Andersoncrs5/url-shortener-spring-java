@@ -7,7 +7,9 @@ import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.UserEntity;
 import com.read.api.infrastructure.persistence.mapper.UserMapperRepository;
 import com.read.api.infrastructure.persistence.mongo.MongoUserRepository;
+import com.read.api.infrastructure.persistence.shared.MongoRetryTranslation;
 import com.read.api.infrastructure.persistence.utils.QueryUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
@@ -30,9 +32,10 @@ public class UserRepositoryImpl
     public UserRepositoryImpl(
             MongoTemplate template,
             MongoUserRepository repository,
-            UserMapperRepository mapper
+            UserMapperRepository mapper,
+            MongoRetryTranslation retryTranslator
     ) {
-        super(template);
+        super(template, retryTranslator);
         this.repository = repository;
         this.mapper = mapper;
     }
@@ -53,64 +56,76 @@ public class UserRepositoryImpl
     }
 
     @Override
+    @Retry(name = "database")
     public UserModel save(UserModel user) {
-        return mapper.toModel(
+        return retryTranslator.execute(() ->mapper.toModel(
                 repository.save(mapper.toEntity(user))
-        );
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public UserModel insert(UserModel user) {
-        return mapper.toModel(
+        return retryTranslator.execute(() -> mapper.toModel(
                 repository.insert(mapper.toEntity(user))
+        ));
+    }
+
+    @Override
+    @Retry(name = "database")
+    public Optional<UserModel> findById(Long id) {
+        return retryTranslator.execute(() ->
+                repository.findById(id).map(mapper::toModel)
         );
     }
 
     @Override
-    public Optional<UserModel> findById(Long id) {
-        return repository.findById(id)
-                .map(mapper::toModel);
-    }
-
-    @Override
+    @Retry(name = "database")
     public boolean existsById(Long id) {
-        return super.existsById(id);
+        return retryTranslator.execute(() ->
+                        super.existsById(id)
+                );
     }
 
     @Override
+    @Retry(name = "database")
     public int deleteById(Long id) {
-        return super.deleteById(id);
+        return retryTranslator.execute(() ->(
+                super.deleteById(id)
+        ));
     }
 
     @Override
+    @Retry(name = "database")
     public Page<UserModel> findAll(UserFilter filter, Pageable pageable) {
-        Query query = new Query();
+        return retryTranslator.execute(() -> {
+            Query query = new Query();
+            applyBaseFilter(query, filter);
 
-        // Herda os filtros bases automaticamente (id, createdAt, updatedAt)
-        applyBaseFilter(query, filter);
+            QueryUtils.addLike(query, "name", filter.getName());
+            QueryUtils.addLike(query, "email", filter.getEmail());
+            QueryUtils.addEquals(query, "active", filter.getActive());
 
-        // Aplica os filtros específicos de usuário usando a classe utilitária do projeto
-        QueryUtils.addLike(query, "name", filter.getName());
-        QueryUtils.addLike(query, "email", filter.getEmail());
-        QueryUtils.addEquals(query, "active", filter.getActive());
-
-        // Executa a paginação padronizada da classe abstrata
-        return toPage(query, pageable);
+            return toPage(query, pageable);
+        });
     }
-
     @Override
+    @Retry(name = "database")
     public Optional<UserModel> findByEmailIgnoreCase(String email) {
-        return this.repository.findByEmailIgnoreCase(email)
-                .map(mapper::toModel);
+        return retryTranslator.execute(() ->
+                this.repository.findByEmailIgnoreCase(email).map(mapper::toModel)
+        );
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsByEmailIgnoreCase(String email) {
-        return this.repository.existsByEmailIgnoreCase(email);
+        return retryTranslator.execute(() -> this.repository.existsByEmailIgnoreCase(email));
     }
 
     @Override
+    @Retry(name = "database")
     public boolean existsByNameIgnoreCase(String name) {
-        return this.repository.existsByNameIgnoreCase(name);
+        return retryTranslator.execute(() -> this.repository.existsByNameIgnoreCase(name));
     }
 }
