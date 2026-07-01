@@ -10,16 +10,15 @@ import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.FindAndReplaceOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-public abstract class BaseRepositoryImpl<
-        TModel extends BaseModel,
-        TEntity extends BaseEntity,
-        ID> {
+public abstract class BaseRepositoryImpl<TModel extends BaseModel, TEntity extends BaseEntity, ID> {
 
     protected final MongoTemplate template;
     protected final MongoRetryTranslation retryTranslator;
@@ -39,6 +38,7 @@ public abstract class BaseRepositoryImpl<
     public boolean existsById(ID id) {
         return retryTranslator.execute(() -> {
             Query query = Query.query(Criteria.where("id").is(id));
+            query.fields().include("_id");
             return template.exists(query, entityClass());
         });
     }
@@ -54,14 +54,24 @@ public abstract class BaseRepositoryImpl<
 
     protected Page<TModel> toPage(Query query, Pageable pageable) {
         return retryTranslator.execute(() -> {
-            long total = template.count(query, entityClass());
-
             query.with(pageable);
 
             List<TModel> content = template.find(query, entityClass())
                     .stream()
                     .map(this::toModel)
                     .toList();
+
+            long total;
+            long offset = pageable.getOffset();
+            int pageSize = pageable.getPageSize();
+
+            if (offset == 0 && content.size() < pageSize) {
+                total = content.size();
+            } else if (content.isEmpty() && offset > 0) {
+                total = offset;
+            } else {
+                total = template.count(query.skip(-1).limit(-1), entityClass());
+            }
 
             return new PageImpl<>(content, pageable, total);
         });
@@ -75,13 +85,31 @@ public abstract class BaseRepositoryImpl<
 
     @Retry(name = "database")
     public List<TModel> saveAll(List<TModel> models) {
+        if (models == null || models.isEmpty()) {
+            return List.of();
+        }
+
         return retryTranslator.execute(() -> {
+            BulkOperations bulk = template.bulkOps(
+                    BulkOperations.BulkMode.UNORDERED,
+                    entityClass()
+            );
+
             List<TEntity> entities = models.stream()
                     .map(this::toEntity)
                     .toList();
 
-            return template.insert(entities, entityClass())
-                    .stream()
+            entities.forEach(entity -> {
+                Query query = Query.query(Criteria.where("id").is(entity.getId()));
+
+                FindAndReplaceOptions options = FindAndReplaceOptions.options().upsert();
+
+                bulk.replaceOne(query, entity, options);
+            });
+
+            bulk.execute();
+
+            return entities.stream()
                     .map(this::toModel)
                     .toList();
         });
@@ -89,13 +117,25 @@ public abstract class BaseRepositoryImpl<
 
     @Retry(name = "database")
     public List<TModel> insertAll(List<TModel> models) {
+        if (models == null || models.isEmpty()) {
+            return List.of();
+        }
+
         return retryTranslator.execute(() -> {
+            BulkOperations bulk = template.bulkOps(
+                    BulkOperations.BulkMode.UNORDERED,
+                    entityClass()
+            );
+
             List<TEntity> entities = models.stream()
                     .map(this::toEntity)
                     .toList();
 
-            return template.insert(entities, entityClass())
-                    .stream()
+            bulk.insert(entities);
+
+            bulk.execute();
+
+            return entities.stream()
                     .map(this::toModel)
                     .toList();
         });
