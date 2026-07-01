@@ -9,6 +9,7 @@ import com.read.api.application.usecase.interfaces.user.ExistsUserByNameUseCase;
 import com.read.api.application.usecase.interfaces.user.FindAllUserUseCase;
 import com.read.api.application.usecase.interfaces.user.FindByIdUserUseCase;
 import com.read.api.domain.model.UserModel;
+import com.read.api.utils.annotation.ratelimit.RateLimited;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class UserController implements UserControllerDocs {
     ExistsUserByNameUseCase existsName;
     UserMapperController mapper;
 
+    @Override
+    @RateLimited("read-low")
     public ResponseEntity<Page<?>> getAll(
             String idempotencyKey,
             UserFilter filter,
@@ -43,6 +46,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UserDTO>> findById(
             @PathVariable Long id,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
@@ -67,6 +71,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<Boolean>> emailExists(
             @RequestParam String email
     ) {
@@ -81,6 +86,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<Boolean>> nameExists(
             @RequestParam String name
     ) {
