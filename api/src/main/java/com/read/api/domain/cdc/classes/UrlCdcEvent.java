@@ -1,5 +1,6 @@
 package com.read.api.domain.cdc.classes;
 
+import com.read.api.domain.cdc.BaseCdcEvent;
 import com.read.api.domain.enums.UrlAccessTypeEnum;
 import com.read.api.domain.enums.UrlStatusEnum;
 
@@ -24,5 +25,5 @@ public record UrlCdcEvent(
         LocalDateTime lastAccessAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
+) implements BaseCdcEvent {
 }

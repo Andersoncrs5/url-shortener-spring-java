@@ -1,5 +1,6 @@
 package com.read.api.domain.cdc.classes;
 
+import com.read.api.domain.cdc.BaseCdcEvent;
 import com.read.api.domain.enums.BrowserEnum;
 import com.read.api.domain.enums.ContinentEnum;
 import com.read.api.domain.enums.MatchTypeEnum;
@@ -24,5 +25,5 @@ public record UrlRedirectRuleCdcEvent(
         LocalDateTime endAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
+) implements BaseCdcEvent {
 }
