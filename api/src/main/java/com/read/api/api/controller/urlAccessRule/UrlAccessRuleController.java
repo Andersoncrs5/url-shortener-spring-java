@@ -9,6 +9,7 @@ import com.read.api.application.usecase.interfaces.urlAccessRule.FindAllFilterUr
 import com.read.api.application.usecase.interfaces.urlAccessRule.FindUrlAccessRuleByIdUseCase;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.model.UrlAccessRuleModel;
+import com.read.api.utils.annotation.ratelimit.RateLimited;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
     ExistsByUrlIdAndTypeAndRuleValueUrlAccessRuleUseCase exists;
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<Boolean>> exists(
             Long urlId,
             UrlAccessRuleTypeEnum type,
@@ -51,6 +53,7 @@ public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
     }
 
     @Override
+    @RateLimited("read-low")
     public ResponseEntity<Page<UrlAccessRuleDTO>> findAllFilter(
             @ModelAttribute UrlAccessRuleFilter filter,
             UrlAccessRulePageRequestDTO page
@@ -63,6 +66,7 @@ public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UrlAccessRuleDTO>> findById(
         Long id
     ) {

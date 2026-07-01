@@ -9,6 +9,7 @@ import com.read.api.application.usecase.interfaces.urlTag.ExistsUrlTagBySlugUseC
 import com.read.api.application.usecase.interfaces.urlTag.FindFilterUrlTagUseCase;
 import com.read.api.application.usecase.interfaces.urlTag.FindUrlTagByIdUseCase;
 import com.read.api.domain.model.UrlTagModel;
+import com.read.api.utils.annotation.ratelimit.RateLimited;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class UrlTagController implements UrlTagControllerDocs {
     ExistsUrlTagBySlugUseCase existsBySlug;
 
     @Override
+    @RateLimited("read-low")
     public ResponseEntity<Page<UrlTagDTO>> findAllFilter(
             UrlTagFilter filter,
             UrlTagPageRequestDTO page
@@ -41,6 +43,7 @@ public class UrlTagController implements UrlTagControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UrlTagDTO>> findById(
             Long id
     ) {
@@ -63,6 +66,7 @@ public class UrlTagController implements UrlTagControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<Boolean>> nameExists(
             String name
     ) {
@@ -79,6 +83,7 @@ public class UrlTagController implements UrlTagControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<Boolean>> slugExists(
             String slug
     ) {

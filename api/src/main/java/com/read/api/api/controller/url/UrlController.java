@@ -11,6 +11,7 @@ import com.read.api.application.usecase.interfaces.url.FindUrlByShortCodeUseCase
 import com.read.api.domain.enums.BrowserEnum;
 import com.read.api.domain.enums.OperatingSystemEnum;
 import com.read.api.domain.model.UrlModel;
+import com.read.api.utils.annotation.ratelimit.RateLimited;
 import com.read.api.utils.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -32,6 +33,7 @@ public class UrlController implements UrlControllerDocs {
     FindUrlByIdUseCase findById;
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UrlDTO>> findById(Long id) {
         Result<UrlModel> result = findById.execute(id);
 
@@ -51,6 +53,7 @@ public class UrlController implements UrlControllerDocs {
     }
 
     @Override
+    @RateLimited("read-low")
     public ResponseEntity<Page<UrlDTO>> findAllFilter(
             UrlFilter filter,
             UrlPageRequestDTO page
@@ -63,6 +66,7 @@ public class UrlController implements UrlControllerDocs {
     }
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UrlDTO>> redirectShortCode(
             String shortCode,
             String userAgent,

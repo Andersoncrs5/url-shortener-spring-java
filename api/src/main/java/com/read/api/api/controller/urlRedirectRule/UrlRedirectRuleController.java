@@ -7,6 +7,7 @@ import com.read.api.api.dto.urlRedirectRule.UrlRedirectRuleFilter;
 import com.read.api.application.usecase.interfaces.urlRedirectRule.FindAllFilterUrlRedirectRuleUseCase;
 import com.read.api.application.usecase.interfaces.urlRedirectRule.FindUrlRedirectRuleByIdUseCase;
 import com.read.api.domain.model.UrlRedirectRuleModel;
+import com.read.api.utils.annotation.ratelimit.RateLimited;
 import com.read.api.utils.result.Result;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UrlRedirectRuleController implements UrlRedirectRuleControllerDocs 
     UrlRedirectRuleMapperController mapper;
 
     @Override
+    @RateLimited("read-low")
     public ResponseEntity<Page<UrlRedirectRuleDTO>> findAllFilter(
             UrlRedirectRuleFilter filter,
             UrlRedirectRulePageRequestDTO page
@@ -36,6 +38,7 @@ public class UrlRedirectRuleController implements UrlRedirectRuleControllerDocs 
 
 
     @Override
+    @RateLimited("read-strong")
     public ResponseEntity<ResponseHTTP<UrlRedirectRuleDTO>> findById(Long id) {
         Result<UrlRedirectRuleModel> result = findById.execute(id);
 
