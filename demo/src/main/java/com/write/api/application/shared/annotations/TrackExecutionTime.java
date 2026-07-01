@@ -11,5 +11,6 @@ public @interface TrackExecutionTime {
 
     String value();
     String description() default "";
+    String[] tags() default {};
 
 }

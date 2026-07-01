@@ -6,6 +6,7 @@ import com.write.api.adapters.in.web.controller.docs.swagger.ResponseValidationE
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
 import com.write.api.shared.validation.snowflake.IsId;
@@ -26,6 +27,10 @@ public interface UrlAccessRuleControllerDocs {
     @Idempotent
     @PostMapping
     @RateLimiter(name = "create")
+    @TrackExecutionTime(
+            value = "url.access.rule.create",
+            description = "Execution time of URL Access Rule creation"
+    )
     @Operation(
             summary = "Create URL access rule",
             description = """
@@ -159,6 +164,10 @@ public interface UrlAccessRuleControllerDocs {
     @Idempotent
     @DeleteMapping("/{id}")
     @RateLimiter(name = "delete")
+    @TrackExecutionTime(
+            value = "url.access.rule.delete",
+            description = "Execution time of URL Access Rule deletion"
+    )
     @Operation(
             summary = "Delete URL access rule",
             description = """
@@ -243,6 +252,10 @@ public interface UrlAccessRuleControllerDocs {
     @Idempotent
     @PatchMapping("/{id}")
     @RateLimiter(name = "update")
+    @TrackExecutionTime(
+            value = "url.access.rule.update",
+            description = "Execution time of URL Access Rule update"
+    )
     @Operation(
             summary = "Update URL access rule",
             description = """
