@@ -34,7 +34,7 @@ public class ObservedMetricAspect {
 
     private final MeterRegistry meterRegistry;
 
-    @Around("@annotation(metric)")
+    @Around("@annotation(observedMetric)")
     public Object observe(
             ProceedingJoinPoint joinPoint,
             ObservedMetric metric
