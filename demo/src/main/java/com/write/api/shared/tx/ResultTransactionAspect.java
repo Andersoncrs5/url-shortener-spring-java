@@ -7,8 +7,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 @Aspect
 @Component
@@ -18,24 +18,49 @@ public class ResultTransactionAspect {
     private final PlatformTransactionManager transactionManager;
 
     @Around("@annotation(resultTransaction)")
-    public Object around(ProceedingJoinPoint joinPoint, ResultTransaction resultTransaction) throws Throwable {
-        TransactionStatus status = transactionManager.getTransaction(
-                TransactionDefinition.withDefaults()
-        );
+    public Object around(
+            ProceedingJoinPoint joinPoint,
+            ResultTransaction resultTransaction
+    ) throws Throwable {
+
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+
+        definition.setReadOnly(resultTransaction.readOnly());
+        definition.setPropagationBehavior(resultTransaction.propagation().value());
+        definition.setIsolationLevel(resultTransaction.isolation().value());
+        definition.setTimeout(resultTransaction.timeout());
+
+        TransactionStatus status = transactionManager.getTransaction(definition);
 
         try {
+
             Object returned = joinPoint.proceed();
 
             if (returned instanceof Result<?> result && result.isFailure()) {
-                transactionManager.rollback(status);
+
+                if (status.isNewTransaction()) {
+                    transactionManager.rollback(status);
+                } else {
+                    status.setRollbackOnly();
+                }
+
                 return returned;
             }
 
-            transactionManager.commit(status);
+            if (status.isNewTransaction()) {
+                transactionManager.commit(status);
+            }
+
             return returned;
 
         } catch (Throwable ex) {
-            transactionManager.rollback(status);
+
+            if (status.isNewTransaction()) {
+                transactionManager.rollback(status);
+            } else {
+                status.setRollbackOnly();
+            }
+
             throw ex;
         }
     }
