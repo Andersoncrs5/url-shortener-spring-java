@@ -111,7 +111,7 @@ public class JooqUrlRedirectRuleRepository
     @Override
     public int countByUrlId(Long urlId) {
             return execute(
-                    () -> dsl.selectCount().where(URL_REDIRECT_RULES.URL_ID.eq(urlId)).execute()
+                    () -> dsl.selectCount().from(URL_REDIRECT_RULES).where(URL_REDIRECT_RULES.URL_ID.eq(urlId)).execute()
             );
     }
 }
