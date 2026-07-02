@@ -14,4 +14,5 @@ public interface BaseRepository<T extends BaseModel, ID, F extends BaseFilter> {
     boolean existsById(ID id);
     int deleteById(ID id);
     Page<T> findAll(F filter, Pageable pageable);
+    long deleteAll();
 }
