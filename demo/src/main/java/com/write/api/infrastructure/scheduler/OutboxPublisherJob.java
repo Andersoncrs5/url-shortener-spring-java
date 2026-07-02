@@ -7,6 +7,7 @@ import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ public class OutboxPublisherJob {
     )
     @Bulkhead(name = "outbox")
     @TrackExecutionTime("job.outbox.publisher")
+    @SchedulerLock(name = "OutboxPublisherJob", lockAtMostFor = "PT4M", lockAtLeastFor = "PT1M")
     public void publishPendingEvents() {
         useCase.execute();
     }

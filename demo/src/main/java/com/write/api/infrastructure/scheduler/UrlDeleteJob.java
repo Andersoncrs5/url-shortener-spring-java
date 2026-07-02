@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,7 @@ public class UrlDeleteJob {
             timeUnit = TimeUnit.MINUTES
     )
     @TrackExecutionTime("job.url.delete")
+    @SchedulerLock(name = "UrlDeleteJob", lockAtMostFor = "PT4M", lockAtLeastFor = "PT1M")
     public void delete() {
         List<UrlModel> list = repository.findToDelete(
                 UrlStatusEnum.DELETED,

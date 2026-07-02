@@ -6,6 +6,7 @@ import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ public class OutboxFailJob {
             timeUnit = TimeUnit.MINUTES
     )
     @Bulkhead(name = "outbox")
+    @SchedulerLock(name = "OutboxFailJob", lockAtMostFor = "PT4M", lockAtLeastFor = "PT1M")
     @TrackExecutionTime("job.outbox.publisher.fail")
     public void publishPendingEvents() {
         useCase.execute();
