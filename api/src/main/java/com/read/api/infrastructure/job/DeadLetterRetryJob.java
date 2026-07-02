@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,11 @@ public class DeadLetterRetryJob {
     TryRetryUrlTagUseCase retryUrlTag;
 
     @Scheduled(fixedDelay = 30000)
+    @SchedulerLock(
+            name = "dead-letter-retry",
+            lockAtMostFor = "PT5M",
+            lockAtLeastFor = "PT5S"
+    )
     public void execute() {
 
         List<DeadLetterEventModel> events = repository.findPendingRetryEvents(
