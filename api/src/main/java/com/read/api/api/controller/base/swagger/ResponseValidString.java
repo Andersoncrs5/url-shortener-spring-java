@@ -1,4 +1,4 @@
-package com.read.api.api.controller.swagger;
+package com.read.api.api.controller.base.swagger;
 
 import com.read.api.api.dto.ResponseHTTP;
 

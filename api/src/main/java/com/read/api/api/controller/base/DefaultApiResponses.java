@@ -1,6 +1,6 @@
 package com.read.api.api.controller.base;
 
-import com.read.api.api.controller.swagger.ResponseValidString;
+import com.read.api.api.controller.base.swagger.ResponseValidString;
 import com.read.api.api.dto.ResponseHTTP;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
