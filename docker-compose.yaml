@@ -350,6 +350,7 @@ services:
     image: percona/percona-server-mongodb:latest
     container_name: mongodb-url-spring
     restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
