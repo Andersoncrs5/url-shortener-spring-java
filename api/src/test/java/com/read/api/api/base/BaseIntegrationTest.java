@@ -2,6 +2,7 @@ package com.read.api.api.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.TestcontainersConfiguration;
+import com.read.api.domain.enums.DeadLetterStatus;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
 import com.read.api.domain.enums.UrlAccessTypeEnum;
 import com.read.api.domain.enums.UrlStatusEnum;
@@ -39,6 +40,40 @@ public class BaseIntegrationTest {
     @Autowired UrlRedirectRuleRepository urlRedirectRuleRepository;
     @Autowired UrlRepository urlRepository;
     @Autowired UrlTagRepository urlTagRepository;
+    @Autowired DeadLetterEventRepository deadLetterRepository;
+
+    protected DeadLetterEventModel createDeadLetterEvent() {
+        return createDeadLetterEvent(DeadLetterStatus.PENDING);
+    }
+
+    protected DeadLetterEventModel createDeadLetterEvent(DeadLetterStatus status) {
+
+        DeadLetterEventModel model = DeadLetterEventModel.create(
+                generator.nextId(),
+                "roles",
+                "roles.dlq",
+                "RoleCdcEvent",
+                "{ \"id\": 1, \"name\": \"pochita\" }",
+                20
+        );
+
+        model.setId(generator.nextId());
+
+        model.setStatus(status);
+
+        return deadLetterRepository.insert(model);
+    }
+
+    protected ArrayList<DeadLetterEventModel> createManyDeadLetterEvents(int amount) {
+
+        ArrayList<DeadLetterEventModel> list = new ArrayList<>();
+
+        for (int i = 0; i < amount; i++) {
+            list.add(createDeadLetterEvent());
+        }
+
+        return list;
+    }
 
     protected UrlTagModel createUrlTag() {
         UrlTagModel model = new UrlTagModel();
