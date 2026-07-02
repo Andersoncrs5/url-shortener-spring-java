@@ -4,6 +4,7 @@ import com.read.api.api.dto.deadLetterEvent.DeadLetterEventFilter;
 import com.read.api.domain.enums.DeadLetterStatus;
 import com.read.api.domain.model.DeadLetterEventModel;
 import com.read.api.domain.repository.DeadLetterEventRepository;
+import com.read.api.domain.utils.SnowflakeIdGenerator;
 import com.read.api.infrastructure.persistence.base.BaseRepositoryImpl;
 import com.read.api.infrastructure.persistence.entity.DeadLetterEventEntity;
 import com.read.api.infrastructure.persistence.mapper.DeadLetterEventMapperRepository;
@@ -32,17 +33,20 @@ public class DeadLetterEventRepositoryImpl
         implements DeadLetterEventRepository {
 
     DeadLetterEventMapperRepository mapper;
+    SnowflakeIdGenerator generator;
     MongoDeadLetterEventRepository repository;
 
     public DeadLetterEventRepositoryImpl(
             MongoTemplate template,
             DeadLetterEventMapperRepository mapper,
             MongoDeadLetterEventRepository repository,
-            MongoRetryTranslation retryTranslator
+            MongoRetryTranslation retryTranslator,
+            SnowflakeIdGenerator generator1
     ) {
         super(template, retryTranslator);
         this.mapper = mapper;
         this.repository = repository;
+        this.generator = generator1;
     }
 
     @Override
@@ -71,6 +75,8 @@ public class DeadLetterEventRepositoryImpl
     @Override
     @Retry(name = "database")
     public DeadLetterEventModel insert(DeadLetterEventModel event) {
+        event.setId(generator.nextId());
+
         return retryTranslator.execute(() -> mapper.toModel(
                 repository.insert(mapper.toEntity(event))
         ));
