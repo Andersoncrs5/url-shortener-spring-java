@@ -1,9 +1,11 @@
 package com.read.api.api.controller.urlRedirectRule;
 
+import com.read.api.api.controller.base.DefaultApiResponses;
 import com.read.api.api.controller.base.swagger.classes.ResponseUrlRedirectRuleDTO;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.urlRedirectRule.UrlRedirectRuleDTO;
 import com.read.api.api.dto.urlRedirectRule.UrlRedirectRuleFilter;
+import com.read.api.utils.validation.isId.IsId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@DefaultApiResponses
 @Tag(name = "URL Redirect Rules", description = "Endpoints for managing and inspecting conditional routing, split-testing, and dynamic destination targets")
 public interface UrlRedirectRuleControllerDocs {
 
@@ -30,8 +33,6 @@ public interface UrlRedirectRuleControllerDocs {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Paginated evaluation matrix returned successfully"),
             @ApiResponse(responseCode = "429", description = "Too many requests",
-                    content = @Content(schema = @Schema(implementation = ResponseHTTP.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected internal server error",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class)))
     })
     ResponseEntity<Page<UrlRedirectRuleDTO>> findAllFilter(
@@ -55,12 +56,10 @@ public interface UrlRedirectRuleControllerDocs {
             @ApiResponse(responseCode = "404", description = "Redirect rule context not found",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class))),
             @ApiResponse(responseCode = "429", description = "Too many requests",
-                    content = @Content(schema = @Schema(implementation = ResponseHTTP.class))),
-            @ApiResponse(responseCode = "500", description = "Unexpected internal server error",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class)))
     })
     ResponseEntity<ResponseHTTP<UrlRedirectRuleDTO>> findById(
             @Parameter(description = "Unique dynamic rule numerical identifier", required = true, example = "77203", in = ParameterIn.PATH)
-            @PathVariable Long id
+            @PathVariable @IsId Long id
     );
 }

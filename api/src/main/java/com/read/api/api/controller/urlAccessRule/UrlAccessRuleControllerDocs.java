@@ -1,10 +1,12 @@
 package com.read.api.api.controller.urlAccessRule;
 
+import com.read.api.api.controller.base.DefaultApiResponses;
 import com.read.api.api.controller.base.swagger.classes.ResponseUrlAccessRuleDTO;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.urlAccessRule.UrlAccessRuleDTO;
 import com.read.api.api.dto.urlAccessRule.UrlAccessRuleFilter;
 import com.read.api.domain.enums.UrlAccessRuleTypeEnum;
+import com.read.api.utils.validation.isId.IsId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@DefaultApiResponses
 @Tag(name = "URL Access Rules", description = "Endpoints for querying and validating security and access constraints applied to shortened links")
 public interface UrlAccessRuleControllerDocs {
 
@@ -74,7 +77,7 @@ public interface UrlAccessRuleControllerDocs {
     })
     ResponseEntity<ResponseHTTP<Boolean>> exists(
             @Parameter(description = "The database context link owner identifier", required = true, example = "1024", in = ParameterIn.QUERY)
-            @RequestParam Long urlId,
+            @RequestParam @IsId Long urlId,
 
             @Parameter(description = "The target validation behavior constraint to search for", required = true, in = ParameterIn.QUERY)
             @RequestParam UrlAccessRuleTypeEnum type,

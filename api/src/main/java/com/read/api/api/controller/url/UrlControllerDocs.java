@@ -1,9 +1,11 @@
 package com.read.api.api.controller.url;
 
+import com.read.api.api.controller.base.DefaultApiResponses;
 import com.read.api.api.controller.base.swagger.classes.ResponseHttpUrl;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.url.UrlDTO;
 import com.read.api.api.dto.url.UrlFilter;
+import com.read.api.utils.validation.isId.IsId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+@DefaultApiResponses
 @Tag(name = "URL Management", description = "Endpoints for retrieving information and resolving shortened URLs")
 public interface UrlControllerDocs {
 
@@ -39,7 +42,7 @@ public interface UrlControllerDocs {
     })
     ResponseEntity<ResponseHTTP<UrlDTO>> findById(
             @Parameter(description = "Unique URL numerical database identifier", required = true, example = "1024", in = ParameterIn.PATH)
-            @PathVariable Long id
+            @PathVariable @IsId Long id
     );
 
     @GetMapping

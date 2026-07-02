@@ -1,9 +1,11 @@
 package com.read.api.api.controller.user;
 
+import com.read.api.api.controller.base.DefaultApiResponses;
 import com.read.api.api.controller.base.swagger.classes.ResponseBooleanDTO;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.user.UserDTO;
 import com.read.api.api.dto.user.UserFilter;
+import com.read.api.utils.validation.isId.IsId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@DefaultApiResponses
 @Tag(name = "Users", description = "Endpoints for user management, identity checking, and registry lookup")
 public interface UserControllerDocs {
 
@@ -46,13 +49,12 @@ public interface UserControllerDocs {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User profile context resolved successfully",
                     content = @Content(schema = @Schema(implementation = UserDTO.class))),
-            @ApiResponse(responseCode = "44", description = "User target entity not found",
+            @ApiResponse(responseCode = "404", description = "User target entity not found",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class)))
     })
     ResponseEntity<ResponseHTTP<UserDTO>> findById(
             @Parameter(description = "Unique user numerical system identifier", required = true, example = "9182", in = ParameterIn.PATH)
-            @PathVariable Long id,
-
+            @PathVariable @IsId Long id,
             @Parameter(description = "Unique key used to guarantee idempotency context window validation", required = true, example = "6f1a4d93-8d3d-4c4f-9f0a-3b8f4c0d1234", in = ParameterIn.HEADER)
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );

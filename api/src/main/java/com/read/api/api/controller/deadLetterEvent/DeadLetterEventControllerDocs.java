@@ -1,8 +1,10 @@
 package com.read.api.api.controller.deadLetterEvent;
 
+import com.read.api.api.controller.base.DefaultApiResponses;
 import com.read.api.api.dto.ResponseHTTP;
 import com.read.api.api.dto.deadLetterEvent.DeadLetterEventDTO;
 import com.read.api.api.dto.deadLetterEvent.DeadLetterEventFilter;
+import com.read.api.utils.validation.isId.IsId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Dead Letter Event", description = "Management and auditing of failed integration events")
+@DefaultApiResponses
 public interface DeadLetterEventControllerDocs {
 
     @GetMapping("/{id}")
@@ -42,11 +45,6 @@ public interface DeadLetterEventControllerDocs {
                     )
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid ID format supplied",
-                    content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "Dead Letter Event not found with the provided ID",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
@@ -54,11 +52,6 @@ public interface DeadLetterEventControllerDocs {
             @ApiResponse(
                     responseCode = "429",
                     description = "Too many requests - Rate limit exceeded",
-                    content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Unexpected internal server error",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
             )
     })
@@ -69,6 +62,7 @@ public interface DeadLetterEventControllerDocs {
                     example = "918273645",
                     in = ParameterIn.PATH
             )
+            @IsId
             @PathVariable Long id
     );
 
@@ -96,11 +90,6 @@ public interface DeadLetterEventControllerDocs {
             @ApiResponse(
                     responseCode = "429",
                     description = "Too many requests - Rate limit exceeded",
-                    content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Unexpected internal server error",
                     content = @Content(schema = @Schema(implementation = ResponseHTTP.class))
             )
     })

@@ -1,6 +1,7 @@
 package com.read.api.api.controller.base;
 
 import com.read.api.api.controller.base.swagger.ResponseValidString;
+import com.read.api.api.controller.base.swagger.classes.ResponseValidationError;
 import com.read.api.api.dto.ResponseHTTP;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,7 +18,8 @@ import java.lang.annotation.*;
         content = @Content(
                 schema = @Schema(
                         oneOf = {
-                                ResponseValidString.class
+                                ResponseValidString.class,
+                                ResponseValidationError.class
                         }
                 )
         )
