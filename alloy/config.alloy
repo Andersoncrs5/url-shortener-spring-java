@@ -1,3 +1,6 @@
+// =====================================================================
+// 1. RECEIVERS & EXPORTERS (TRACES / TEMPO)
+// =====================================================================
 otelcol.receiver.otlp "default" {
   grpc {}
   http {}
@@ -9,7 +12,7 @@ otelcol.receiver.otlp "default" {
 
 otelcol.exporter.otlp "tempo" {
   client {
-    endpoint = "tempo:4318"
+    endpoint = "tempo:4317"
 
     tls {
       insecure = true
@@ -17,6 +20,9 @@ otelcol.exporter.otlp "tempo" {
   }
 }
 
+// =====================================================================
+// 2. LOGS DO DEMO (SPRING BOOT)
+// =====================================================================
 loki.source.file "spring_logs" {
   targets = [
     {
@@ -24,21 +30,65 @@ loki.source.file "spring_logs" {
       app      = "spring-boot",
     },
   ]
+  forward_to = [loki.process.parse_demo_json.receiver]
+}
+
+loki.process "parse_demo_json" {
+  stage.json {
+    expressions = {
+      traceId = "mdc.trace_id",
+      spanId  = "mdc.span_id",
+      level   = "level",
+    }
+  }
+
+  stage.labels {
+    values = {
+      traceId = "",
+      spanId  = "",
+      level   = "",
+    }
+  }
 
   forward_to = [loki.write.local.receiver]
 }
 
+// =====================================================================
+// 3. LOGS DA READ-API
+// =====================================================================
 loki.source.file "api_logs" {
   targets = [
     {
-      __path__ = "/var/log/api-spring/*.log",
+      __path__ = "/var/log/api-spring/api-spring.log",
       app      = "read-api",
     },
   ]
+  forward_to = [loki.process.parse_api_json.receiver]
+}
+
+loki.process "parse_api_json" {
+  stage.json {
+    expressions = {
+      traceId = "mdc.trace_id",
+      spanId  = "mdc.span_id",
+      level   = "level",
+    }
+  }
+
+  stage.labels {
+    values = {
+      traceId = "",
+      spanId  = "",
+      level   = "",
+    }
+  }
 
   forward_to = [loki.write.local.receiver]
 }
 
+// =====================================================================
+// 4. CLIENT EXPORTER (LOKI)
+// =====================================================================
 loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"

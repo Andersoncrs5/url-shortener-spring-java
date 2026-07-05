@@ -101,6 +101,12 @@ services:
         GF_SECURITY_ADMIN_PASSWORD: admin
         GF_AUTH_ANONYMOUS_ENABLED: true
         GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+
+        GF_DATABASE_TYPE: mysql
+        GF_DATABASE_HOST: tidb-server:4000
+        GF_DATABASE_NAME: grafana
+        GF_DATABASE_USER: grafana
+        GF_DATABASE_PASSWORD: grafana
     networks:
         - url_shot_java
 
@@ -135,6 +141,9 @@ services:
     image: grafana/loki:3.0.0
     container_name: loki
     command: -config.file=/etc/loki/local-config.yaml
+    depends_on:
+      alloy:
+        condition: service_started
     ports:
       - "3100:3100"
     networks:
@@ -156,6 +165,11 @@ services:
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
+    depends_on:
+      demo:
+        condition: service_healthy
+      api:
+        condition: service_healthy
     ports:
       - "4317:4317"
       - "4318:4318"
