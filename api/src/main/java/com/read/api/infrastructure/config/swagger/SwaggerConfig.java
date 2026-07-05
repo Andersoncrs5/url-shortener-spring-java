@@ -66,7 +66,7 @@ public class SwaggerConfig {
 
                 .addServersItem(
                         new Server()
-                                .url("http://localhost:9999")
+                                .url("http://localhost:8888")
                                 .description("Local")
                 )
 

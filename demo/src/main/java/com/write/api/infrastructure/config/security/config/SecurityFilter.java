@@ -1,12 +1,15 @@
 package com.write.api.infrastructure.config.security.config;
 
+import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.infrastructure.config.security.jwt.TokenService;
 import com.write.api.ports.out.repository.IUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,14 +24,22 @@ import java.io.IOException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
-    private final IUserRepository userRepository;
-    private final CustomUserDetailsService userDetailsService;
+    TokenService tokenService;
+    IUserRepository userRepository;
+    CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/actuator") || path.contains("/actuator") ) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = this.recoverToken(request);
 
         if (token == null) {

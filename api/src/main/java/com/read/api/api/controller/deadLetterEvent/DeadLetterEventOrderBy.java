@@ -1,9 +1,10 @@
 package com.read.api.api.controller.deadLetterEvent;
 
+import com.read.api.api.controller.base.ConvertibleEnum;
 import lombok.Getter;
 
 @Getter
-public enum DeadLetterEventOrderBy {
+public enum DeadLetterEventOrderBy implements ConvertibleEnum {
 
     ID("id"),
     EVENT_ID("eventId"),

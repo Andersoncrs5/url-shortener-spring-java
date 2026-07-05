@@ -1,3 +1,19 @@
-CREATE DATABASE IF NOT EXISTS url_shortener;
-CREATE DATABASE IF NOT EXISTS url_shortener_test;
-CREATE DATABASE IF NOT EXISTS grafana;
+CREATE DATABASE IF NOT EXISTS url_shortener
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_bin;
+
+CREATE DATABASE IF NOT EXISTS url_shortener_test
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_bin;
+
+CREATE DATABASE IF NOT EXISTS grafana
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_bin;
+
+CREATE USER IF NOT EXISTS 'grafana'@'%' IDENTIFIED BY 'grafana';
+
+GRANT SELECT ON url_shortener.* TO 'grafana'@'%';
+
+GRANT SELECT ON information_schema.* TO 'grafana'@'%';
+
+FLUSH PRIVILEGES;

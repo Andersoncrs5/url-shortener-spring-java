@@ -1,0 +1,18 @@
+[
+  {
+    "name": "com.read.api.utils.metrics.observed.ObservedMetric",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.read.api.utils.metrics.observed.ObservedMetricAspect",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "org.aspectj.lang.reflect.MethodSignature",
+    "allPublicMethods": true
+  }
+]

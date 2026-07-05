@@ -12,4 +12,8 @@ public class BaseModel {
     Long version;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+
+    public Long getVersion() {
+        return version == null ? 0L : version;
+    }
 }

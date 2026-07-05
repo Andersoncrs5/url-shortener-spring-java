@@ -1,9 +1,10 @@
 package com.read.api.api.controller.urlTag;
 
+import com.read.api.api.controller.base.ConvertibleEnum;
 import lombok.Getter;
 
 @Getter
-public enum UrlTagOrderBy {
+public enum UrlTagOrderBy implements ConvertibleEnum {
 
     ID("id"),
     NAME("name"),

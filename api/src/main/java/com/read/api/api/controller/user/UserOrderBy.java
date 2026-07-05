@@ -1,6 +1,10 @@
 package com.read.api.api.controller.user;
 
-public enum UserOrderBy {
+import com.read.api.api.controller.base.ConvertibleEnum;
+import lombok.Getter;
+
+@Getter
+public enum UserOrderBy implements ConvertibleEnum {
     ID("id"),
     NAME("name"),
     EMAIL("email"),
@@ -13,7 +17,4 @@ public enum UserOrderBy {
         this.field = field;
     }
 
-    public String getField() {
-        return field;
-    }
 }

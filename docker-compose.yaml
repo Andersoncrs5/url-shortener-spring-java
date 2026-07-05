@@ -1,4 +1,53 @@
 services:
+  api:
+    environment:
+      - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://alloy:4318
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+      - LOGGING_FILE_PATH=/var/log/spring
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+      - OTEL_SERVICE_NAME=read-api
+
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb_read_api:27017/admin?authSource=admin&replicaSet=rs0
+
+      - SPRING_KAFKA_PRODUCER_KEY_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer
+      - SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer
+
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: read-api
+    ports:
+      - "8888:8080"
+    networks:
+      - url_shot_java
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      tidb-server:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      dragonfly:
+        condition: service_started
+      tempo:
+        condition: service_started
+      ticdc-setup:
+        condition: service_completed_successfully
+      mongo-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./api/logs:/var/log/spring
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 45s
+
   demo:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
@@ -16,38 +65,44 @@ services:
     networks:
       - url_shot_java
     depends_on:
+      mongodb:
+        condition: service_healthy
       tidb-server:
-        condition: service_started
+        condition: service_healthy
       redpanda:
         condition: service_started
       dragonfly:
         condition: service_started
       tempo:
         condition: service_started
-      alloy:
-        condition: service_started
       ticdc-setup:
         condition: service_completed_successfully
     volumes:
       - ./demo/logs:/var/log/spring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 70s
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
+        - "3000:3000"
     depends_on:
       tidb-server:
         condition: service_healthy
+    volumes:
+        - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_AUTH_ANONYMOUS_ENABLED: true
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+        GF_SECURITY_ADMIN_USER: admin
+        GF_SECURITY_ADMIN_PASSWORD: admin
+        GF_AUTH_ANONYMOUS_ENABLED: true
+        GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
     networks:
-      - url_shot_java
+        - url_shot_java
 
   prometheus:
     image: victoriametrics/victoria-metrics:latest
@@ -60,8 +115,10 @@ services:
     depends_on:
         mongodb-exporter:
             condition: service_started
+        api:
+            condition: service_healthy
         demo:
-            condition: service_started
+            condition: service_healthy
         kafka-exporter:
             condition: service_started
         tikv:
@@ -70,7 +127,7 @@ services:
         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
         - victoria_data:/victoria-metrics-data
     ports:
-        - "9090:8428"
+        - "9090:9090"
     networks:
         - url_shot_java
 
@@ -104,6 +161,7 @@ services:
       - "4318:4318"
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - ./api/logs:/var/log/api-spring
       - ./demo/logs:/var/log/spring
     command:
       - run
@@ -193,6 +251,46 @@ services:
     networks:
       - url_shot_java
 
+#   tiflash:
+#     image: pingcap/tiflash:latest
+#     container_name: tiflash-url-spring
+#     restart: unless-stopped
+#     command:
+#       - tiflash
+#       - server
+#       - --config-file=/etc/tiflash/tiflash.toml
+#     volumes:
+#       - ./tidb/tiflash/tiflash.toml:/etc/tiflash/tiflash.toml
+#       - tiflash_data:/data
+#     ports:
+#       - "3930:3930"
+#       - "8234:8234"
+#
+#     depends_on:
+#       pd:
+#         condition: service_started
+#       tikv:
+#         condition: service_started
+#     networks:
+#       - url_shot_java
+#
+#   tiflash-init:
+#     image: mysql:8
+#     container_name: tiflash-init
+#     depends_on:
+#       tidb-server:
+#         condition: service_healthy
+#       api:
+#         condition: service_started
+#       tiflash:
+#         condition: service_started
+#     volumes:
+#         - ./tidb/flash/tiflash-init.sh:/scripts/tiflash-init.sh
+#
+#     entrypoint: ["/bin/sh", "-c", "sleep 20 && /bin/sh /scripts/tiflash-init.sh"]
+#     networks:
+#         - url_shot_java
+
   ticdc-setup:
     image: pingcap/ticdc:latest
     container_name: ticdc-setup-automation
@@ -205,7 +303,7 @@ services:
       ticdc:
         condition: service_started
       redpanda:
-        condition: service_started
+        condition: service_healthy
     networks:
       - url_shot_java
 
@@ -273,9 +371,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     restart: unless-stopped
-
     privileged: true
-
     ports:
         - "8085:8080"
     volumes:
@@ -286,7 +382,6 @@ services:
         - /dev/disk:/dev/disk:ro
     devices:
         - /dev/kmsg
-
     networks:
         - url_shot_java
 
@@ -319,7 +414,7 @@ services:
                 bootstrap.servers: "redpanda:9092"
     depends_on:
       redpanda:
-        condition: service_started
+        condition: service_healthy
     networks:
       - url_shot_java
 
@@ -327,9 +422,13 @@ services:
     image: docker.dragonflydb.io/dragonflydb/dragonfly
     container_name: dragonfly-url-spring
     restart: unless-stopped
-    command: ["dragonfly", "--logtostderr", "--dir", "/data"]
+    command:
+      - dragonfly
+      - --logtostderr
+      - --dir=/data
+      - --maxmemory=4gb
     ulimits:
-      memlock: -1
+        memlock: -1
     ports:
       - "6379:6379"
     volumes:
@@ -347,31 +446,71 @@ services:
         - url_shot_java
 
   mongodb:
-    image: percona/percona-server-mongodb:latest
-    container_name: mongodb-url-spring
-    restart: unless-stopped
-    command: ["--replSet", "rs0", "--bind_ip_all"]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
+    image: mongo:7.0
+    container_name: mongodb_read_api
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
       - url_shot_java
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  mongodb2:
+    image: mongo:7.0
+    container_name: mongodb2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo2_data:/data/db
+    networks:
+      - url_shot_java
+
+  mongo-init:
+    image: mongo:7.0
+    container_name: mongo-init
+    networks:
+      - url_shot_java
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+      echo 'Aguardando o motor do MongoDB responder...';
+      until mongosh --host mongodb:27017 --eval 'db.adminCommand(\"ping\")' &>/dev/null; do
+        sleep 2;
+      done;
+
+      echo 'Inicializando o Replica Set rs0...';
+      mongosh --host mongodb:27017 --eval 'rs.initiate({_id: \"rs0\", members: [{_id: 0, host: \"mongodb:27017\"}, {_id: 1, host: \"mongodb2:27017\"}]})';
+
+      echo 'Aguardando o nó se tornar PRIMARY...';
+      until mongosh --host mongodb:27017 --eval 'db.hello().isWritablePrimary' | grep -q 'true'; do
+        sleep 2;
+      done;
+
+      echo 'Criando usuário administrador (root:root)...';
+      mongosh --host mongodb:27017 --eval 'db.getSiblingDB(\"admin\").createUser({user: \"root\", pwd: \"root\", roles: [{role: \"root\", db: \"admin\"}]})';
+      echo 'Configuração do MongoDB Replica Set finalizada com sucesso!';
+      "
 
   mongodb-exporter:
     image: percona/mongodb_exporter:0.51.0
-    command:
-        - --mongodb.uri=mongodb://root:root@mongodb:27017/admin
+    environment:
+        - MONGODB_URI=mongodb://root:root@mongodb:27017/admin?authSource=admin&replicaSet=rs0
     ports:
       - "9216:9216"
     networks:
         - url_shot_java
     depends_on:
       mongodb:
-        condition: service_started
+        condition: service_healthy
 
 networks:
   url_shot_java:
@@ -380,7 +519,10 @@ networks:
 volumes:
   pd_data:
   tikv_data:
+  #tiflash_data:
   redpanda_data:
   dragonfly_data:
   mongodb_data:
+  mongo2_data:
   victoria_data:
+  mongo_shared_config:

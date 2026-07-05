@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.kafka.consumer.user;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.cdc.classes.UserCdcEvent;
@@ -28,6 +29,9 @@ public class UserCdcConsumerDlq
         super(cache, insert, mapper);
     }
 
+    private static final TypeReference<DeadLetterEvent<UserCdcEvent>> TYPE =
+            new TypeReference<>() {};
+
     @KafkaListener(
             topics = "users.dlq",
             groupId = "url-shortener"
@@ -36,11 +40,11 @@ public class UserCdcConsumerDlq
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
     public void consume(
-            ConsumerRecord<String, DeadLetterEvent<UserCdcEvent>> record
-
+            ConsumerRecord<String, String> record
     ) {
         saveDeadLetter(
                 record,
+                TYPE,
                 TopicEnum.USERS,
                 TopicEnum.USERS_DLQ,
                 "users"

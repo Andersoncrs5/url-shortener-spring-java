@@ -1,12 +1,16 @@
 package com.read.api.api.controller.urlAccessRule;
 
-public enum UrlAccessRuleOrderBy {
+import com.read.api.api.controller.base.ConvertibleEnum;
+import lombok.Getter;
+
+@Getter
+public enum UrlAccessRuleOrderBy implements ConvertibleEnum {
     ID("id"),
     URL_ID("urlId"),
     TYPE("type"),
     RULE_VALUE("ruleValue"),
     ACTIVE("active"),
-    ASSIFNED_BY_USER_ID("assignedByUserId"),
+    ASSIGNED_BY_USER_ID("assignedByUserId"),
     EXPIRES_AT("expiresAt"),
     CREATED_AT("createdAt"),
     UPDATED_AT("updatedAt");
@@ -17,7 +21,4 @@ public enum UrlAccessRuleOrderBy {
         this.field = field;
     }
 
-    public String getField() {
-        return field;
-    }
 }

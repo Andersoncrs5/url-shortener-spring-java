@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.kafka.consumer.role;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.cdc.classes.RoleCdcEvent;
@@ -13,6 +14,7 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -35,11 +37,11 @@ public class RoleCdcConsumerDlq extends AbstractDlqConsumer<RoleCdcEvent> {
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
     public void consume(
-            ConsumerRecord<String, DeadLetterEvent<RoleCdcEvent>> record
+            ConsumerRecord<String, String> record
     ) {
-
         saveDeadLetter(
                 record,
+                new TypeReference<DeadLetterEvent<RoleCdcEvent>>() {},
                 TopicEnum.ROLES,
                 TopicEnum.ROLES_DLQ,
                 "roles"

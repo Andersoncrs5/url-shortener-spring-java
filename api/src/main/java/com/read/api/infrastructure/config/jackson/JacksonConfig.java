@@ -1,8 +1,13 @@
 package com.read.api.infrastructure.config.jackson;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.CoercionAction;
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.databind.type.LogicalType;
 import org.bson.types.ObjectId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +20,20 @@ public class JacksonConfig {
 
         ObjectMapper mapper = new ObjectMapper();
 
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        mapper.coercionConfigFor(LogicalType.Boolean)
+                .setCoercion(CoercionInputShape.String, CoercionAction.TryConvert);
+
         SimpleModule module = new SimpleModule();
 
         module.addSerializer(
                 ObjectId.class,
                 new ToStringSerializer()
         );
+
+        module.addDeserializer(Boolean.class, new Boolean01Deserializer());
+        module.addDeserializer(boolean.class, new Boolean01Deserializer());
 
         mapper.registerModule(module);
 

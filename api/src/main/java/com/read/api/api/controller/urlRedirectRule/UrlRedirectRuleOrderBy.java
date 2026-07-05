@@ -1,9 +1,10 @@
 package com.read.api.api.controller.urlRedirectRule;
 
+import com.read.api.api.controller.base.ConvertibleEnum;
 import lombok.Getter;
 
 @Getter
-public enum UrlRedirectRuleOrderBy {
+public enum UrlRedirectRuleOrderBy implements ConvertibleEnum {
     ID("id"),
     URL_ID("urlId"),
     PRIORITY("priority"),

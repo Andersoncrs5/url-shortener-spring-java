@@ -91,10 +91,6 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
 
@@ -200,20 +196,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring AOP (já traz proxy + integração com @Aspect) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
             <version>3.4.7</version>
         </dependency>
 
-        <!-- AspectJ runtime (necessário em alguns casos de weaving/pointcuts) -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>1.9.25.1</version>
         </dependency>
-
 
         <dependency>
             <groupId>io.micrometer</groupId>

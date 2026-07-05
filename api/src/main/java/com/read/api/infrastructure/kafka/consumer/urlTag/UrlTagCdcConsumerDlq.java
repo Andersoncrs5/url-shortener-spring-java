@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.kafka.consumer.urlTag;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.cdc.classes.UrlTagCdcEvent;
@@ -28,6 +29,9 @@ public class UrlTagCdcConsumerDlq
         super(cache, insert, mapper);
     }
 
+    private static final TypeReference<DeadLetterEvent<UrlTagCdcEvent>> TYPE =
+            new TypeReference<>() {};
+
     @KafkaListener(
             topics = "url_tags.dlq",
             groupId = "url-shortener"
@@ -36,11 +40,11 @@ public class UrlTagCdcConsumerDlq
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
     public void consume(
-            ConsumerRecord<String, DeadLetterEvent<UrlTagCdcEvent>> record
+            ConsumerRecord<String, String> record
     ) {
-
         saveDeadLetter(
                 record,
+                TYPE,
                 TopicEnum.URL_TAG,
                 TopicEnum.URL_TAG_DLQ,
                 "urlTag"

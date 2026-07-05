@@ -1,5 +1,6 @@
 package com.write.api.infrastructure.messaging.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
@@ -12,10 +13,12 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -28,7 +31,7 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
     @CircuitBreaker(name = "kafka", fallbackMethod = "fallbackPublish")
     @Retry(name = "kafka")
     @Bulkhead(name = "kafka")
-    @TrackExecutionTime("kafka.publish")
+    @TrackExecutionTime("outbox.kafka.publish")
     public SendResult<String, String> publish(OutboxEventModel event) {
 
         OutboxEventMessage message = new OutboxEventMessage(
@@ -50,7 +53,7 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
                     json
             ).toCompletableFuture().join();
 
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize event", e);
         }
     }
@@ -60,6 +63,15 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
             OutboxEventModel event,
             Throwable ex
     ) {
+        log.error(
+                "Kafka publish failed. eventId={}, topic={}, aggregateId={} cause={}" ,
+                event.getId(),
+                event.getTopic(),
+                event.getAggregateId(),
+                ex.getMessage(),
+                ex
+        );
+
         throw new CircuitBreakerException(
                 "Kafka publish failed after retries: " + event.getId(),
                 ex

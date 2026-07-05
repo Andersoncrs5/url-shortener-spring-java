@@ -1,5 +1,8 @@
 package com.read.api.infrastructure.kafka.consumer.role;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.cdc.role.RoleCdcServiceUseCase;
 import com.read.api.domain.cdc.TiCdcEvent;
 import com.read.api.domain.cdc.classes.RoleCdcEvent;
@@ -11,21 +14,27 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleCdcConsumer extends AbstractCdcConsumer<RoleCdcEvent> {
 
     RoleCdcServiceUseCase service;
+    ObjectMapper mapper;
 
     public RoleCdcConsumer(
             RoleCdcServiceUseCase service,
-            DeadLetterPublisher deadLetterPublisher
+            DeadLetterPublisher deadLetterPublisher,
+            ObjectMapper mapper
     ) {
         super(deadLetterPublisher);
         this.service = service;
+        this.mapper = mapper;
     }
 
     @KafkaListener(
@@ -35,13 +44,22 @@ public class RoleCdcConsumer extends AbstractCdcConsumer<RoleCdcEvent> {
     @Retry(name = "kafka")
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
-    public void consume(
-            TiCdcEvent<RoleCdcEvent> event
-    ) {
-        process(
-                event,
-                () -> service.process(event),
-                TopicEnum.ROLES_DLQ
-        );
+    public void consume(String payload) {
+
+        try {
+            TiCdcEvent<RoleCdcEvent> event =
+                    mapper.readValue(
+                            payload,
+                            new TypeReference<TiCdcEvent<RoleCdcEvent>>() {}
+                    );
+
+            process(
+                    event,
+                    () -> service.process(event),
+                    TopicEnum.ROLES_DLQ
+            );
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

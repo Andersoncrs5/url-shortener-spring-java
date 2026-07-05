@@ -1,6 +1,7 @@
 package com.read.api.infrastructure.kafka.base;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.enums.DeadLetterStatus;
@@ -21,7 +22,8 @@ public abstract class AbstractDlqConsumer<T> {
     private final ObjectMapper mapper;
 
     protected void saveDeadLetter(
-            ConsumerRecord<String, DeadLetterEvent<T>> record,
+            ConsumerRecord<String, String> record,
+            TypeReference<DeadLetterEvent<T>> type,
             TopicEnum sourceTopic,
             TopicEnum dlqTopic,
             String eventType
@@ -44,11 +46,13 @@ public abstract class AbstractDlqConsumer<T> {
             return;
         }
 
-        DeadLetterEvent<T> event = record.value();
+        DeadLetterEvent<T> event;
 
         try {
+            event = mapper.readValue(record.value(), type);
             payload = mapper.writeValueAsString(event.payload());
         } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
 

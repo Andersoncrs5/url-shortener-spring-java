@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.kafka.consumer.urlAccessRule;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.cdc.classes.UrlAccessRuleCdcEvent;
@@ -28,6 +29,9 @@ public class UrlAccessRuleCdcConsumerDlq
         super(cache, insert, mapper);
     }
 
+    private static final TypeReference<DeadLetterEvent<UrlAccessRuleCdcEvent>> TYPE =
+            new TypeReference<>() {};
+
     @KafkaListener(
             topics = "url_access_rule.dlq",
             groupId = "url-shortener"
@@ -36,11 +40,11 @@ public class UrlAccessRuleCdcConsumerDlq
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
     public void consume(
-            ConsumerRecord<String, DeadLetterEvent<UrlAccessRuleCdcEvent>> record
+            ConsumerRecord<String, String> record
     ) {
-
         saveDeadLetter(
                 record,
+                TYPE,
                 TopicEnum.URL_ACCESS_RULE,
                 TopicEnum.URL_ACCESS_RULE_DLQ,
                 "urlAccessRule"

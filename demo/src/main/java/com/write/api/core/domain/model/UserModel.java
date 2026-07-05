@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserModel extends BaseModel {
 
-    Long version;
     String name;
     String email;
     String refreshToken;

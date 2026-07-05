@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.kafka.consumer.urlRedirectRule;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.read.api.application.usecase.interfaces.deadLetterEvent.InsertDeadLetterEventUseCase;
 import com.read.api.domain.cdc.classes.UrlRedirectRuleCdcEvent;
@@ -28,6 +29,9 @@ public class UrlRedirectRuleCdcConsumerDlq
         super(cache, insert, mapper);
     }
 
+    private static final TypeReference<DeadLetterEvent<UrlRedirectRuleCdcEvent>> TYPE =
+            new TypeReference<>() {};
+
     @KafkaListener(
             topics = "url_redirect_rules.dlq",
             groupId = "url-shortener"
@@ -36,11 +40,11 @@ public class UrlRedirectRuleCdcConsumerDlq
     @CircuitBreaker(name = "kafka")
     @Bulkhead(name = "kafka")
     public void consume(
-            ConsumerRecord<String, DeadLetterEvent<UrlRedirectRuleCdcEvent>> record
+            ConsumerRecord<String, String> record
     ) {
-
         saveDeadLetter(
                 record,
+                TYPE,
                 TopicEnum.URL_REDIRECT_RULE,
                 TopicEnum.URL_REDIRECT_RULE_DLQ,
                 "urlRedirectRule"

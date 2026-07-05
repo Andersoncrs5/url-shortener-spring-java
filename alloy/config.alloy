@@ -28,6 +28,17 @@ loki.source.file "spring_logs" {
   forward_to = [loki.write.local.receiver]
 }
 
+loki.source.file "api_logs" {
+  targets = [
+    {
+      __path__ = "/var/log/api-spring/*.log",
+      app      = "read-api",
+    },
+  ]
+
+  forward_to = [loki.write.local.receiver]
+}
+
 loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"

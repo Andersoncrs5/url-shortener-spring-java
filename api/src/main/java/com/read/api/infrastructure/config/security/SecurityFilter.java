@@ -38,6 +38,13 @@ public class SecurityFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/actuator") || path.contains("/actuator") ) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = this.recoverToken(request);
 
         if (token == null) {
