@@ -200,7 +200,9 @@ services:
     volumes:
       - pd_data:/data
     networks:
-      - url_shot_java
+      url_shot_java:
+        aliases:
+          - pd
 
   tikv:
     image: pingcap/tikv:latest
@@ -265,45 +267,52 @@ services:
     networks:
       - url_shot_java
 
-#   tiflash:
-#     image: pingcap/tiflash:latest
-#     container_name: tiflash-url-spring
-#     restart: unless-stopped
-#     command:
-#       - tiflash
-#       - server
-#       - --config-file=/etc/tiflash/tiflash.toml
-#     volumes:
-#       - ./tidb/tiflash/tiflash.toml:/etc/tiflash/tiflash.toml
-#       - tiflash_data:/data
-#     ports:
-#       - "3930:3930"
-#       - "8234:8234"
-#
-#     depends_on:
-#       pd:
-#         condition: service_started
-#       tikv:
-#         condition: service_started
-#     networks:
-#       - url_shot_java
-#
-#   tiflash-init:
-#     image: mysql:8
-#     container_name: tiflash-init
-#     depends_on:
-#       tidb-server:
-#         condition: service_healthy
-#       api:
-#         condition: service_started
-#       tiflash:
-#         condition: service_started
-#     volumes:
-#         - ./tidb/flash/tiflash-init.sh:/scripts/tiflash-init.sh
-#
-#     entrypoint: ["/bin/sh", "-c", "sleep 20 && /bin/sh /scripts/tiflash-init.sh"]
-#     networks:
-#         - url_shot_java
+  # tiflash:
+  #    image: pingcap/tiflash:latest
+  #    container_name: tiflash-url-spring
+  #    restart: unless-stopped
+  #    environment:
+  #      - LD_LIBRARY_PATH=/usr/local/bin
+  #    command:
+  #      - tiflash
+  #      - server
+  #      - --config-file=/etc/tiflash/tiflash.toml
+  #    volumes:
+  #      - ./tidb/tiflash/tiflash.toml:/etc/tiflash/tiflash.toml
+  #      - tiflash_data:/data
+  #    ports:
+  #      - "3930:3930"
+  #      - "8234:8234"
+  #      - "20170:20170"
+  #      - "20292:20292"
+  #    depends_on:
+  #      pd:
+  #        condition: service_started
+  #      tikv:
+  #        condition: service_started
+  #    networks:
+  #      - url_shot_java
+  #
+  # tiflash-init:
+  #    image: mysql:8
+  #    container_name: tiflash-init
+  #    depends_on:
+  #      demo:
+  #        condition: service_healthy
+  #      tidb-server:
+  #        condition: service_healthy
+  #      api:
+  #        condition: service_started
+  #      tiflash:
+  #        condition: service_started
+  #    volumes:
+  #        - ./tidb/flash/tiflash-init.sh:/scripts/tiflash-init.sh
+  #
+  #    entrypoint: ["/bin/sh", "-c", "sleep 20 && /bin/sh /scripts/tiflash-init.sh"]
+  #    networks:
+  #     url_shot_java:
+  #       aliases:
+  #         - pd
 
   ticdc-setup:
     image: pingcap/ticdc:latest
@@ -403,6 +412,9 @@ services:
     image: prom/node-exporter:latest
     container_name: node-exporter
     restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
     pid: host
     ports:
         - "9100:9100"
