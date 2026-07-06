@@ -1,0 +1,22 @@
+tmp_path = "/data/tmp"
+data_dir = "/data/data"
+
+[raft]
+pd_addr = "pd:2379"
+
+[status]
+metrics_port = 8234
+
+[flash]
+service_addr = "0.0.0.0:3930"
+
+[flash.proxy]
+engine-addr = "0.0.0.0:3930"
+raft-addr = "0.0.0.0:20170"
+status-addr = "0.0.0.0:20292"
+data-dir = "/data/proxy"
+
+[logger]
+level = "info"
+log = "/data/tiflash.log"
+errorlog = "/data/tiflash_error.log"

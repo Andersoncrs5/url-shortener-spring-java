@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: TiDB
+    type: mysql
+    access: proxy
+    host: tidb-server:4000
+    user: grafana
+    database: url_shortener
+    secureJsonData:
+      password: grafana
+    jsonData:
+      maxOpenConns: 20
+      maxIdleConns: 10
+      connMaxLifetime: 14400
