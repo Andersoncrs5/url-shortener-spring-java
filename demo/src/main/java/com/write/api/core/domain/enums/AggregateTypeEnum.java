@@ -11,7 +11,10 @@ public enum AggregateTypeEnum {
     ADMINS,
     URL,
     URL_ACCESS_RULE,
+    URL_REDIRECT_RULE,
     URL_TAG,
     API_KEY,
-    ROLE
+    ROLE,
+    NOTIFY
+
 }
