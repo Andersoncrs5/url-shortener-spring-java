@@ -14,19 +14,18 @@ import org.testcontainers.junit.jupiter.Container;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestcontainersConfiguration {
 
-	@Container
-	static KafkaContainer kafka =
-			new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
-
-	@DynamicPropertySource
-	static void kafkaProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+	@Bean
+	@ServiceConnection
+	KafkaContainer kafkaContainer() {
+		return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
 	}
 
 	@Bean
 	@ServiceConnection
 	MySQLContainer<?> mysqlContainer() {
-		return new MySQLContainer<>("mysql:8.4");
+		return new MySQLContainer<>("mysql:8.4")
+				.withCommand("--lower_case_table_names=1")
+				.withDatabaseName("test");
 	}
 
 	@Bean
