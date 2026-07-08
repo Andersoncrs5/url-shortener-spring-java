@@ -17,6 +17,15 @@ management:
     tags:
       application: ${spring.application.name}
 
+application:
+  name-short: notify-api
+  name: Notify API
+  description: Notification service responsible for email delivery and user notification processing.
+  version: 1.0.0
+  environment: local
+  timezone: America/Sao_Paulo
+  default-language: en-US
+
 spring:
   application:
     name: notify-api
