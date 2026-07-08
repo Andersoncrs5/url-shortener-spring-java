@@ -13,8 +13,10 @@ import java.util.UUID;
 public abstract class BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private Long id;
+
+    @Version
+    private Long version;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
