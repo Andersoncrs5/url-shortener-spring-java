@@ -4,6 +4,7 @@ import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.outbox.events.url.UrlDeleteEvent;
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -17,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-@Service
+@UseService
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DeleteUrlByIdForceService implements DeleteUrlByIdForceUseCase {

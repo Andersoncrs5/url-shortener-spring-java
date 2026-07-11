@@ -7,6 +7,7 @@ import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.mapper.urlAccessRule.CreateUrlAccessRuleMapper;
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -30,7 +31,9 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 
-@Slf4j @Service @Validated @RequiredArgsConstructor
+@Slf4j
+@UseService
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreateUrlAccessRuleService implements CreateUrlAccessRuleUseCase {
     SnowflakeIdGenerator idGen;

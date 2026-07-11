@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.OutboxEventModel;
@@ -18,13 +19,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Optional;
 
 @Slf4j
-@Service
+@UseService
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HandlerDlqService implements HandlerDlqUseCase {
@@ -52,7 +52,7 @@ public class HandlerDlqService implements HandlerDlqUseCase {
         boolean firstExecution = redisCrudService.saveIfAbsent(
                 "dlq:" + event.eventId(),
                 "processed",
-                Duration.ofHours(24)
+                Duration.ofHours(48)
         );
 
         if (!firstExecution) {
@@ -68,7 +68,7 @@ public class HandlerDlqService implements HandlerDlqUseCase {
 
         OutboxEventModel outboxEvent = optional.get();
 
-        if (outboxEvent.getRetryCount() >= 20) {
+        if (outboxEvent.getRetryCount() >= 30) {
             outboxEvent.setStatus(OutboxStatusEnum.FAILED);
             outboxEvent.setErrorMessage("Max retries exceeded");
             repository.save(outboxEvent);

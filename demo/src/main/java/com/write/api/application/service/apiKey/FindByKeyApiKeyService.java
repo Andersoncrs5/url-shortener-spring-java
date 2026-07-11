@@ -2,6 +2,7 @@ package com.write.api.application.service.apiKey;
 
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.ports.in.apiKey.FindByKeyApiKeyUseCase;
 import com.write.api.ports.out.repository.IApiKeyRepository;
@@ -19,14 +20,14 @@ import java.util.HexFormat;
 import java.util.Optional;
 
 @Slf4j
-@Service
-@Validated
+@UseService
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FindByKeyApiKeyService implements FindByKeyApiKeyUseCase {
 
     IApiKeyRepository repository;
 
+    @ResultTransaction(readOnly = true)
     @TrackExecutionTime("apikey.find")
     public Result<ApiKeyModel> execute(String key) {
         String hash = sha256(key);
