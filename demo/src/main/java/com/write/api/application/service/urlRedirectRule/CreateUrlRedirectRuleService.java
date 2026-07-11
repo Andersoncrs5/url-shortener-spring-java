@@ -1,12 +1,19 @@
 package com.write.api.application.service.urlRedirectRule;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.urlRedirectRule.UrlRedirectRuleCreatedEvent;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.mapper.urlRedirectRule.CreateUrlRedirectRuleServiceMapper;
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.in.urlRedirectRule.CreateUrlRedirectRuleUseCase;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
 import com.write.api.shared.db.DatabaseConstraintHandler;
@@ -15,15 +22,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
 
-@Service
+@UseService
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreateUrlRedirectRuleService implements CreateUrlRedirectRuleUseCase {
     IUrlRedirectRuleRepository repository;
     CreateUrlRedirectRuleServiceMapper mapper;
     SnowflakeIdGenerator idGen;
+    CreateOutboxEventUseCase outbox;
 
     @Override
     @ResultTransaction
@@ -43,6 +50,22 @@ public class CreateUrlRedirectRuleService implements CreateUrlRedirectRuleUseCas
             rule.setRuleHash(hash);
 
             UrlRedirectRuleModel inserted = repository.insert(rule);
+
+            var outboxResult = outbox.execute(
+                    new CreateOutboxEventCommand(
+                            AggregateTypeEnum.URL_REDIRECT_RULE,
+                            inserted.getId(),
+                            EventTypeEnum.URL_REDIRECT_RULE_CREATED,
+                            TopicEnum.URL_REDIRECT_RULE_CREATED,
+                            UrlRedirectRuleCreatedEvent.create(
+                                    inserted.getId(),
+                                    inserted.getUrlId(),
+                                    inserted.getCreatedAt()
+                            )
+                    )
+            );
+
+            if (outboxResult.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
 
             return Result.success(inserted, 201);
         } catch (DataIntegrityViolationException e) {

@@ -1,5 +1,6 @@
 package com.write.api.application.service.user;
 
+import com.write.api.application.dto.notification.ByeByeEmailEventDTO;
 import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.outbox.events.user.UserDeletedEvent;
 import com.write.api.application.shared.Result;
@@ -7,7 +8,9 @@ import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
+import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.core.domain.model.UserModel;
+import com.write.api.ports.in.notification.ByeByeMessageNotificationUseCase;
 import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.in.user.DeleteByIdUserUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
@@ -24,6 +27,7 @@ public class DeleteUserByIdUserService implements DeleteByIdUserUseCase {
 
     CreateOutboxEventUseCase outbox;
     IUserRepository repository;
+    ByeByeMessageNotificationUseCase byeMessage;
 
     @Override
     @ResultTransaction
@@ -57,6 +61,14 @@ public class DeleteUserByIdUserService implements DeleteByIdUserUseCase {
                     "Expected 1 row deleted but got " + deleted
             );
         }
+
+        Result<OutboxEventModel> executed = byeMessage.execute(ByeByeEmailEventDTO.create(
+                user.getId(),
+                user.getEmail(),
+                user.getName()
+        ));
+
+        if (executed.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
 
         return Result.success(200);
     }
