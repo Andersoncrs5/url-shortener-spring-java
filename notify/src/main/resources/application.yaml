@@ -27,22 +27,20 @@ application:
   default-language: en-US
 
 spring:
-  application:
-    name: notify-api
+  sql:
+    init:
+      mode: always
   datasource:
-    url: jdbc:mysql://tidb-server:4000/url_shortener_notify?cachePrepStmts=true&prepStmtCacheSize=500&prepStmtCacheSqlLimit=4096&useServerPrepStmts=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/notify_db
     username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      pool-name: UrlShortenerNotifyPool
-      maximum-pool-size: 40
-      minimum-idle: 10
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+
+  application:
+    name: notify-api
   swagger-ui:
     customCssUrl: /swagger-ui/custom.css
+
   data:
     redis:
       host: dragonfly
@@ -56,8 +54,8 @@ spring:
     consumer:
       group-id: url-shortener-notify-group
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     producer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -77,7 +75,6 @@ resilience4j:
           - com.mongodb.MongoTimeoutException
         ignore-exceptions:
           - org.springframework.dao.DuplicateKeyException
-          - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalArgumentException
       save:
         max-attempts: 4
@@ -144,9 +141,7 @@ resilience4j:
         retry-exceptions:
           - com.read.api.domain.exceptions.TransientDatabaseException
         ignore-exceptions:
-          - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
-          -
       kafka:
         timeout-duration: 5s
         max-attempts: 4
@@ -220,6 +215,14 @@ resilience4j:
         timeout-duration: 0
 
 logging:
+  level:
+    root: INFO
+
+    io.ebean.SQL: DEBUG
+    io.ebean.TXN: DEBUG
+    io.ebean.SUM: DEBUG
+
+    com.notify.notify: DEBUG
   file:
     name: /var/log/spring/app.log
 
