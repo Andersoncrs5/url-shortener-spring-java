@@ -2,6 +2,10 @@ CREATE DATABASE IF NOT EXISTS url_shortener
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_bin;
 
+CREATE DATABASE IF NOT EXISTS url_shortener_notify
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_bin;
+
 CREATE DATABASE IF NOT EXISTS url_shortener_test
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_bin;
