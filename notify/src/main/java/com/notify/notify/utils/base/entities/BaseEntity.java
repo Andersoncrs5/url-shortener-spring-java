@@ -3,6 +3,7 @@ package com.notify.notify.utils.base.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,16 +14,16 @@ import java.util.UUID;
 public abstract class BaseEntity {
 
     @Id
-    private Long id;
+    protected Long id;
 
     @Version
-    private Long version;
+    protected Long version;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    protected LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
