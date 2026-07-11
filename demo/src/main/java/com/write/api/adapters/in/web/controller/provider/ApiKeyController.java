@@ -2,11 +2,11 @@ package com.write.api.adapters.in.web.controller.provider;
 
 import com.write.api.adapters.in.web.controller.docs.ApiKeyControllerDocs;
 import com.write.api.adapters.in.web.mapper.ApiKeyMapper;
+import com.write.api.adapters.in.web.shared.annotations.RestApiController;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.apiKey.ApiKeyDTO;
 import com.write.api.application.dto.apiKey.CreateApiKeyDTO;
 import com.write.api.application.dto.apiKey.UpdateApiKeyDTO;
-import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
@@ -19,16 +19,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Validated
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/api-key")
+@RestApiController("v1/api-key")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApiKeyController implements ApiKeyControllerDocs {
 
