@@ -1,14 +1,15 @@
 package com.write.api.adapters.in.web.controller.provider;
 
 import com.write.api.adapters.in.web.controller.docs.AuthControllerDocs;
+import com.write.api.adapters.in.web.shared.annotations.RestApiController;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.auth.AuthTokenResponseDTO;
 import com.write.api.application.dto.user.CreateUserDTO;
 import com.write.api.application.dto.user.LoginUserDTO;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.model.UserModel;
 import com.write.api.infrastructure.config.api.idempotent.Idempotent;
 import com.write.api.infrastructure.config.security.classes.UserPrincipal;
-import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.in.auth.LoginUserUseCase;
 import com.write.api.ports.in.auth.LogoutAuthUseCase;
 import com.write.api.ports.in.auth.RefreshTokenUseCase;
@@ -17,14 +18,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@Validated
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/auth")
+@RestApiController("v1/auth")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController implements AuthControllerDocs {
 
