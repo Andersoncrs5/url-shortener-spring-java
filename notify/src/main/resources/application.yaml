@@ -54,7 +54,7 @@ spring:
   kafka:
     bootstrap-servers: redpanda:9092
     consumer:
-      group-id: url-shortener-group
+      group-id: url-shortener-notify-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
