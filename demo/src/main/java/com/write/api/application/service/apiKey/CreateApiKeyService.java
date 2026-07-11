@@ -1,13 +1,21 @@
 package com.write.api.application.service.apiKey;
 
 import com.write.api.application.dto.apiKey.CreateApiKeyDTO;
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.apiKey.ApiKeyCreatedEvent;
+import com.write.api.application.dto.outbox.events.urlAccessRule.UrlAccessRuleCreatedEvent;
 import com.write.api.application.mapper.apiKey.CreateApiKeyMapper;
 import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
+import com.write.api.application.shared.annotations.UseService;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.ports.in.apiKey.CreateApiKeyUseCase;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IApiKeyRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import com.write.api.shared.tx.ResultTransaction;
@@ -27,8 +35,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-@Service
-@Validated
+@UseService
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreateApiKeyService implements CreateApiKeyUseCase {
@@ -37,6 +44,7 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
     IApiKeyRepository repository;
     IUserRoleRepository userRoleRepository;
     CreateApiKeyMapper mapper;
+    CreateOutboxEventUseCase outbox;
 
     @Override
     @ResultTransaction
@@ -78,8 +86,27 @@ public class CreateApiKeyService implements CreateApiKeyUseCase {
 
         try {
 
-            repository.insert(apiKey);
+            ApiKeyModel inserted = repository.insert(apiKey);
             log.info("Api key created with success");
+
+            var outboxResult = outbox.execute(
+                    new CreateOutboxEventCommand(
+                            AggregateTypeEnum.API_KEY,
+                            inserted.getId(),
+                            EventTypeEnum.API_KEY_CREATED,
+                            TopicEnum.API_KEY_CREATED,
+                            ApiKeyCreatedEvent.create(
+                                    inserted.getId(),
+                                    inserted.getName(),
+                                    inserted.getUserId(),
+                                    inserted.getOwnerUserId(),
+                                    inserted.isActive()
+                            )
+                    )
+            );
+
+            if (outboxResult.isFailure()) return Result.failure(outboxResult.getErrors(), outboxResult.getStatusCode());
+
             return Result.success(key, 201);
 
         } catch (DataIntegrityViolationException e) {
