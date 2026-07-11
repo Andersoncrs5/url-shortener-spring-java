@@ -36,10 +36,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
@@ -108,11 +105,7 @@
 			<artifactId>spring-boot-starter-actuator-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis-test</artifactId>
@@ -172,12 +165,6 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers-mysql</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.8.14</version>
 		</dependency>
 
 		<dependency>
@@ -280,7 +267,44 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>8.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.ebean</groupId>
+			<artifactId>ebean</artifactId>
+			<version>19.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.ebean</groupId>
+			<artifactId>ebean-spring-txn</artifactId>
+			<version>17.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.ebean</groupId>
+			<artifactId>ebean-ddl-generator</artifactId>
+			<version>19.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.9.25.1</version>
+		</dependency>
+
 	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -306,6 +330,30 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>io.ebean</groupId>
+				<artifactId>ebean-maven-plugin</artifactId>
+				<version>19.2.0</version>
+
+				<executions>
+					<execution>
+						<id>enhance</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>test-enhance</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>testEnhance</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
