@@ -1,17 +1,20 @@
 package com.notify.notify.utils.base.entities;
 
-import jakarta.persistence.*;
+import io.ebean.Model;
+import io.ebean.annotation.WhenCreated;
+import io.ebean.annotation.WhenModified;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity extends Model {
 
     @Id
     protected Long id;
@@ -19,20 +22,9 @@ public abstract class BaseEntity {
     @Version
     protected Long version;
 
-    @Column(nullable = false, updatable = false)
+    @WhenCreated
     protected LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @WhenModified
     protected LocalDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
