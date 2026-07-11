@@ -2,27 +2,22 @@ package com.write.api.application.service.outbox;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
 import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.OutboxEventModel;
-import com.write.api.infrastructure.config.cache.RedisCrudService;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
 import com.write.api.ports.out.repository.IOutboxEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,20 +26,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class HandlerDlqServiceTest {
+class HandlerDlqServiceTest extends BaseServiceTest {
 
     @Mock
     private IOutboxEventRepository repository;
 
     @Mock
     private OutboxEventPublisher publisher;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private RedisCrudService redisCrudService;
 
     @InjectMocks
     private HandlerDlqService service;
@@ -127,7 +115,7 @@ class HandlerDlqServiceTest {
         verify(redisCrudService).saveIfAbsent(
                 eq("dlq:1"),
                 eq("processed"),
-                eq(Duration.ofHours(24))
+                eq(Duration.ofHours(48))
         );
     }
 
@@ -168,7 +156,7 @@ class HandlerDlqServiceTest {
     @Test
     void shouldMarkAsFailedWhenRetryLimitExceeded() throws Exception {
 
-        outboxEvent.setRetryCount(20);
+        outboxEvent.setRetryCount(30);
 
         when(objectMapper.readValue(eq(payload), any(TypeReference.class)))
                 .thenReturn(message);

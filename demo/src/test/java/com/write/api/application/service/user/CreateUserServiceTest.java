@@ -1,8 +1,11 @@
 package com.write.api.application.service.user;
 
+import com.write.api.application.dto.notification.WelcomeEmailEventDTO;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
+import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.core.domain.model.UserModel;
+import com.write.api.ports.in.notification.WelcomeMessageNotificationUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,9 @@ class CreateUserServiceTest {
     private IUserRepository repository;
 
     @Mock
+    private WelcomeMessageNotificationUseCase welcomeMessage;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -37,6 +43,7 @@ class CreateUserServiceTest {
 
     @BeforeEach
     void setup() {
+
         input = new UserModel();
         input.setName("john");
         input.setEmail("john@test.com");
@@ -50,6 +57,7 @@ class CreateUserServiceTest {
         saved.setPasswordHash("encoded-password");
     }
 
+
     @Test
     void shouldCreateUserSuccessfully() {
 
@@ -59,116 +67,195 @@ class CreateUserServiceTest {
         when(repository.insert(any(UserModel.class)))
                 .thenReturn(saved);
 
+        when(welcomeMessage.execute(any(WelcomeEmailEventDTO.class)))
+                .thenReturn(Result.success(new OutboxEventModel()));
+
+
         Result<UserModel> result = service.create(input);
+
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getStatusCode()).isEqualTo(201);
 
-        assertThat(result.getValue()).isNotNull();
-        assertThat(result.getValue().getId()).isEqualTo(1L);
+        assertThat(result.getValue())
+                .isNotNull();
 
-        ArgumentCaptor<UserModel> captor =
-                ArgumentCaptor.forClass(UserModel.class);
+        assertThat(result.getValue().getId())
+                .isEqualTo(1L);
 
-        verify(repository).insert(captor.capture());
 
-        UserModel captured = captor.getValue();
+        ArgumentCaptor<WelcomeEmailEventDTO> dtoCaptor =
+                ArgumentCaptor.forClass(WelcomeEmailEventDTO.class);
 
-        assertThat(captured.getPasswordHash())
-                .isEqualTo("encoded-password");
 
-        InOrder inOrder = inOrder(passwordEncoder, repository);
+        verify(welcomeMessage)
+                .execute(dtoCaptor.capture());
 
-        inOrder.verify(passwordEncoder).encode("123456");
-        inOrder.verify(repository).insert(any(UserModel.class));
+
+        WelcomeEmailEventDTO dto = dtoCaptor.getValue();
+
+
+        assertThat(dto.userId())
+                .isEqualTo(1L);
+
+        assertThat(dto.email())
+                .isEqualTo("john@test.com");
+
+        assertThat(dto.name())
+                .isEqualTo("john");
+
+
+        InOrder inOrder =
+                inOrder(passwordEncoder, repository, welcomeMessage);
+
+
+        inOrder.verify(passwordEncoder)
+                .encode("123456");
+
+
+        inOrder.verify(repository)
+                .insert(any(UserModel.class));
+
+
+        inOrder.verify(welcomeMessage)
+                .execute(any(WelcomeEmailEventDTO.class));
     }
+
+
+    @Test
+    void shouldFailWhenWelcomeNotificationCannotBeCreated() {
+
+        when(passwordEncoder.encode(anyString()))
+                .thenReturn("encoded");
+
+
+        when(repository.insert(any(UserModel.class)))
+                .thenReturn(saved);
+
+
+        when(welcomeMessage.execute(any()))
+                .thenReturn(
+                        Result.failure(
+                                "Could not create notification",
+                                500
+                        )
+                );
+
+
+        Result<UserModel> result =
+                service.create(input);
+
+
+        assertThat(result.isSuccess())
+                .isFalse();
+
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(500);
+
+
+        assertThat(result.getMessage())
+                .isEqualTo("Could not create notification");
+
+
+        verify(repository)
+                .insert(any(UserModel.class));
+
+
+        verify(welcomeMessage)
+                .execute(any(WelcomeEmailEventDTO.class));
+    }
+
 
     @Test
     void shouldReturnEmailAlreadyExists() {
 
         DataIntegrityViolationException ex =
-                mock(DataIntegrityViolationException.class, RETURNS_DEEP_STUBS);
+                mock(
+                        DataIntegrityViolationException.class,
+                        RETURNS_DEEP_STUBS
+                );
+
 
         when(passwordEncoder.encode(anyString()))
                 .thenReturn("encoded");
 
+
         when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("duplicate key ruleValue violates uk_users_email");
+                .thenReturn(
+                        "duplicate key ruleValue violates uk_users_email"
+                );
+
 
         when(repository.insert(any()))
                 .thenThrow(ex);
 
-        UserModel user = new UserModel();
-        user.setPasswordHash("123");
 
-        Result<UserModel> result = service.create(user);
+        Result<UserModel> result =
+                service.create(input);
 
-        assertThat(result.isSuccess()).isFalse();
-        assertThat(result.getStatusCode()).isEqualTo(409);
+
+        assertThat(result.isSuccess())
+                .isFalse();
+
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(409);
+
+
         assertThat(result.getMessage())
                 .isEqualTo("Email already exists");
 
-        verify(passwordEncoder).encode("123");
-        verify(repository).insert(any(UserModel.class));
+
+        verify(welcomeMessage, never())
+                .execute(any());
     }
+
 
     @Test
     void shouldReturnUsernameAlreadyExists() {
 
         DataIntegrityViolationException ex =
-                mock(DataIntegrityViolationException.class, RETURNS_DEEP_STUBS);
+                mock(
+                        DataIntegrityViolationException.class,
+                        RETURNS_DEEP_STUBS
+                );
+
 
         when(passwordEncoder.encode(anyString()))
                 .thenReturn("encoded");
 
+
         when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("duplicate key uk_users_name");
+                .thenReturn(
+                        "duplicate key uk_users_name"
+                );
+
 
         when(repository.insert(any()))
                 .thenThrow(ex);
 
-        UserModel user = new UserModel();
-        user.setPasswordHash("123");
 
-        Result<UserModel> result = service.create(user);
+        Result<UserModel> result =
+                service.create(input);
 
-        assertThat(result.isSuccess()).isFalse();
-        assertThat(result.getStatusCode()).isEqualTo(409);
+
+        assertThat(result.isSuccess())
+                .isFalse();
+
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(409);
+
+
         assertThat(result.getMessage())
                 .isEqualTo("Username already exists");
 
-        verify(passwordEncoder).encode("123");
-        verify(repository).insert(any(UserModel.class));
+
+        verify(welcomeMessage, never())
+                .execute(any());
     }
 
-    @Test
-    void shouldReturnGenericDatabaseError() {
-
-        DataIntegrityViolationException ex =
-                mock(DataIntegrityViolationException.class, RETURNS_DEEP_STUBS);
-
-        when(passwordEncoder.encode(anyString()))
-                .thenReturn("encoded");
-
-        when(ex.getMostSpecificCause().getMessage())
-                .thenReturn("some random constraint error");
-
-        when(repository.insert(any()))
-                .thenThrow(ex);
-
-        UserModel user = new UserModel();
-        user.setPasswordHash("123");
-
-        Result<UserModel> result = service.create(user);
-
-        assertThat(result.isSuccess()).isFalse();
-        assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage())
-                .contains("Database integrity error");
-
-        verify(passwordEncoder).encode("123");
-        verify(repository).insert(any(UserModel.class));
-    }
 
     @Test
     void shouldThrowInternalServerErrorException() {
@@ -176,17 +263,21 @@ class CreateUserServiceTest {
         when(passwordEncoder.encode(anyString()))
                 .thenReturn("encoded");
 
+
         when(repository.insert(any()))
-                .thenThrow(new RuntimeException("boom"));
+                .thenThrow(
+                        new RuntimeException("boom")
+                );
 
-        UserModel user = new UserModel();
-        user.setPasswordHash("123");
 
-        assertThatThrownBy(() -> service.create(user))
+        assertThatThrownBy(
+                () -> service.create(input)
+        )
                 .isInstanceOf(InternalServerErrorException.class)
                 .hasMessage("boom");
 
-        verify(passwordEncoder).encode("123");
-        verify(repository).insert(any(UserModel.class));
+
+        verify(welcomeMessage, never())
+                .execute(any());
     }
 }

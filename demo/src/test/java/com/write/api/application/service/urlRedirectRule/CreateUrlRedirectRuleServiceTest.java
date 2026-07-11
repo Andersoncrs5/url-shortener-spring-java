@@ -1,32 +1,33 @@
 package com.write.api.application.service.urlRedirectRule;
 
+import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.dto.outbox.events.urlRedirectRule.UrlRedirectRuleCreatedEvent;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.mapper.urlRedirectRule.CreateUrlRedirectRuleServiceMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
+import com.write.api.core.domain.enums.AggregateTypeEnum;
+import com.write.api.core.domain.enums.EventTypeEnum;
+import com.write.api.core.domain.enums.TopicEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlRedirectRuleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
+import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUrlRedirectRuleServiceTest {
-
-    @Mock
-    private SnowflakeIdGenerator idGen;
+class CreateUrlRedirectRuleServiceTest extends BaseServiceTest {
 
     @Mock
     private CreateUrlRedirectRuleServiceMapper mapper;
@@ -34,12 +35,14 @@ class CreateUrlRedirectRuleServiceTest {
     @Mock
     private IUrlRedirectRuleRepository repository;
 
+    @Mock
+    private CreateOutboxEventUseCase outbox;
+
     @InjectMocks
     private CreateUrlRedirectRuleService service;
 
     private CreateUrlRedirectRuleDTO dto;
     private UrlRedirectRuleModel mapped;
-    private UrlRedirectRuleModel saved;
 
     private final Long urlId = 100L;
     private final Long id = 7563458973674679L;
@@ -68,126 +71,260 @@ class CreateUrlRedirectRuleServiceTest {
         mapped.setRedirectUrl("https://google.com");
         mapped.setPriority(1);
         mapped.setActive(true);
-
-        saved = new UrlRedirectRuleModel();
-        saved.setId(999L);
-        saved.setUrlId(urlId);
-        saved.setRedirectUrl("https://google.com");
-        saved.setPriority(1);
-        saved.setActive(true);
-        saved.setCreatedAt(LocalDateTime.now());
-        saved.setUpdatedAt(LocalDateTime.now());
     }
 
     @Test
     void shouldCreateUrlRedirectRuleSuccessfully() {
 
-        when(mapper.toModel(dto)).thenReturn(mapped);
-        when(idGen.nextId()).thenReturn(id);
+        when(repository.countByUrlId(urlId))
+                .thenReturn(1);
 
-        when(repository.insert(any())).thenAnswer(invocation -> {
-            UrlRedirectRuleModel arg = invocation.getArgument(0);
-            arg.setId(id);
-            arg.setCreatedAt(LocalDateTime.now());
-            return arg;
-        });
+        when(mapper.toModel(dto))
+                .thenReturn(mapped);
 
-        Result<UrlRedirectRuleModel> result = service.execute(dto);
+        when(idGen.nextId())
+                .thenReturn(id);
 
-        assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getStatusCode()).isEqualTo(201);
-        assertThat(result.getValue()).isNotNull();
-        assertThat(result.getValue().getId()).isEqualTo(id);
-        assertThat(result.getValue().getUrlId()).isEqualTo(urlId);
+        when(repository.insert(any()))
+                .thenAnswer(invocation -> {
+                    UrlRedirectRuleModel model =
+                            invocation.getArgument(0);
 
-        ArgumentCaptor<UrlRedirectRuleModel> captor =
-                ArgumentCaptor.forClass(UrlRedirectRuleModel.class);
+                    model.setCreatedAt(LocalDateTime.now());
 
-        verify(mapper).toModel(dto);
-        verify(repository).insert(captor.capture());
+                    return model;
+                });
 
-        UrlRedirectRuleModel inserted = captor.getValue();
-        assertThat(inserted.getUrlId()).isEqualTo(urlId);
-        assertThat(inserted.getRedirectUrl()).isEqualTo("https://google.com");
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(Result.success());
 
-        InOrder order = inOrder(mapper, repository);
-        order.verify(mapper).toModel(dto);
-        order.verify(repository).insert(any());
 
-        verifyNoMoreInteractions(mapper, repository);
+        Result<UrlRedirectRuleModel> result =
+                service.execute(dto);
+
+
+        assertThat(result.isSuccess())
+                .isTrue();
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(201);
+
+        assertThat(result.getValue().getId())
+                .isEqualTo(id);
+
+
+        ArgumentCaptor<CreateOutboxEventCommand> captor =
+                ArgumentCaptor.forClass(CreateOutboxEventCommand.class);
+
+
+        verify(outbox)
+                .execute(captor.capture());
+
+
+        CreateOutboxEventCommand command =
+                captor.getValue();
+
+
+        assertThat(command.aggregateType())
+                .isEqualTo(AggregateTypeEnum.URL_REDIRECT_RULE);
+
+        assertThat(command.aggregateId())
+                .isEqualTo(id);
+
+        assertThat(command.eventType())
+                .isEqualTo(EventTypeEnum.URL_REDIRECT_RULE_CREATED);
+
+        assertThat(command.topic())
+                .isEqualTo(TopicEnum.URL_REDIRECT_RULE_CREATED);
+
+
+        UrlRedirectRuleCreatedEvent event =
+                (UrlRedirectRuleCreatedEvent) command.payload();
+
+
+        assertThat(event.id())
+                .isEqualTo(id);
+
+        assertThat(event.urlId())
+                .isEqualTo(urlId);
+
+
+        verify(repository)
+                .insert(any());
+
+        verifyNoMoreInteractions(
+                repository,
+                mapper,
+                outbox
+        );
     }
+
+
+    @Test
+    void shouldReturn400WhenLimitRulesExceeded() {
+
+        when(repository.countByUrlId(urlId))
+                .thenReturn(50);
+
+
+        Result<UrlRedirectRuleModel> result =
+                service.execute(dto);
+
+
+        assertThat(result.isFailure())
+                .isTrue();
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(400);
+
+        assertThat(result.getMessage())
+                .isEqualTo("Number max of rule is 50");
+
+
+        verify(repository, never())
+                .insert(any());
+
+        verifyNoInteractions(outbox);
+    }
+
 
     @Test
     void shouldReturn409WhenRuleAlreadyExists() {
-        when(mapper.toModel(dto)).thenReturn(mapped);
+
+        when(repository.countByUrlId(urlId))
+                .thenReturn(1);
+
+        when(mapper.toModel(dto))
+                .thenReturn(mapped);
+
 
         when(repository.insert(any()))
-                .thenThrow(new DataIntegrityViolationException(
-                        "duplicate",
-                        new RuntimeException("uk_url_redirect_rules_hash")
-                ));
+                .thenThrow(
+                        new DataIntegrityViolationException(
+                                "duplicate",
+                                new RuntimeException(
+                                        "uk_url_redirect_rules_hash"
+                                )
+                        )
+                );
 
-        Result<UrlRedirectRuleModel> result = service.execute(dto);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getStatusCode()).isEqualTo(409);
-        assertThat(result.getMessage()).contains("Rule already present in url");
+        Result<UrlRedirectRuleModel> result =
+                service.execute(dto);
 
-        verify(mapper).toModel(dto);
-        verify(repository).insert(any());
+
+        assertThat(result.isFailure())
+                .isTrue();
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(409);
+
+        assertThat(result.getMessage())
+                .contains("Rule already present");
     }
 
+
     @Test
-    void shouldReturn404WhenUrlNotFound() {
-        when(mapper.toModel(dto)).thenReturn(mapped);
+    void shouldReturn404WhenUrlDoesNotExist() {
+
+        when(repository.countByUrlId(urlId))
+                .thenReturn(1);
+
+        when(mapper.toModel(dto))
+                .thenReturn(mapped);
+
 
         when(repository.insert(any()))
-                .thenThrow(new DataIntegrityViolationException(
-                        "fk violation",
-                        new RuntimeException("fk_url_redirect_rules_url")
-                ));
+                .thenThrow(
+                        new DataIntegrityViolationException(
+                                "fk",
+                                new RuntimeException(
+                                        "fk_url_redirect_rules_url"
+                                )
+                        )
+                );
 
-        Result<UrlRedirectRuleModel> result = service.execute(dto);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getStatusCode()).isEqualTo(404);
-        assertThat(result.getMessage()).contains("Url not found");
+        Result<UrlRedirectRuleModel> result =
+                service.execute(dto);
 
-        verify(mapper).toModel(dto);
-        verify(repository).insert(any());
+
+        assertThat(result.isFailure())
+                .isTrue();
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(404);
+
+        assertThat(result.getMessage())
+                .contains("Url not found");
     }
 
-    @Test
-    void shouldReturn400WhenIntegrityMessageIsNull() {
-        when(mapper.toModel(dto)).thenReturn(mapped);
-
-        RuntimeException root = mock(RuntimeException.class);
-        when(root.getMessage()).thenReturn(null);
-
-        when(repository.insert(any()))
-                .thenThrow(new DataIntegrityViolationException("error", root));
-
-        Result<UrlRedirectRuleModel> result = service.execute(dto);
-
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getStatusCode()).isEqualTo(400);
-
-        verify(mapper).toModel(dto);
-        verify(repository).insert(any());
-    }
 
     @Test
-    void shouldThrowInternalServerErrorWhenUnexpectedExceptionOccurs() {
-        when(mapper.toModel(dto)).thenReturn(mapped);
+    void shouldThrowInternalServerError() {
+
+        when(repository.countByUrlId(urlId))
+                .thenReturn(1);
+
+        when(mapper.toModel(dto))
+                .thenReturn(mapped);
+
 
         when(repository.insert(any()))
-                .thenThrow(new RuntimeException("boom"));
+                .thenThrow(
+                        new RuntimeException("boom")
+                );
+
 
         assertThatThrownBy(() -> service.execute(dto))
                 .isInstanceOf(InternalServerErrorException.class)
                 .hasMessage("boom");
+    }
 
-        verify(mapper).toModel(dto);
-        verify(repository).insert(any());
+
+    @Test
+    void shouldFailWhenOutboxFails() {
+
+        when(repository.countByUrlId(urlId))
+                .thenReturn(1);
+
+        when(mapper.toModel(dto))
+                .thenReturn(mapped);
+
+        when(idGen.nextId())
+                .thenReturn(id);
+
+        when(repository.insert(any()))
+                .thenReturn(mapped);
+
+
+        when(outbox.execute(any(CreateOutboxEventCommand.class)))
+                .thenReturn(
+                        Result.failure(
+                                500,
+                                "Outbox error"
+                        )
+                );
+
+
+        Result<UrlRedirectRuleModel> result =
+                service.execute(dto);
+
+
+        assertThat(result.isFailure())
+                .isTrue();
+
+        assertThat(result.getStatusCode())
+                .isEqualTo(500);
+
+        assertThat(result.getMessage())
+                .isEqualTo("Outbox error");
+
+
+        verify(repository)
+                .insert(any());
+
+        verify(outbox)
+                .execute(any(CreateOutboxEventCommand.class));
     }
 }

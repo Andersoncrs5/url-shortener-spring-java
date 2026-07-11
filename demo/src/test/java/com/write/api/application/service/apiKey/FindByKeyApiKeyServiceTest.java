@@ -1,5 +1,6 @@
 package com.write.api.application.service.apiKey;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.ports.out.repository.IApiKeyRepository;
@@ -19,8 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class FindByKeyApiKeyServiceTest {
+class FindByKeyApiKeyServiceTest extends BaseServiceTest {
 
     @Mock
     private IApiKeyRepository repository;
