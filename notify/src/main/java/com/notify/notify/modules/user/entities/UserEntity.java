@@ -4,7 +4,10 @@ import com.notify.notify.utils.base.entities.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Persistable;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -21,7 +24,7 @@ import java.util.Set;
 )
 @Getter
 @Setter
-public class UserEntity extends BaseEntity {
+public class UserEntity extends BaseEntity implements Persistable<Long> {
     @Column(nullable = false)
     private String name;
 
@@ -31,9 +34,28 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private Boolean active;
 
-
     @Column(nullable = false)
     private Boolean emailVerified;
 
+    @Column(nullable = true)
+    private @NonNull LocalDateTime blockedAt;
+
     private Set<String> roles;
+
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public Long getId() {
+        return this.id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return this.isNew;
+    }
+
+    public void markNotNew() {
+        this.isNew = false;
+    }
 }
