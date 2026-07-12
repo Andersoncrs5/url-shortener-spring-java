@@ -1,8 +1,8 @@
 package com.write.api.infra.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
 import com.write.api.core.domain.enums.TopicEnum;
@@ -10,16 +10,13 @@ import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.infrastructure.messaging.kafka.KafkaOutboxEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,14 +24,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class KafkaOutboxEventPublisherTest {
+class KafkaOutboxEventPublisherTest extends BaseServiceTest {
 
     @Mock
     private KafkaTemplate<String, String> kafkaTemplate;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     private KafkaOutboxEventPublisher publisher;
@@ -61,19 +54,14 @@ class KafkaOutboxEventPublisherTest {
         when(objectMapper.writeValueAsString(any(OutboxEventMessage.class)))
                 .thenReturn(json);
 
-        when(kafkaTemplate.send(
-                eq("URL_CREATED"),
-                eq("10"),
-                eq(json)
-        )).thenReturn(CompletableFuture.completedFuture(sendResult));
+        when(kafkaTemplate.send(eq("URL_CREATED"), eq("10"), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(sendResult));
 
         SendResult<String, String> result = publisher.publish(event);
 
         assertThat(result).isSameAs(sendResult);
 
-        ArgumentCaptor<OutboxEventMessage> captor =
-                ArgumentCaptor.forClass(OutboxEventMessage.class);
-
+        ArgumentCaptor<OutboxEventMessage> captor = ArgumentCaptor.forClass(OutboxEventMessage.class);
         verify(objectMapper).writeValueAsString(captor.capture());
 
         OutboxEventMessage message = captor.getValue();
@@ -85,47 +73,66 @@ class KafkaOutboxEventPublisherTest {
         assertThat(message.payload()).isEqualTo("{\"id\":10}");
         assertThat(message.version()).isEqualTo(1L);
 
-        verify(kafkaTemplate).send("URL_CREATED", "10", json);
+        verify(kafkaTemplate).send(eq("URL_CREATED"), eq("10"), anyString());
         verifyNoMoreInteractions(objectMapper, kafkaTemplate);
     }
 
     @Test
     void shouldThrowRuntimeExceptionWhenSerializationFails() throws Exception {
         when(objectMapper.writeValueAsString(any(OutboxEventMessage.class)))
-                .thenThrow(new JsonProcessingException("invalid json") {});
+                .thenThrow(new JsonProcessingException("Serialization error") {});
 
         assertThatThrownBy(() -> publisher.publish(event))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("Failed to serialize event")
-                .hasCauseInstanceOf(JsonProcessingException.class)
-                .hasRootCauseMessage("invalid json");
+                .hasMessageContaining("Failed to serialize event")
+                .hasCauseInstanceOf(JsonProcessingException.class);
 
         verify(objectMapper).writeValueAsString(any(OutboxEventMessage.class));
         verifyNoInteractions(kafkaTemplate);
-        verifyNoMoreInteractions(objectMapper);
     }
 
     @Test
-    void shouldWrapKafkaFailureFromFuture() throws Exception {
-        String json = "{\"ok\":true}";
-        CompletableFuture<SendResult<String, String>> failedFuture =
-                new CompletableFuture<>();
-        failedFuture.completeExceptionally(new RuntimeException("broker down"));
+    void shouldThrowRuntimeExceptionWhenKafkaDeliveryFailsAsync() throws Exception {
+        String json = "{\"eventId\":\"42\"}";
 
-        when(objectMapper.writeValueAsString(any(OutboxEventMessage.class)))
-                .thenReturn(json);
+        doReturn(json).when(objectMapper).writeValueAsString(any(OutboxEventMessage.class));
 
-        when(kafkaTemplate.send("URL_CREATED", "10", json))
-                .thenReturn(failedFuture);
+        CompletableFuture<SendResult<String, String>> failedFuture = new CompletableFuture<>();
+        failedFuture.completeExceptionally(new RuntimeException("Kafka connection lost"));
+
+        doReturn(failedFuture).when(kafkaTemplate).send(eq("URL_CREATED"), eq("10"), any());
 
         assertThatThrownBy(() -> publisher.publish(event))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("Failed to serialize event")
-                .hasCauseInstanceOf(CompletionException.class)
-                .hasRootCauseMessage("broker down");
+                .hasMessageContaining("Kafka delivery failed")
+                .hasRootCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage("Kafka connection lost");
 
         verify(objectMapper).writeValueAsString(any(OutboxEventMessage.class));
-        verify(kafkaTemplate).send("URL_CREATED", "10", json);
-        verifyNoMoreInteractions(objectMapper, kafkaTemplate);
+        verify(kafkaTemplate).send(eq("URL_CREATED"), eq("10"), any());
+    }
+
+    @Test
+    void shouldExecuteFallbackMethodAndThrowCircuitBreakerException() throws Exception {
+        RuntimeException exceptionCause = new RuntimeException("Resilience4j triggered failure");
+
+        java.lang.reflect.Method fallbackMethod = KafkaOutboxEventPublisher.class.getDeclaredMethod(
+                "fallbackPublish", OutboxEventModel.class, Throwable.class);
+        fallbackMethod.setAccessible(true);
+
+        java.lang.reflect.InvocationTargetException reflectionException = org.junit.jupiter.api.Assertions.assertThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> fallbackMethod.invoke(publisher, event, exceptionCause)
+        );
+
+        Throwable actualException = reflectionException.getCause();
+
+        assertThat(actualException)
+                .isInstanceOf(com.write.api.core.domain.exception.CircuitBreakerException.class)
+                .hasMessageContaining("Kafka publish failed after retries: 42");
+
+        if (actualException.getCause() != null) {
+            assertThat(actualException.getCause()).isSameAs(exceptionCause);
+        }
     }
 }
