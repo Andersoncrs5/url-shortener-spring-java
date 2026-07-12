@@ -1,8 +1,8 @@
-package com.write.api.application.service.urlAccessRuleService;
+package com.write.api.application.service.urlAccessRule;
 
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
 import com.write.api.application.mapper.urlAccessRule.UpdateUrlAccessRuleMapper;
-import com.write.api.application.service.urlAccessRule.UpdateUrlAccessRuleService;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
 import com.write.api.core.domain.model.UrlAccessRuleModel;
@@ -19,8 +19,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UpdateUrlAccessRuleServiceTest {
+class UpdateUrlAccessRuleServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlAccessRuleRepository repository;
