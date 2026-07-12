@@ -28,7 +28,7 @@ public class UrlDeleteJob {
     DeleteUrlByIdForceUseCase deleteUrlByIdForce;
 
     @Scheduled(
-            fixedDelay = 10,
+            fixedDelay = 20,
             timeUnit = TimeUnit.MINUTES
     )
     @TrackExecutionTime("job.url.delete")
