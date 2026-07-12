@@ -3,6 +3,8 @@ package com.notify.notify.consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.notify.notify.TestContainersConfiguration;
 import com.notify.notify.configs.snowflake.SnowflakeIdGenerator;
+import com.notify.notify.modules.roles.entities.RoleEntity;
+import com.notify.notify.modules.roles.repository.RoleRepository;
 import com.notify.notify.modules.user.entities.UserEntity;
 import com.notify.notify.modules.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ public abstract class BaseConsumerTest {
     @Autowired protected KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected UserRepository repository;
+    @Autowired protected RoleRepository roleRepository;
     @Autowired protected SnowflakeIdGenerator generator;
 
     public UserEntity createUser() {
@@ -39,7 +42,23 @@ public abstract class BaseConsumerTest {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(user);
+        repository.insert(user);
+        return user;
+    }
+
+    public RoleEntity createRole() {
+        RoleEntity role = new RoleEntity();
+
+        role.setId(generator.nextId());
+        role.setName("role-" + generator.nextId());
+        role.setName("description-" + generator.nextId());
+        role.setActive(true);
+        role.setCreatedAt(LocalDateTime.now());
+        role.setUpdatedAt(LocalDateTime.now());
+
+        roleRepository.insert(role);
+
+        return role;
     }
 
 }
