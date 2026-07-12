@@ -19,6 +19,9 @@ public enum TopicEnum {
     URLS("urls"),
     URLS_DLQ("urls.dlq"),
 
+    USER_ROLES("user_roles"),
+    USER_ROLES_DLQ("user_roles.dlq"),
+
     ROLES("roles"),
     ROLES_DLQ("roles.dlq");
 
