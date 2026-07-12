@@ -117,7 +117,10 @@ public class JooqUrlAccessRuleRepository
     @Override
     public int countByUrlId(Long id) {
         return execute(
-                () -> dsl.selectCount().from(URL_ACCESS_RULE).where(URL_ACCESS_RULE.URL_ID.eq(id)).execute()
+                () -> dsl.selectCount()
+                        .from(URL_ACCESS_RULE)
+                        .where(URL_ACCESS_RULE.URL_ID.eq(id))
+                        .fetchSingleInto(Integer.class)
         );
     }
 }

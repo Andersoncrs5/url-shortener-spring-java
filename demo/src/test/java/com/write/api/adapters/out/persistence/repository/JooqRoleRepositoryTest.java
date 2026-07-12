@@ -4,18 +4,12 @@ import com.write.api.adapters.out.persistence.help.BaseRepositoryTest;
 import com.write.api.core.domain.model.RoleModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 class JooqRoleRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
