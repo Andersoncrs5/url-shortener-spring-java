@@ -29,4 +29,30 @@ public class UserEntity extends BaseEntity {
         this.roles = new HashSet<>();
     }
 
+    public void addRole(String role) {
+        if (this.roles == null) {
+            this.roles = new HashSet<>();
+        } else {
+            try {
+                this.roles.add(role);
+            } catch (UnsupportedOperationException e) {
+                this.roles = new HashSet<>(this.roles);
+                this.roles.add(role);
+            }
+        }
+    }
+
+    public void removeRole(String role) {
+        if (this.roles == null) {
+            this.roles = new HashSet<>();
+            return;
+        }
+        try {
+            this.roles.remove(role);
+        } catch (UnsupportedOperationException e) {
+            this.roles = new HashSet<>(this.roles);
+            this.roles.remove(role);
+        }
+    }
+
 }
