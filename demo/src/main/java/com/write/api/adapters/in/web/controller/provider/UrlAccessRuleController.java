@@ -2,6 +2,7 @@ package com.write.api.adapters.in.web.controller.provider;
 
 import com.write.api.adapters.in.web.controller.docs.UrlAccessRuleControllerDocs;
 import com.write.api.adapters.in.web.mapper.UrlAccessRuleMapper;
+import com.write.api.adapters.in.web.shared.annotations.RestApiController;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlAccessRule.CreateUrlAccessRuleDTO;
 import com.write.api.application.dto.urlAccessRule.UpdateUrlAccessRuleDTO;
@@ -14,14 +15,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@Validated
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/url-access-rule")
+@RestApiController("v1/url-access-rule")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlAccessRuleController implements UrlAccessRuleControllerDocs {
 

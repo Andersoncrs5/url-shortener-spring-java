@@ -2,6 +2,7 @@ package com.write.api.adapters.in.web.controller.provider;
 
 import com.write.api.adapters.in.web.controller.docs.UrlRedirectRuleControllerDocs;
 import com.write.api.adapters.in.web.mapper.UrlRedirectRuleMapper;
+import com.write.api.adapters.in.web.shared.annotations.RestApiController;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.urlRedirectRule.CreateUrlRedirectRuleDTO;
 import com.write.api.application.dto.urlRedirectRule.UpdateUrlRedirectRuleDTO;
@@ -15,14 +16,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@Validated
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/url-redirect-rule")
+@RestApiController("v1/url-redirect-rule")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UrlRedirectRuleController implements UrlRedirectRuleControllerDocs {
 

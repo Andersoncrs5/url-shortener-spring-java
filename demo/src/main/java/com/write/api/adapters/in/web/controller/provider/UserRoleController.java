@@ -2,6 +2,7 @@ package com.write.api.adapters.in.web.controller.provider;
 
 import com.write.api.adapters.in.web.controller.docs.UserRoleControllerDocs;
 import com.write.api.adapters.in.web.mapper.UserRoleMapper;
+import com.write.api.adapters.in.web.shared.annotations.RestApiController;
 import com.write.api.adapters.in.web.shared.response.ResponseHttp;
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.shared.Result;
@@ -17,10 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Validated
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/user-role")
+@RestApiController("v1/user-role")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserRoleController implements UserRoleControllerDocs {
 
