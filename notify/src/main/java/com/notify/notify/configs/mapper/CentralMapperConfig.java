@@ -6,7 +6,15 @@ import org.mapstruct.ReportingPolicy;
 
 @org.mapstruct.MapperConfig(
         componentModel = "spring",
-        uses = { MapperConfig.class },
+        uses = {
+                MapperConfig.class,
+                BooleanIntegerMapper.class,
+                BooleanStringMapper.class,
+                EnumStringMapper.class,
+                LocalDateTimeInstantMapper.class,
+                LocalDateTimeOffsetDateTimeMapper.class,
+                StringEnumMapper.class
+        },
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED
