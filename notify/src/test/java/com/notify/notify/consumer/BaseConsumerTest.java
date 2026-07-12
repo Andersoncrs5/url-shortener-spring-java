@@ -7,6 +7,8 @@ import com.notify.notify.modules.roles.entities.RoleEntity;
 import com.notify.notify.modules.roles.repository.RoleRepository;
 import com.notify.notify.modules.user.entities.UserEntity;
 import com.notify.notify.modules.user.repository.UserRepository;
+import com.notify.notify.modules.userRole.entities.UserRoleEntity;
+import com.notify.notify.modules.userRole.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -28,6 +30,7 @@ public abstract class BaseConsumerTest {
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected UserRepository repository;
     @Autowired protected RoleRepository roleRepository;
+    @Autowired protected UserRoleRepository userRoleRepository;
     @Autowired protected SnowflakeIdGenerator generator;
 
     public UserEntity createUser() {
@@ -59,6 +62,22 @@ public abstract class BaseConsumerTest {
         roleRepository.insert(role);
 
         return role;
+    }
+
+    protected UserRoleEntity createUserRoleRelation(UserEntity user, RoleEntity role, UserEntity admin) {
+        UserRoleEntity entity = new UserRoleEntity();
+        entity.setId(generator.nextId());
+        entity.setUserId(user.getId());
+        entity.setRoleId(role.getId());
+
+        if (user.getRoles() == null || user.getRoles().getClass().getName().contains("Immutable")) {
+            user.setRoles(new java.util.HashSet<>(user.getRoles() != null ? user.getRoles() : java.util.Collections.emptySet()));
+        }
+
+        user.addRole(role.getName());
+        repository.update(user);
+
+        return userRoleRepository.insert(entity);
     }
 
 }
