@@ -24,7 +24,7 @@ public class TopicConfig {
 
             topics.add(
                     TopicBuilder.name(topic.value())
-                            .partitions(3)
+                            .partitions(4)
                             .replicas(1)
                             .build()
             );
@@ -54,7 +54,7 @@ public class TopicConfig {
         for (String topic: topicsCdc) {
             topics.add(
                     TopicBuilder.name(topic)
-                            .partitions(5)
+                            .partitions(6)
                             .replicas(1)
                             .build()
             );
