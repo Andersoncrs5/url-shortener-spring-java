@@ -1,6 +1,5 @@
 package com.write.api.adapters.in.web.shared.annotations;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +13,6 @@ import java.lang.annotation.*;
 @Validated
 @RestController
 @RequestMapping
-@Tag(name = "API")
 public @interface RestApiController {
 
     @AliasFor(
