@@ -43,3 +43,31 @@ CREATE TABLE IF NOT EXISTS user_roles (
 
     CONSTRAINT uk_user_roles_user_role UNIQUE (user_id, role_id)
 );
+
+CREATE TABLE notifications (
+    id BIGINT PRIMARY KEY,
+
+    recipient VARCHAR(255) NOT NULL,
+    channel VARCHAR(50) NOT NULL,
+    subject VARCHAR(255),
+    body TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    template_name VARCHAR(100),
+    retry_count INT NOT NULL DEFAULT 0,
+    provider_message_id VARCHAR(255),
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_notifications_status_retry
+    ON notifications(status, retry_count);
+
+CREATE INDEX idx_notifications_recipient
+    ON notifications(recipient);
+
+CREATE INDEX idx_notifications_channel
+    ON notifications(channel);
+
+CREATE INDEX idx_notifications_provider_msg
+    ON notifications(provider_message_id);
