@@ -3,13 +3,9 @@ package com.write.api.infrastructure.messaging.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.messaging.OutboxEventMessage;
-import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.exception.CircuitBreakerException;
 import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
-import io.github.resilience4j.bulkhead.annotation.Bulkhead;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 @Slf4j
@@ -30,7 +27,6 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
     ObjectMapper objectMapper;
 
     @Override
-    @TrackExecutionTime("outbox.kafka.publish")
     public SendResult<String, String> publish(OutboxEventModel event) {
         String topic = event.getTopic().value().toLowerCase();
 
@@ -46,14 +42,15 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
 
         try {
             String json = objectMapper.writeValueAsString(message);
-
             log.info("Send event to topic: {}, id: {} ", topic, message.eventId());
 
-            kafkaTemplate.send(
+            CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
                     topic,
                     message.aggregateId().toString(),
                     json
-            ).whenComplete((result, ex) -> {
+            );
+
+            future.whenComplete((result, ex) -> {
                 if (ex == null) {
                     log.info("Outbox event {} delivered successfully!", event.getId());
                 } else {
@@ -61,10 +58,12 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
                 }
             });
 
-            return null;
+            return future.join();
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize event", e);
+        } catch (CompletionException e) {
+            throw new RuntimeException("Kafka delivery failed", e.getCause());
         }
     }
 
@@ -74,7 +73,7 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
             Throwable ex
     ) {
         log.error(
-                "Kafka publish failed. eventId={}, topic={}, aggregateId={} cause={}" ,
+                "Kafka publish failed. eventId={}, topic={}, aggregateId={} cause={}",
                 event.getId(),
                 event.getTopic(),
                 event.getAggregateId(),
@@ -87,5 +86,4 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
                 ex
         );
     }
-
 }

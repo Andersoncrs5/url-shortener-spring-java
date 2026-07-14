@@ -2,6 +2,7 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlTagLinkRepositoryMapper;
+import com.write.api.application.shared.annotations.UseRepository;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.UrlTagLinksRecord;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 import static com.write.api.generated.jooq.Tables.URL_TAG_LINKS;
 
-@Repository
+@UseRepository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUrlTagLinkRepository extends JooqRepository implements IUrlTagLinkRepository {

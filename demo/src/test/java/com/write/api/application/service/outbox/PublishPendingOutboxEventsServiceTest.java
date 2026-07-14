@@ -1,11 +1,10 @@
 package com.write.api.application.service.outbox;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.core.domain.enums.OutboxStatusEnum;
 import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.ports.out.messaging.OutboxEventPublisher;
 import com.write.api.ports.out.repository.IOutboxEventRepository;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class PublishPendingOutboxEventsServiceTest {
+class PublishPendingOutboxEventsServiceTest extends BaseServiceTest {
 
     @Mock
     private IOutboxEventRepository repository;
@@ -60,11 +58,7 @@ class PublishPendingOutboxEventsServiceTest {
                 .thenReturn(List.of(event1, event2));
 
         when(publisher.publish(any(OutboxEventModel.class)))
-                .thenAnswer(invocation -> mockSendResult(
-                        "url.created",
-                        0,
-                        10L
-                ));
+                .thenReturn(mock(SendResult.class));
 
         service.execute();
 
@@ -128,27 +122,5 @@ class PublishPendingOutboxEventsServiceTest {
         verify(repository).findByStatus(OutboxStatusEnum.PENDING, 100);
         verifyNoInteractions(publisher);
         verify(repository, never()).saveAll(anyList());
-    }
-
-    private SendResult<String, String> mockSendResult(
-            String topic,
-            int partition,
-            long offset
-    ) {
-        @SuppressWarnings("unchecked")
-        SendResult<String, String> sendResult = mock(SendResult.class);
-
-        RecordMetadata metadata = new RecordMetadata(
-                new TopicPartition(topic, partition),
-                offset,
-                0,
-                System.currentTimeMillis(),
-                0,
-                0
-        );
-
-        when(sendResult.getRecordMetadata()).thenReturn(metadata);
-
-        return sendResult;
     }
 }

@@ -73,13 +73,15 @@ services:
       start_period: 70s
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.6.3
     container_name: grafana
     ports:
         - "3000:3000"
     depends_on:
       tidb-server:
         condition: service_healthy
+      tidb-init:
+        condition: service_completed_successfully
     volumes:
         - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
@@ -88,11 +90,6 @@ services:
         GF_AUTH_ANONYMOUS_ENABLED: true
         GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
 
-        GF_DATABASE_TYPE: mysql
-        GF_DATABASE_HOST: tidb-server:4000
-        GF_DATABASE_NAME: grafana
-        GF_DATABASE_USER: grafana
-        GF_DATABASE_PASSWORD: grafana
     networks:
         - url_shot_java
 
@@ -248,57 +245,14 @@ services:
     ports:
       - "8300:8300"
     depends_on:
+      tikv:
+        condition: service_started
+      tidb-server:
+        condition: service_healthy
       pd:
         condition: service_started
     networks:
       - url_shot_java
-
-  # tiflash:
-  #    image: pingcap/tiflash:latest
-  #    container_name: tiflash-url-spring
-  #    restart: unless-stopped
-  #    environment:
-  #      - LD_LIBRARY_PATH=/usr/local/bin
-  #    command:
-  #      - tiflash
-  #      - server
-  #      - --config-file=/etc/tiflash/tiflash.toml
-  #    volumes:
-  #      - ./tidb/tiflash/tiflash.toml:/etc/tiflash/tiflash.toml
-  #      - tiflash_data:/data
-  #    ports:
-  #      - "3930:3930"
-  #      - "8234:8234"
-  #      - "20170:20170"
-  #      - "20292:20292"
-  #    depends_on:
-  #      pd:
-  #        condition: service_started
-  #      tikv:
-  #        condition: service_started
-  #    networks:
-  #      - url_shot_java
-  #
-  # tiflash-init:
-  #    image: mysql:8
-  #    container_name: tiflash-init
-  #    depends_on:
-  #      demo:
-  #        condition: service_healthy
-  #      tidb-server:
-  #        condition: service_healthy
-  #      api:
-  #        condition: service_started
-  #      tiflash:
-  #        condition: service_started
-  #    volumes:
-  #        - ./tidb/flash/tiflash-init.sh:/scripts/tiflash-init.sh
-  #
-  #    entrypoint: ["/bin/sh", "-c", "sleep 20 && /bin/sh /scripts/tiflash-init.sh"]
-  #    networks:
-  #     url_shot_java:
-  #       aliases:
-  #         - pd
 
   ticdc-setup:
     image: pingcap/ticdc:latest
@@ -336,6 +290,7 @@ services:
     ports:
       - "9092:9092"
       - "9094:9094"
+      - "9999:9999"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -351,6 +306,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
+
+      JMX_PORT: 9999
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9999 -Djava.rmi.server.hostname=redpanda"
     networks:
       - url_shot_java
     healthcheck:
@@ -359,6 +317,26 @@ services:
       timeout: 5s
       retries: 15
       start_period: 30s
+
+  kafka-jmx-exporter:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter
+    ports:
+      - "9404:9404"
+    environment:
+      JMX_EXPORTER_CONFIG: |
+        lowercaseOutputName: true
+        lowercaseOutputLabelNames: true
+    command:
+      - "9404"
+      - "redpanda:9999"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    networks:
+      - url_shot_java
 
   kafka-exporter:
     image: redpandadata/kminion:latest
@@ -533,7 +511,6 @@ networks:
 volumes:
   pd_data:
   tikv_data:
-  #tiflash_data:
   redpanda_data:
   dragonfly_data:
   mongodb_data:

@@ -2,6 +2,7 @@ package com.write.api.application.service.urlTag;
 
 import com.write.api.application.dto.urlTag.UpdateUrlTagDTO;
 import com.write.api.application.mapper.urlTag.UpdateUrlTagMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagModel;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateUrlTagServiceTest {
+class UpdateUrlTagServiceTest extends BaseServiceTest {
 
     @Mock
     private UpdateUrlTagMapper mapper;

@@ -6,7 +6,9 @@ import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
 import com.write.api.application.dto.outbox.events.user.UserCreatedEvent;
 import com.write.api.application.shared.Result;
 import com.write.api.ports.in.outbox.HandlerDlqUseCase;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -15,9 +17,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserCreatedDlqConsumer {
 
-    private final HandlerDlqUseCase handlerDlq;
+    HandlerDlqUseCase handlerDlq;
 
     @KafkaListener(
             topics = "user.created.dlq",

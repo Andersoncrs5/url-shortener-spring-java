@@ -17,8 +17,7 @@ public class TestcontainersConfiguration {
 	@Bean
 	@ServiceConnection
 	KafkaContainer kafkaContainer() {
-		return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"))
-				.withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true");
+		return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
 	}
 
 	@Bean

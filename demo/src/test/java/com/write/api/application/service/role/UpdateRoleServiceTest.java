@@ -2,26 +2,25 @@ package com.write.api.application.service.role;
 
 import com.write.api.application.dto.role.UpdateRoleDTO;
 import com.write.api.application.mapper.role.UpdateRoleMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.ports.out.repository.IRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UpdateRoleServiceTest {
+class UpdateRoleServiceTest extends BaseServiceTest {
 
     @Mock
     private IRoleRepository repository;

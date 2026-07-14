@@ -2,6 +2,7 @@ package com.write.api.application.service.urlRedirectRule;
 
 import com.write.api.application.dto.urlRedirectRule.UpdateUrlRedirectRuleDTO;
 import com.write.api.application.mapper.urlRedirectRule.UpdateUrlRedirectRuleServiceMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.MatchTypeEnum;
 import com.write.api.core.domain.exception.InternalServerErrorException;
@@ -9,12 +10,10 @@ import com.write.api.core.domain.model.UrlRedirectRuleModel;
 import com.write.api.ports.out.repository.IUrlRedirectRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
@@ -24,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UpdateUrlRedirectRuleServiceTest {
+class UpdateUrlRedirectRuleServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlRedirectRuleRepository repository;

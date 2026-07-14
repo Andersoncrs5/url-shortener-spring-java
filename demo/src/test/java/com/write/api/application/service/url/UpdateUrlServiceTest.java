@@ -3,6 +3,7 @@ package com.write.api.application.service.url;
 import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.url.UpdateUrlDTO;
 import com.write.api.application.mapper.url.UpdateUrlMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.enums.UrlStatusEnum;
@@ -29,8 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UpdateUrlServiceTest {
+class UpdateUrlServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlRepository repository;

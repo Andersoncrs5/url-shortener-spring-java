@@ -2,28 +2,23 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UserRoleRepositoryMapper;
+import com.write.api.application.shared.annotations.UseRepository;
 import com.write.api.core.domain.model.UserRoleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-
-import static com.write.api.generated.jooq.Tables.ROLES;
-import static com.write.api.generated.jooq.Tables.USER_ROLES;
-
 import com.write.api.generated.jooq.tables.records.UserRolesRecord;
 import com.write.api.ports.out.repository.IUserRoleRepository;
-import com.write.api.shared.persistence.DatabaseRetryTranslator;
-import com.write.api.shared.persistence.RetryTranslation;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jooq.DSLContext;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+import static com.write.api.generated.jooq.Tables.ROLES;
+import static com.write.api.generated.jooq.Tables.USER_ROLES;
+
+@UseRepository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUserRoleRepository extends JooqRepository implements IUserRoleRepository {

@@ -2,16 +2,14 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.RoleRepositoryMapper;
+import com.write.api.application.shared.annotations.UseRepository;
 import com.write.api.core.domain.model.RoleModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.RolesRecord;
 import com.write.api.ports.out.repository.IRoleRepository;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jooq.DSLContext;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -19,7 +17,7 @@ import java.util.Optional;
 import static com.write.api.generated.jooq.Tables.ROLES;
 import static org.jooq.impl.DSL.lower;
 
-@Repository
+@UseRepository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqRoleRepository extends JooqRepository implements IRoleRepository {

@@ -2,6 +2,7 @@ package com.write.api.application.service.user;
 
 import com.write.api.application.dto.user.UpdateUserDTO;
 import com.write.api.application.mapper.user.UserUpdateMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.out.repository.IUserRepository;
@@ -21,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateUserServiceTest {
+class UpdateUserServiceTest extends BaseServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;

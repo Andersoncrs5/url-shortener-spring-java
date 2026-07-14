@@ -2,19 +2,14 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.UrlRepositoryMapper;
-import com.write.api.core.domain.enums.UrlAccessTypeEnum;
+import com.write.api.application.shared.annotations.UseRepository;
 import com.write.api.core.domain.enums.UrlStatusEnum;
-import com.write.api.core.domain.model.OutboxEventModel;
 import com.write.api.core.domain.model.UrlModel;
-import com.write.api.core.domain.service.SnowflakeIdGenerator;
-import com.write.api.generated.jooq.tables.records.UrlsRecord;
 import com.write.api.ports.out.repository.IUrlRepository;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.jooq.DSLContext;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +17,7 @@ import java.util.Optional;
 
 import static com.write.api.generated.jooq.tables.Urls.URLS;
 
-@Repository
+@UseRepository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqUrlRepository extends JooqRepository implements IUrlRepository {

@@ -2,6 +2,7 @@ package com.write.api.adapters.out.persistence.repository;
 
 import com.write.api.adapters.out.persistence.base.JooqRepository;
 import com.write.api.adapters.out.persistence.mapper.ApiKeyRepositoryMapper;
+import com.write.api.application.shared.annotations.UseRepository;
 import com.write.api.core.domain.model.ApiKeyModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.generated.jooq.tables.records.ApiKeysRecord;
@@ -13,13 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.write.api.generated.jooq.Tables.API_KEYS;
 
-@Repository
+@UseRepository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JooqApiKeyRepository extends JooqRepository implements IApiKeyRepository {
