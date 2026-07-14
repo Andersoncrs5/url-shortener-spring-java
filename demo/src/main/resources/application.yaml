@@ -50,9 +50,9 @@ resilience4j:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
       kafka:
-        timeout-duration: 5s
-        max-attempts: 3
-        wait-duration: 200ms
+        timeout-duration: 6s
+        max-attempts: 5
+        wait-duration: 400ms
         enable-exponential-backoff: true
         exponential-backoff-multiplier: 4
         retry-exceptions:
@@ -62,10 +62,12 @@ resilience4j:
   circuitbreaker:
     instances:
       kafka:
-        sliding-window-size: 20
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
         failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 5
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
         automatic-transition-from-open-to-half-open-enabled: true
 
   bulkhead:
@@ -151,6 +153,7 @@ spring:
       enabled: true
   kafka:
     properties:
+      max.block.ms: 10000
       reconnect.backoff.ms: 1000
       reconnect.backoff.max.ms: 10000
     bootstrap-servers: redpanda:9092
