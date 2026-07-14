@@ -4,8 +4,14 @@ management:
       exposure:
         include: "health,info,prometheus,metrics"
   tracing:
+    enabled: true
     sampling:
       probability: 1.0
+    propagation:
+      type: [w3c, b3]
+  otlp:
+    tracing:
+      endpoint: http://alloy:4318/v1/traces
   metrics:
     distribution:
       percentiles-histogram:
@@ -24,7 +30,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:root@root@mongodb_read_api:27017/admin?authSource=admin&replicaSet=rs0
+      uri: mongodb://root:root@mongodb_read_api:27017/admin?authSource=admin&replicaSet=rs0
       database: url_shortener
     redis:
       host: dragonfly
@@ -42,6 +48,7 @@ spring:
   threads:
     virtual:
       enabled: true
+
   kafka:
     bootstrap-servers: redpanda:9092
     consumer:
@@ -50,8 +57,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 resilience4j:
   retry:
@@ -123,7 +130,6 @@ resilience4j:
           - org.springframework.dao.DataAccessResourceFailureException
           - com.mongodb.MongoSocketException
           - com.mongodb.MongoTimeoutException
-
         ignore-exceptions:
           - org.springframework.dao.DuplicateKeyException
           - java.lang.IllegalArgumentException

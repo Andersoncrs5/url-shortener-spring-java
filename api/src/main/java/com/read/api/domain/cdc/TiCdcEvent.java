@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.read.api.domain.enums.TiCdcEventTypeEnum;
 import com.read.api.infrastructure.config.jackson.Boolean01Deserializer;
+import com.read.api.utils.validation.isId.IsId;
+
 import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TiCdcEvent<T>(
+        @IsId
         Long id,
         String database,
         String table,
