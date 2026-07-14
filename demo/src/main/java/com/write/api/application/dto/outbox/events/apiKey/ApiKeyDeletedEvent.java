@@ -1,10 +1,12 @@
 package com.write.api.application.dto.outbox.events.apiKey;
 
+import com.write.api.shared.validation.snowflake.IsId;
+
 public record ApiKeyDeletedEvent(
-        Long id,
+        @IsId Long id,
         String name,
-        Long userId,
-        Long ownerUserId,
+        @IsId Long userId,
+        @IsId Long ownerUserId,
         boolean active
 ) {
     public static ApiKeyDeletedEvent create(

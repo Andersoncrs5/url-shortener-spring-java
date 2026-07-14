@@ -1,5 +1,6 @@
 package com.read.api.infrastructure.properties;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "spring.kafka")
 public class KafkaProperties {
 
+    @NotBlank
     private String bootstrapServers;
 
     private Consumer consumer = new Consumer();
@@ -20,13 +22,16 @@ public class KafkaProperties {
     @Getter
     @Setter
     public static class Consumer {
-
+        @NotBlank
         private String groupId;
 
+        @NotBlank
         private String autoOffsetReset;
 
+        @NotBlank
         private String keyDeserializer;
 
+        @NotBlank
         private String valueDeserializer;
     }
 
@@ -34,8 +39,10 @@ public class KafkaProperties {
     @Setter
     public static class Producer {
 
+        @NotBlank
         private String keySerializer;
 
+        @NotBlank
         private String valueSerializer;
     }
 }

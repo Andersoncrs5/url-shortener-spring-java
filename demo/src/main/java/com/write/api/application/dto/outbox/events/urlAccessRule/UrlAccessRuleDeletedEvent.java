@@ -1,13 +1,11 @@
 package com.write.api.application.dto.outbox.events.urlAccessRule;
 
-import com.write.api.core.domain.enums.UrlAccessRuleTypeEnum;
-
-import java.time.LocalDateTime;
+import com.write.api.shared.validation.snowflake.IsId;
 
 public record UrlAccessRuleDeletedEvent(
-        Long id,
-        Long urlId,
-        Long assignedByUserId
+        @IsId Long id,
+        @IsId Long urlId,
+        @IsId Long assignedByUserId
 ) {
 
     public static UrlAccessRuleDeletedEvent create(

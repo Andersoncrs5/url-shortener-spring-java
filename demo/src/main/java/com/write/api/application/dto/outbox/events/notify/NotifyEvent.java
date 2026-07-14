@@ -2,12 +2,13 @@ package com.write.api.application.dto.outbox.events.notify;
 
 import com.write.api.core.domain.enums.NotificationChannel;
 import com.write.api.core.domain.enums.NotificationPriority;
+import com.write.api.shared.validation.snowflake.IsId;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record NotifyEvent(
-        Long outboxId,
+        @IsId Long outboxId,
         String aggregateType,
         String eventType,
         String topic,

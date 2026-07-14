@@ -1,9 +1,11 @@
 package com.write.api.application.dto.outbox.events.admin;
 
+import com.write.api.shared.validation.snowflake.IsId;
+
 import java.time.LocalDateTime;
 
 public record NotifyAdmEvent(
-        Long outboxId,
+        @IsId Long outboxId,
         String aggregateType,
         String eventType,
         String topic,

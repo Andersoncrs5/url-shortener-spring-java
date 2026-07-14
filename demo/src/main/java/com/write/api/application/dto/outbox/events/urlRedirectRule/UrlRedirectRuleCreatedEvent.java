@@ -5,8 +5,8 @@ import com.write.api.shared.validation.snowflake.IsId;
 import java.time.LocalDateTime;
 
 public record UrlRedirectRuleCreatedEvent(
-        Long id,
-        Long urlId,
+        @IsId Long id,
+        @IsId Long urlId,
         LocalDateTime createdAt
 ) {
     public static UrlRedirectRuleCreatedEvent create(

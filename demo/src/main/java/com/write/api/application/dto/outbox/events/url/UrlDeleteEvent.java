@@ -1,7 +1,9 @@
 package com.write.api.application.dto.outbox.events.url;
 
+import com.write.api.shared.validation.snowflake.IsId;
+
 public record UrlDeleteEvent(
-        Long id,
+        @IsId Long id,
         String title,
         String shortCode
 ) {

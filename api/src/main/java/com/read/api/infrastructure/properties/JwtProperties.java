@@ -1,6 +1,7 @@
 package com.read.api.infrastructure.properties;
 
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,6 +26,7 @@ public class JwtProperties {
     @Getter
     @Setter
     public static class Jwt {
+        @NotBlank
         private String secret;
     }
 }

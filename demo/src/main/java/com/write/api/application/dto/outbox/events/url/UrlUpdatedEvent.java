@@ -1,11 +1,12 @@
 package com.write.api.application.dto.outbox.events.url;
 
 import com.write.api.core.domain.enums.UrlStatusEnum;
+import com.write.api.shared.validation.snowflake.IsId;
 
 import java.time.LocalDateTime;
 
 public record UrlUpdatedEvent(
-        Long id,
+        @IsId Long id,
         String title,
         String shortCode,
         UrlStatusEnum status,

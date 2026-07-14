@@ -166,11 +166,11 @@ resilience4j:
           - org.springframework.dao.DataIntegrityViolationException
           - java.lang.IllegalStateException
       kafka:
-        timeout-duration: 5s
-        max-attempts: 4
-        wait-duration: 200ms
+        timeout-duration: 6s
+        max-attempts: 5
+        wait-duration: 250ms
         enable-exponential-backoff: true
-        exponential-backoff-multiplier: 4
+        exponential-backoff-multiplier: 5
         retry-exceptions:
           - org.apache.kafka.common.errors.RetriableException
           - org.springframework.kafka.KafkaException
