@@ -349,6 +349,7 @@ services:
     restart: unless-stopped
     ports:
       - "9092:9092"
+      - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -537,6 +538,7 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+
 
 networks:
   url_shot_java:
