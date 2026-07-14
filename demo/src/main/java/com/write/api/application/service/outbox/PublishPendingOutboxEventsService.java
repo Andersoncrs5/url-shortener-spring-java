@@ -30,6 +30,7 @@ public class PublishPendingOutboxEventsService implements PublishPendingOutboxEv
     @ResultTransaction
     @TrackExecutionTime("outbox.publish.pending")
     public void execute() {
+        log.info("Starting publish event in outbox");
         List<OutboxEventModel> events = repository.findByStatus(OutboxStatusEnum.PENDING,100);
         List<OutboxEventModel> toSave = new java.util.ArrayList<>();
 
@@ -42,11 +43,8 @@ public class PublishPendingOutboxEventsService implements PublishPendingOutboxEv
                 toSave.add(event);
 
                 log.info(
-                        "Outbox event {} published to topic={}, partition={}, offset={}",
-                        event.getId(),
-                        published.getRecordMetadata().topic(),
-                        published.getRecordMetadata().partition(),
-                        published.getRecordMetadata().offset()
+                        "Outbox event {} published",
+                        event.getId()
                 );
 
             } catch (Exception ex) {
@@ -55,7 +53,7 @@ public class PublishPendingOutboxEventsService implements PublishPendingOutboxEv
                 event.setNextRetryAt(LocalDateTime.now().plusMinutes(5));
                 toSave.add(event);
 
-                log.error("Failed to publish outbox event {}", event.getId(), ex);
+                log.error("Failed to publish outbox event {}, message {}", event.getId(), ex.getMessage(), ex);
             }
         }
 
