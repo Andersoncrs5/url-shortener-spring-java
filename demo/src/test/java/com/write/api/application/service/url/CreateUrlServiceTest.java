@@ -4,12 +4,9 @@ import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.outbox.events.url.UrlCreatedEvent;
 import com.write.api.application.dto.url.CreateUrlDTO;
 import com.write.api.application.mapper.url.CreateUrlMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
-import com.write.api.core.domain.enums.AggregateTypeEnum;
-import com.write.api.core.domain.enums.EventTypeEnum;
-import com.write.api.core.domain.enums.TopicEnum;
-import com.write.api.core.domain.enums.UrlAccessTypeEnum;
-import com.write.api.core.domain.enums.UrlStatusEnum;
+import com.write.api.core.domain.enums.*;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
@@ -17,12 +14,10 @@ import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -34,8 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUrlServiceTest {
+class CreateUrlServiceTest extends BaseServiceTest {
 
     @Mock
     private CreateUrlMapper mapper;
@@ -48,9 +42,6 @@ class CreateUrlServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private SnowflakeIdGenerator idGen;
 
     @InjectMocks
     private CreateUrlService service;

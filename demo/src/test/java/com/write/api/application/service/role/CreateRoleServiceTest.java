@@ -2,6 +2,7 @@ package com.write.api.application.service.role;
 
 import com.write.api.application.dto.role.CreateRoleDTO;
 import com.write.api.application.mapper.role.CreateRoleMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
@@ -23,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CreateRoleServiceTest {
+class CreateRoleServiceTest extends BaseServiceTest {
 
     @Mock
     private IRoleRepository repository;

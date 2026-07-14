@@ -3,6 +3,7 @@ package com.write.api.application.service.user;
 import com.write.api.application.dto.notification.ByeByeEmailEventDTO;
 import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
 import com.write.api.application.dto.outbox.events.user.UserDeletedEvent;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
@@ -14,12 +15,10 @@ import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
 import com.write.api.ports.out.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
@@ -28,8 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 
-@ExtendWith(MockitoExtension.class)
-class DeleteUserByIdUserServiceTest {
+class DeleteUserByIdUserServiceTest extends BaseServiceTest {
 
 
     @Mock

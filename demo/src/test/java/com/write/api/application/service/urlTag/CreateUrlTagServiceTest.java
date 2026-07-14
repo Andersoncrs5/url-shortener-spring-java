@@ -2,6 +2,7 @@ package com.write.api.application.service.urlTag;
 
 import com.write.api.application.dto.urlTag.CreateUrlTagDTO;
 import com.write.api.application.mapper.urlTag.CreateUrlTagMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagModel;
@@ -9,10 +10,8 @@ import com.write.api.core.domain.model.UserModel;
 import com.write.api.ports.out.repository.IUrlTagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,8 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUrlTagServiceTest {
+class CreateUrlTagServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlTagRepository repository;

@@ -1,6 +1,7 @@
 package com.write.api.application.service.url;
 
 import com.write.api.application.dto.url.CreateUrlDTO;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.UrlAccessTypeEnum;
 import com.write.api.core.domain.model.ApiKeyModel;
@@ -10,19 +11,16 @@ import com.write.api.ports.in.apiKey.ValidateApiKeyUseCase;
 import com.write.api.ports.in.url.CreateUrlUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUrlFromApiKeyServiceTest {
+class CreateUrlFromApiKeyServiceTest extends BaseServiceTest {
 
     @Mock
     private CreateUrlUseCase useCase;

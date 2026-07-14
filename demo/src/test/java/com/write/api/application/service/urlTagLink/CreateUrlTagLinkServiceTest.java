@@ -2,18 +2,17 @@ package com.write.api.application.service.urlTagLink;
 
 import com.write.api.application.dto.urlTagLink.CreateUrlTagLinkDTO;
 import com.write.api.application.mapper.urlTagLink.CreateUrlTagLinkMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.UrlTagLinkModel;
 import com.write.api.ports.out.repository.IUrlTagLinkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,8 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUrlTagLinkServiceTest {
+class CreateUrlTagLinkServiceTest extends BaseServiceTest {
 
     @Mock
     private CreateUrlTagLinkMapper mapper;

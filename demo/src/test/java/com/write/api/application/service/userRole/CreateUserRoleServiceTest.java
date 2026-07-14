@@ -2,8 +2,8 @@ package com.write.api.application.service.userRole;
 
 import com.write.api.application.dto.userRole.CreateUserRoleDTO;
 import com.write.api.application.mapper.userRole.CreateUserRoleMapper;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
-import com.write.api.core.domain.exception.InternalServerErrorException;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
@@ -12,17 +12,13 @@ import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CreateUserRoleServiceTest {
+class CreateUserRoleServiceTest extends BaseServiceTest {
 
     @Mock
     private IUserRoleRepository repository;

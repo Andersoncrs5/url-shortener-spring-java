@@ -1,17 +1,16 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.UrlStatusEnum;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.out.repository.IUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -19,8 +18,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class DeleteUrlByIdSoftServiceTest {
+class DeleteUrlByIdSoftServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlRepository repository;

@@ -1,5 +1,6 @@
 package com.write.api.application.service.userRole;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
@@ -9,11 +10,9 @@ import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -25,8 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class DeleteUserRoleServiceTest {
+class DeleteUserRoleServiceTest extends BaseServiceTest {
 
     @Mock
     private IUserRoleRepository repository;

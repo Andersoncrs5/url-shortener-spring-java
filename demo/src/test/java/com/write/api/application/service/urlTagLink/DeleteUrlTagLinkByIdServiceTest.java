@@ -1,5 +1,6 @@
 package com.write.api.application.service.urlTagLink;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.ports.out.repository.IUrlTagLinkRepository;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class DeleteUrlTagLinkByIdServiceTest {
+class DeleteUrlTagLinkByIdServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlTagLinkRepository repository;

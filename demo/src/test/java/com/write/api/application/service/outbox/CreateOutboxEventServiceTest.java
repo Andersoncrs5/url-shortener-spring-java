@@ -3,6 +3,7 @@ package com.write.api.application.service.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.write.api.application.dto.outbox.CreateOutboxEventCommand;
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.enums.AggregateTypeEnum;
 import com.write.api.core.domain.enums.EventTypeEnum;
@@ -22,13 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CreateOutboxEventServiceTest {
+class CreateOutboxEventServiceTest extends BaseServiceTest {
 
     @Mock
     private IOutboxEventRepository repository;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     private CreateOutboxEventService service;

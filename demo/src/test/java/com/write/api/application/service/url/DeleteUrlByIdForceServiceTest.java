@@ -1,5 +1,6 @@
 package com.write.api.application.service.url;
 
+import com.write.api.application.service.base.BaseServiceTest;
 import com.write.api.application.shared.Result;
 import com.write.api.core.domain.model.UrlModel;
 import com.write.api.ports.in.outbox.CreateOutboxEventUseCase;
@@ -18,8 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class DeleteUrlByIdForceServiceTest {
+class DeleteUrlByIdForceServiceTest extends BaseServiceTest {
 
     @Mock
     private IUrlRepository repository;
