@@ -27,6 +27,15 @@ application:
   default-language: en-US
 
 spring:
+  mail:
+    host: mailpit
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
   sql:
     init:
       mode: always
