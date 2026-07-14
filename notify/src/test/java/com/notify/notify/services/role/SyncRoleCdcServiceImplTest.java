@@ -8,6 +8,7 @@ import com.notify.notify.modules.roles.dto.RoleCdcEvent;
 import com.notify.notify.modules.roles.entities.RoleEntity;
 import com.notify.notify.modules.roles.mapper.RoleMapper;
 import com.notify.notify.modules.roles.services.base.DeleteRoleByIdService;
+import com.notify.notify.modules.roles.services.base.InsertRoleService;
 import com.notify.notify.modules.roles.services.base.SyncRoleService;
 import com.notify.notify.modules.roles.services.provider.SyncRoleCdcServiceImpl;
 import com.notify.notify.services.base.BaseServiceTest;
@@ -15,10 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.time.Duration;
@@ -33,26 +32,15 @@ import static org.mockito.Mockito.*;
 @DisplayName("SyncRoleCdcServiceImpl Unit Tests")
 public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
 
-    @Mock
-    RedisCrudService redis;
+    @Mock RedisCrudService redis;
+    @Mock SyncRoleService sync;
+    @Mock InsertRoleService insertRole;
+    @Mock DeleteRoleByIdService delete;
+    @Mock RoleMapper mapper;
+    @Mock TiCdcEvent<RoleCdcEvent> mockEvent;
+    @Mock RoleCdcEvent mockRoleCdcEvent;
 
-    @Mock
-    SyncRoleService sync;
-
-    @Mock
-    DeleteRoleByIdService delete;
-
-    @Mock
-    RoleMapper mapper;
-
-    @InjectMocks
-    SyncRoleCdcServiceImpl syncRoleCdcService;
-
-    @Mock
-    TiCdcEvent<RoleCdcEvent> mockEvent;
-
-    @Mock
-    RoleCdcEvent mockRoleCdcEvent;
+    @InjectMocks SyncRoleCdcServiceImpl syncRoleCdcService;
 
     RoleEntity roleEntity;
     String eventId;
@@ -75,16 +63,13 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should ignore duplicated CDC event if key exists in Redis")
         void shouldSkipProcessingWhenEventIsDuplicated() {
-
             when(redis.exists(eventId)).thenReturn(true);
-
 
             Result<RoleEntity> result = syncRoleCdcService.execute(mockEvent);
 
-
             assertTrue(result.isSuccess());
             verify(redis, times(1)).exists(eventId);
-            verifyNoInteractions(sync, delete, mapper);
+            verifyNoInteractions(sync, insertRole, delete, mapper);
             verify(redis, never()).save(any(), any(), any());
         }
     }
@@ -96,16 +81,13 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should successfully sync insert CDC event and save key to cache")
         void shouldProcessInsertSuccessfully() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(true);
             when(mockEvent.firstData()).thenReturn(mockRoleCdcEvent);
             when(mapper.toEntity(mockRoleCdcEvent)).thenReturn(roleEntity);
-            when(sync.execute(roleEntity)).thenReturn(Result.success(roleEntity));
-
+            when(insertRole.execute(roleEntity)).thenReturn(Result.success(roleEntity));
 
             Result<RoleEntity> result = syncRoleCdcService.execute(mockEvent);
-
 
             assertTrue(result.isSuccess());
             assertEquals(roleEntity, result.getValue());
@@ -115,18 +97,15 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should return failure and skip redis cache write when insert execution fails")
         void shouldReturnFailureWhenInsertFails() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(true);
             when(mockEvent.firstData()).thenReturn(mockRoleCdcEvent);
             when(mapper.toEntity(mockRoleCdcEvent)).thenReturn(roleEntity);
 
             Result<RoleEntity> failureResult = Result.failure("Conflict detected", HttpStatus.INTERNAL_SERVER_ERROR);
-            when(sync.execute(roleEntity)).thenReturn(failureResult);
-
+            when(insertRole.execute(roleEntity)).thenReturn(failureResult);
 
             Result<RoleEntity> result = syncRoleCdcService.execute(mockEvent);
-
 
             assertTrue(result.isFailure());
             verify(redis, never()).save(anyString(), anyString(), any(Duration.class));
@@ -140,7 +119,6 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should successfully sync update CDC event")
         void shouldProcessUpdateSuccessfully() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(false);
             when(mockEvent.isUpdate()).thenReturn(true);
@@ -148,9 +126,7 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
             when(mapper.toEntity(mockRoleCdcEvent)).thenReturn(roleEntity);
             when(sync.execute(roleEntity)).thenReturn(Result.success(roleEntity));
 
-
             Result<RoleEntity> result = syncRoleCdcService.execute(mockEvent);
-
 
             assertTrue(result.isSuccess());
             verify(redis).save(eq(eventId), eq("processed"), any(Duration.class));
@@ -164,7 +140,6 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should successfully process delete event and invoke delete service")
         void shouldProcessDeleteSuccessfully() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(false);
             when(mockEvent.isUpdate()).thenReturn(false);
@@ -174,9 +149,7 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
             when(mockEvent.old()).thenReturn(List.of(mockRoleCdcEvent));
             when(delete.execute(55L)).thenReturn(Result.success());
 
-
             Result<RoleEntity> result = syncRoleCdcService.execute(mockEvent);
-
 
             assertTrue(result.isSuccess());
             verify(redis).save(eq(eventId), eq("processed"), any(Duration.class));
@@ -185,13 +158,11 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should throw BusinessException when delete payload has no old list data")
         void shouldThrowExceptionWhenOldDataIsEmptyOnDelete() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(false);
             when(mockEvent.isUpdate()).thenReturn(false);
             when(mockEvent.isDelete()).thenReturn(true);
             when(mockEvent.old()).thenReturn(Collections.emptyList());
-
 
             BusinessException exception = assertThrows(BusinessException.class, () -> {
                 syncRoleCdcService.execute(mockEvent);
@@ -209,7 +180,6 @@ public class SyncRoleCdcServiceImplTest extends BaseServiceTest {
         @Test
         @DisplayName("Should throw BusinessException when action type is unsupported")
         void shouldThrowExceptionWhenActionIsUnsupported() {
-
             when(redis.exists(eventId)).thenReturn(false);
             when(mockEvent.isInsert()).thenReturn(false);
             when(mockEvent.isUpdate()).thenReturn(false);

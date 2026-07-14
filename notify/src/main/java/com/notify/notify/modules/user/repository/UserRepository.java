@@ -28,6 +28,36 @@ public class UserRepository extends BaseRepository<UserEntity, Long> {
         return "users";
     }
 
+    public Optional<UserEntity> findByEmail(String email) {
+        String sql = "SELECT * FROM " + this.tableName() + " WHERE email = ?";
+
+        try {
+            UserEntity user = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                UserEntity u = new UserEntity();
+                u.setId(rs.getLong("id"));
+                u.setName(rs.getString("name"));
+                u.setEmail(rs.getString("email"));
+                u.setActive(rs.getBoolean("active"));
+                u.setEmailVerified(rs.getBoolean("email_verified"));
+
+                Timestamp blockedAtTs = rs.getTimestamp("blocked_at");
+                u.setBlockedAt(blockedAtTs != null ? blockedAtTs.toLocalDateTime() : null);
+
+                String rolesStr = rs.getString("roles");
+                if (rolesStr != null && !rolesStr.isBlank()) {
+                    u.setRoles(new HashSet<>(Arrays.asList(rolesStr.split(","))));
+                } else {
+                    u.setRoles(new HashSet<>());
+                }
+                return u;
+            }, email);
+
+            return Optional.ofNullable(user);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     @Override
     public Optional<UserEntity> findById(Long id) {
         String sql = "SELECT * FROM users WHERE id = ?";

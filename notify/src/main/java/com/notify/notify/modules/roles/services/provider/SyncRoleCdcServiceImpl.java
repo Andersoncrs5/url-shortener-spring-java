@@ -8,6 +8,7 @@ import com.notify.notify.modules.roles.dto.RoleCdcEvent;
 import com.notify.notify.modules.roles.entities.RoleEntity;
 import com.notify.notify.modules.roles.mapper.RoleMapper;
 import com.notify.notify.modules.roles.services.base.DeleteRoleByIdService;
+import com.notify.notify.modules.roles.services.base.InsertRoleService;
 import com.notify.notify.modules.roles.services.base.SyncRoleCdcService;
 import com.notify.notify.modules.roles.services.base.SyncRoleService;
 import com.notify.notify.utils.annotations.UseService;
@@ -30,6 +31,7 @@ public class SyncRoleCdcServiceImpl implements SyncRoleCdcService {
     RedisCrudService redis;
     SyncRoleService sync;
     DeleteRoleByIdService delete;
+    InsertRoleService insertRole;
     RoleMapper mapper;
 
     @Override
@@ -71,7 +73,7 @@ public class SyncRoleCdcServiceImpl implements SyncRoleCdcService {
 
     private Result<RoleEntity> processInsert(TiCdcEvent<RoleCdcEvent> event) {
         RoleEntity role = mapper.toEntity(event.firstData());
-        Result<RoleEntity> result = sync.execute(role);
+        Result<RoleEntity> result = insertRole.execute(role);
 
         if (result.isFailure()) {
             log.error("Error inserting role: {}", role.getName());

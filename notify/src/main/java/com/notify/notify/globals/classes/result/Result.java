@@ -52,6 +52,9 @@ public class Result<T> {
         return new Result<>(null, List.of(), status);
     }
 
+    public static <T> Result<T> failure(Result<T> result) {
+        return new Result<>(result.value, result.errors, result.statusCode);
+    }
 
     public static <T> Result<T> failure(String error, HttpStatus status) {
         return new Result<>(null, List.of(error), status);
