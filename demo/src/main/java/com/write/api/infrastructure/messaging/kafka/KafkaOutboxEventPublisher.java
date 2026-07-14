@@ -30,18 +30,16 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
     ObjectMapper objectMapper;
 
     @Override
-    @CircuitBreaker(name = "kafka", fallbackMethod = "fallbackPublish")
-    @Retry(name = "kafka")
-    @Bulkhead(name = "kafka")
     @TrackExecutionTime("outbox.kafka.publish")
     public SendResult<String, String> publish(OutboxEventModel event) {
+        String topic = event.getTopic().value().toLowerCase();
 
         OutboxEventMessage message = new OutboxEventMessage(
                 String.valueOf(event.getId()),
                 event.getAggregateType().name(),
                 event.getAggregateId(),
                 event.getEventType().name(),
-                event.getTopic().name(),
+                topic,
                 event.getPayload(),
                 event.getVersion()
         );
@@ -49,16 +47,24 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
         try {
             String json = objectMapper.writeValueAsString(message);
 
-            return kafkaTemplate.send(
-                    message.topic(),
+            log.info("Send event to topic: {}, id: {} ", topic, message.eventId());
+
+            kafkaTemplate.send(
+                    topic,
                     message.aggregateId().toString(),
                     json
-            ).toCompletableFuture().join();
+            ).whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.info("Outbox event {} delivered successfully!", event.getId());
+                } else {
+                    log.error("Kafka async delivery failed for event {}", event.getId(), ex);
+                }
+            });
+
+            return null;
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize event", e);
-        } catch (CompletionException e) {
-            throw new RuntimeException("Kafka delivery failed", e.getCause());
         }
     }
 
