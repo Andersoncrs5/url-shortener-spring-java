@@ -1,14 +1,11 @@
 package com.write.api.bootstrap;
 
-import com.write.api.application.dto.userRole.CreateUserRoleDTO;
-import com.write.api.application.shared.Result;
 import com.write.api.application.shared.annotations.TrackExecutionTime;
 import com.write.api.core.domain.model.RoleModel;
 import com.write.api.core.domain.model.UserModel;
 import com.write.api.core.domain.model.UserRoleModel;
 import com.write.api.core.domain.service.SnowflakeIdGenerator;
 import com.write.api.infrastructure.config.properties.SuperAdminProperties;
-import com.write.api.ports.in.userRole.CreateUserRoleUseCase;
 import com.write.api.ports.out.repository.IRoleRepository;
 import com.write.api.ports.out.repository.IUserRepository;
 import com.write.api.ports.out.repository.IUserRoleRepository;
@@ -21,7 +18,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -63,7 +59,6 @@ public class LinkSuperAdmRoleToSuperAdmBootstrap implements ApplicationRunner {
             );
             return;
         }
-
 
         if (userRoleRepository.existsByRoleIdAndUserId(role.getId(), superAdm.getId())) {
             log.info("Role already linked the user");
