@@ -73,7 +73,7 @@ services:
       start_period: 70s
 
   grafana:
-    image: grafana/grafana:11.6.3
+    image: grafana/grafana:latest
     container_name: grafana
     ports:
         - "3000:3000"
@@ -322,21 +322,17 @@ services:
     image: bitnami/jmx-exporter:latest
     container_name: kafka-jmx-exporter
     ports:
-      - "9404:9404"
-    environment:
-      JMX_EXPORTER_CONFIG: |
-        lowercaseOutputName: true
-        lowercaseOutputLabelNames: true
+        - "9404:9404"
+    volumes:
+        - ./monitoring/kafka-jmx-exporter.yml:/config/jmx-exporter.yml:ro
     command:
-      - "9404"
-      - "redpanda:9999"
+        - "9404"
+        - "/config/jmx-exporter.yml"
     depends_on:
-      redpanda:
-        condition: service_healthy
-      prometheus:
-        condition: service_started
+       redpanda:
+          condition: service_healthy
     networks:
-      - url_shot_java
+        - url_shot_java
 
   kafka-exporter:
     image: redpandadata/kminion:latest
