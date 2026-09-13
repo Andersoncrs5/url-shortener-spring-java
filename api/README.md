@@ -1,389 +1,713 @@
 # URL Shortener — Read API
 
-The **Read API** is the query side of a distributed URL Shortener system designed around **CQRS (Command Query Responsibility Segregation)**.
+A read-optimized API responsible for serving URL shortener data in a distributed, event-driven architecture.
 
-While the Write API is responsible for transactional operations and publishing changes, the Read API consumes **Change Data Capture (CDC)** events through Apache Kafka and continuously builds optimized read models in **MongoDB**.
+The application is designed around **CQRS**, where the read side is completely separated from the write side. Data changes are propagated asynchronously through **Change Data Capture (CDC)** and **Apache Kafka**, allowing the Read API to maintain its own persistence and caching layers without directly depending on the transactional write database.
 
-The architecture is designed to separate write and read workloads, allowing each side of the system to evolve and scale independently.
+The project was designed with a strong focus on **scalability, asynchronous processing, resilience, observability, testability, and clean separation of responsibilities**.
 
 ---
 
 ## Architecture
 
-The Read API follows a layered architecture inspired by **Clean Architecture and Hexagonal Architecture**, separating the API, application, domain, and infrastructure concerns.
-
-The main data flow is:
+The Read API is part of a distributed URL shortener architecture:
 
 ```text
-                         ┌──────────────────────┐
-                         │       Write API      │
-                         │    Command Side      │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │    Write Database    │
-                         └──────────┬───────────┘
-                                    │
-                                    │ CDC
-                                    ▼
-                         ┌──────────────────────┐
-                         │        TiCDC         │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │        Kafka         │
-                         └──────────┬───────────┘
-                                    │
-              ┌─────────────────────┼─────────────────────┐
-              │                     │                     │
-              ▼                     ▼                     ▼
-       ┌────────────┐        ┌────────────┐        ┌────────────┐
-       │ URL Events │        │ User Events│        │ Role Events│
-       └─────┬──────┘        └─────┬──────┘        └─────┬──────┘
-             │                     │                     │
-             └─────────────────────┼─────────────────────┘
-                                   ▼
-                         ┌──────────────────────┐
-                         │       Read API       │
-                         │     Query Side       │
-                         └──────────┬───────────┘
-                                    │
-                         ┌──────────┴───────────┐
-                         │                      │
-                         ▼                      ▼
-                ┌─────────────────┐    ┌─────────────────┐
-                │     MongoDB     │    │      Redis      │
-                │   Read Models   │    │      Cache      │
-                └─────────────────┘    └─────────────────┘
+                         ┌──────────────────┐
+                         │     Write API    │
+                         │                  │
+                         │ Spring Boot      │
+                         │ Transactional DB │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                              TiCDC / CDC
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │      Kafka       │
+                         │                  │
+                         │ CDC Events       │
+                         └────────┬─────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+          ┌──────────────────┐        ┌──────────────────┐
+          │    Read API      │        │   Other Services │
+          │                  │        │                  │
+          │ Spring Boot      │        │                  │
+          │ Kafka Consumers  │        │                  │
+          └────────┬─────────┘        └──────────────────┘
+                   │
+          ┌────────┴─────────┐
+          │                  │
+          ▼                  ▼
+    ┌───────────┐      ┌───────────┐
+    │ MongoDB   │      │   Redis   │
+    │ Read Model│      │   Cache   │
+    └───────────┘      └───────────┘
 ```
 
-The resulting architecture allows the system to use a persistence model optimized for queries without coupling read operations directly to the transactional write database.
+The Read API does not need to query the transactional database for normal read operations.
+
+Instead, it consumes domain changes from Kafka and builds its own read model.
 
 ---
 
-## Key Responsibilities
+# Key Concepts
 
-The Read API is responsible for:
+## CQRS
 
-* Consuming CDC events from Kafka
-* Processing changes asynchronously
-* Maintaining MongoDB read models
-* Serving optimized query operations
-* Supporting pagination and filtering
-* Providing URL, user, role, tag, and rule queries
-* Maintaining read-side consistency with the write database
-* Handling failed event processing through a Dead Letter Queue
-* Retrying failed events
-* Providing cache support through Redis
-* Applying authentication and authorization
-* Applying request rate limiting
-* Supporting idempotent processing
-* Exposing metrics and operational information
-* Providing REST and OpenAPI documentation
+The application follows the **Command Query Responsibility Segregation** pattern.
+
+The write and read workloads are separated:
+
+```text
+                  ┌──────────────────────┐
+                  │      Write Side      │
+                  │                      │
+                  │ Commands             │
+                  │ Transactions         │
+                  │ Source of Truth       │
+                  └──────────┬───────────┘
+                             │
+                             │ CDC
+                             ▼
+                         Kafka Topics
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │       Read Side      │
+                  │                      │
+                  │ Queries              │
+                  │ MongoDB              │
+                  │ Redis                │
+                  └──────────────────────┘
+```
+
+This allows each side of the system to evolve independently according to its workload.
+
+The Read API is optimized for:
+
+* high read throughput
+* low-latency queries
+* independent horizontal scaling
+* denormalized read models
+* caching
+* asynchronous synchronization
 
 ---
 
-# CQRS
+# Event-Driven Synchronization
 
-The system separates commands from queries.
+The Read API receives changes through Kafka consumers.
 
-```text
-             COMMAND SIDE                         QUERY SIDE
+The CDC layer transforms database changes into domain-specific events such as:
 
-        ┌──────────────────┐                ┌──────────────────┐
-        │     Write API    │                │     Read API     │
-        └────────┬─────────┘                └────────▲─────────┘
-                 │                                   │
-                 ▼                                   │
-        ┌──────────────────┐                         │
-        │ Write Database   │                         │
-        └────────┬─────────┘                         │
-                 │                                   │
-                 │ CDC                               │
-                 ▼                                   │
-        ┌──────────────────┐                         │
-        │      TiCDC       │                         │
-        └────────┬─────────┘                         │
-                 │                                   │
-                 ▼                                   │
-        ┌──────────────────┐                         │
-        │      Kafka       │─────────────────────────┘
-        └──────────────────┘
-```
+* User events
+* URL events
+* Role events
+* URL access rule events
+* URL redirect rule events
+* URL tag events
 
-The two sides have different responsibilities.
-
-### Write API
-
-The command side handles:
-
-* Creating and modifying data
-* Transactional operations
-* Domain operations
-* Persistence in the write database
-* Publishing changes through CDC
-
-### Read API
-
-The query side handles:
-
-* Consuming CDC events
-* Updating read models
-* Querying data
-* Filtering and pagination
-* Serving read-heavy workloads
-* Caching frequently accessed data
-
-This separation prevents read-heavy workloads from unnecessarily impacting the transactional database.
-
----
-
-# Change Data Capture
-
-One of the main characteristics of the system is its use of **Change Data Capture (CDC)**.
-
-Instead of synchronously calling the Read API every time data changes, database changes are captured and propagated asynchronously.
-
-```text
-Database Change
-      │
-      ▼
-    TiCDC
-      │
-      ▼
-    Kafka
-      │
-      ▼
- Read API Consumer
-      │
-      ▼
-CDC Use Case
-      │
-      ▼
-MongoDB Read Model
-```
-
-The application contains dedicated CDC processing components for:
-
-* Users
-* Roles
-* URLs
-* URL access rules
-* URL redirect rules
-* URL tags
-
-Each aggregate has its own CDC mapper and application-level processing logic.
-
----
-
-# Kafka Consumers
-
-Kafka consumers are organized by aggregate type.
-
-```text
-infrastructure/kafka/consumer/
-
-├── role
-│   ├── RoleCdcConsumer
-│   └── RoleCdcConsumerDlq
-│
-├── url
-│   ├── UrlCdcConsumer
-│   └── UrlCdcConsumerDlq
-│
-├── urlAccessRule
-│   ├── UrlAccessRuleCdcConsumer
-│   └── UrlAccessRuleCdcConsumerDlq
-│
-├── urlRedirectRule
-│   ├── UrlRedirectRuleCdcConsumer
-│   └── UrlRedirectRuleCdcConsumerDlq
-│
-├── urlTag
-│   ├── UrlTagCdcConsumer
-│   └── UrlTagCdcConsumerDlq
-│
-└── user
-    ├── UserCdcConsumer
-    └── UserCdcConsumerDlq
-```
-
-Common consumer behavior is abstracted through reusable base components:
-
-```text
-AbstractCdcConsumer
-AbstractDlqConsumer
-```
-
-This avoids duplicating infrastructure logic between individual consumers.
-
----
-
-# CDC Domain Model
-
-CDC events are represented explicitly inside the domain layer.
+The corresponding CDC domain classes are located under:
 
 ```text
 domain/cdc/
-
-├── BaseCdcEvent
-├── TiCdcEvent
-└── classes
-    ├── RoleCdcEvent
-    ├── UrlCdcEvent
-    ├── UrlAccessRuleCdcEvent
-    ├── UrlRedirectRuleCdcEvent
-    ├── UrlTagCdcEvent
-    └── UserCdcEvent
 ```
 
-This provides a dedicated domain representation for change events instead of coupling the application directly to Kafka infrastructure.
+Examples:
 
-The domain also defines CDC-specific concepts such as:
+```text
+BaseCdcEvent.java
+TiCdcEvent.java
 
-* Event types
-* Aggregate types
-* Topics
-* CDC event types
-* Outbox status
-* Dead letter status
+RoleCdcEvent.java
+UrlCdcEvent.java
+UrlAccessRuleCdcEvent.java
+UrlRedirectRuleCdcEvent.java
+UrlTagCdcEvent.java
+UserCdcEvent.java
+```
+
+The infrastructure layer then consumes these events through Kafka consumers.
+
+```text
+TiCDC
+  │
+  ▼
+Kafka
+  │
+  ├── Role Events
+  ├── URL Events
+  ├── User Events
+  ├── Access Rule Events
+  ├── Redirect Rule Events
+  └── Tag Events
+       │
+       ▼
+Kafka Consumers
+       │
+       ▼
+Application Use Cases
+       │
+       ▼
+MongoDB Read Model
+```
 
 ---
 
-# MongoDB Read Models
+# Technology Stack
 
-MongoDB is used as the primary persistence layer for the query side.
+| Technology        | Purpose                                        |
+| ----------------- | ---------------------------------------------- |
+| Java              | Primary programming language                   |
+| Spring Boot       | Application framework                          |
+| Apache Kafka      | Event streaming and asynchronous communication |
+| TiCDC             | Change Data Capture                            |
+| MongoDB           | Read-model persistence                         |
+| Redis             | Caching                                        |
+| JWT               | Authentication                                 |
+| Spring Security   | Authorization and security                     |
+| Docker            | Containerization                               |
+| Testcontainers    | Integration testing                            |
+| Swagger / OpenAPI | API documentation                              |
+| MapStruct         | Object mapping                                 |
+| JUnit             | Unit and integration testing                   |
+| Maven             | Dependency management and build                |
+| Logback           | Application logging                            |
 
-The read API contains MongoDB-specific repositories for the application's main aggregates:
+---
+
+# Project Structure
+
+The application follows a layered architecture with clear separation between:
+
+* API
+* Application
+* Domain
+* Infrastructure
+* Cross-cutting utilities
 
 ```text
-MongoUrlRepository
-MongoUserRepository
-MongoRoleRepository
-MongoUrlTagRepository
-MongoUrlAccessRuleRepository
-MongoUrlRedirectRuleRepository
-MongoOutboxEventRepository
-MongoDeadLetterEventRepository
+src
+├── main
+│   ├── java
+│   │   └── com
+│   │       └── read
+│   │           └── api
+│   │
+│   │               ├── api
+│   │               ├── application
+│   │               ├── domain
+│   │               ├── infrastructure
+│   │               └── utils
+│   │
+│   └── resources
+│
+└── test
+    ├── java
+    └── resources
 ```
 
-This allows the query side to use a persistence model designed specifically for read operations.
+---
 
-The application separates domain repositories from infrastructure implementations:
+# API Layer
+
+The API layer is responsible for exposing HTTP endpoints and translating HTTP requests into application-level operations.
 
 ```text
-Domain Repository
-       │
-       ▼
+api/
+├── controller/
+├── dto/
+└── exception/
+```
+
+## Controllers
+
+Controllers are organized by domain resource:
+
+```text
+controller/
+├── deadLetterEvent/
+├── url/
+├── urlAccessRule/
+├── urlRedirectRule/
+├── urlTag/
+└── user/
+```
+
+Each resource contains dedicated components for:
+
+* HTTP endpoints
+* OpenAPI documentation
+* request mapping
+* pagination
+* ordering
+* controller-specific mapping
+
+For example:
+
+```text
+url/
+├── UrlController.java
+├── UrlControllerDocs.java
+├── UrlMapperController.java
+├── UrlOrderBy.java
+└── UrlPageRequestDTO.java
+```
+
+This keeps API concerns isolated from business logic.
+
+---
+
+# DTO Layer
+
+The API DTOs are separated from the domain models.
+
+```text
+dto/
+├── base/
+├── deadLetterEvent/
+├── metric/
+├── outbox/
+├── role/
+├── tag/
+├── url/
+├── urlAccessRule/
+├── urlRedirectRule/
+└── user/
+```
+
+Each resource provides its own request/response and filtering structures.
+
+For example:
+
+```text
+url/
+├── AccessContextDTO.java
+├── UrlDTO.java
+├── UrlFilter.java
+└── UrlMetricDTO.java
+```
+
+This prevents HTTP-specific representations from leaking into the domain layer.
+
+---
+
+# Application Layer
+
+The application layer contains the use cases that orchestrate application behavior.
+
+```text
+application/
+└── usecase/
+    ├── base/
+    ├── impl/
+    ├── interfaces/
+    └── mapper/
+```
+
+The use-case implementation is separated from its interface.
+
+```text
+interfaces/
+```
+
+contains application contracts.
+
+```text
+impl/
+```
+
+contains concrete implementations.
+
+This allows application logic to remain independent from infrastructure concerns.
+
+---
+
+# Use Cases
+
+The application contains dedicated use cases for operations such as:
+
+```text
+Find
+Insert
+Save
+Delete
+Exists
+Retry
+```
+
+For example, URL operations include:
+
+```text
+FindAllUrlUseCaseImpl
+FindUrlByIdUseCaseImpl
+FindUrlByShortCodeUseCaseImpl
+InsertUrlUseCaseImpl
+SaveUrlUseCaseImpl
+DeleteUrlByIdUseCaseImpl
+TryRetryUrlUseCaseImpl
+```
+
+The same approach is used for:
+
+* Users
+* Roles
+* URL access rules
+* URL redirect rules
+* URL tags
+* Dead-letter events
+
+This keeps business operations explicit and independently testable.
+
+---
+
+# CDC Use Cases
+
+CDC processing is treated as an application-level operation instead of coupling Kafka consumers directly to persistence.
+
+```text
+application/usecase/impl/cdc/
+```
+
+contains dedicated CDC services for each aggregate.
+
+```text
+cdc/
+├── role/
+├── url/
+├── urlAccessRule/
+├── urlRedirectRule/
+├── urlTag/
+└── user/
+```
+
+The flow is therefore:
+
+```text
+Kafka Consumer
+      │
+      ▼
+CDC Application Use Case
+      │
+      ▼
+CDC Mapper
+      │
+      ▼
+Repository
+      │
+      ▼
+MongoDB
+```
+
+This separation makes the event-processing pipeline easier to test and evolve.
+
+---
+
+# Domain Layer
+
+The domain layer contains the application's core models, repositories, events, enums, exceptions and domain utilities.
+
+```text
+domain/
+├── cdc/
+├── dto/
+├── enums/
+├── exceptions/
+├── model/
+├── repository/
+├── service/
+└── utils/
+```
+
+The domain layer does not depend directly on Kafka, MongoDB configuration, HTTP controllers or other infrastructure implementations.
+
+---
+
+# Domain Models
+
+The domain models represent the main business concepts:
+
+```text
+model/
+├── ApiKeyModel.java
+├── DeadLetterEventModel.java
+├── OutboxEventModel.java
+├── RoleModel.java
+├── UrlAccessRuleModel.java
+├── UrlModel.java
+├── UrlRedirectRuleModel.java
+├── UrlTagModel.java
+└── UserModel.java
+```
+
+Metrics are represented separately:
+
+```text
+model/
+└── metrics/
+    └── UrlMetricModel.java
+```
+
+This separation allows the domain representation to remain independent of persistence-specific entities.
+
+---
+
+# Repository Abstraction
+
+Repository interfaces are defined in the domain layer:
+
+```text
+domain/repository/
+```
+
+Examples include:
+
+```text
+UrlRepository
+UserRepository
+RoleRepository
+UrlTagRepository
+UrlAccessRuleRepository
+UrlRedirectRuleRepository
+DeadLetterEventRepository
+OutboxEventRepository
+```
+
+The interfaces describe what the application needs without specifying how persistence is implemented.
+
+---
+
+# Infrastructure Layer
+
+Infrastructure contains concrete implementations of external integrations.
+
+```text
+infrastructure/
+├── cache/
+├── config/
+├── job/
+├── kafka/
+├── mapper/
+├── metrics/
+├── mongo/
+├── persistence/
+├── properties/
+└── tx/
+```
+
+This is where the application integrates with technologies such as:
+
+* Kafka
+* MongoDB
+* Redis
+* Spring Security
+* scheduling
+* metrics
+* serialization
+* transactions
+
+---
+
+# MongoDB Persistence
+
+MongoDB-specific persistence implementations are located under:
+
+```text
+infrastructure/persistence/
+```
+
+The persistence layer separates:
+
+```text
+Domain Model
+      │
+      ▼
+Repository Interface
+      │
+      ▼
 Repository Implementation
-       │
-       ▼
-MongoDB Repository
+      │
+      ▼
+Mongo Entity
+      │
+      ▼
+MongoDB
 ```
 
-This keeps MongoDB-specific details inside the infrastructure layer.
+Entities are kept separate from domain models:
+
+```text
+persistence/entity/
+```
+
+Examples:
+
+```text
+UrlEntity.java
+UserEntity.java
+RoleEntity.java
+UrlTagEntity.java
+UrlAccessRuleEntity.java
+UrlRedirectRuleEntity.java
+DeadLetterEventEntity.java
+OutboxEventEntity.java
+```
+
+This prevents persistence concerns from leaking into the domain model.
+
+---
+
+# MongoDB Repositories
+
+Mongo-specific repository implementations are grouped under:
+
+```text
+persistence/mongo/
+```
+
+Examples:
+
+```text
+MongoUrlRepository.java
+MongoUserRepository.java
+MongoRoleRepository.java
+MongoUrlTagRepository.java
+MongoUrlAccessRuleRepository.java
+MongoUrlRedirectRuleRepository.java
+MongoDeadLetterEventRepository.java
+MongoOutboxEventRepository.java
+```
+
+The repository abstraction therefore remains independent of the MongoDB implementation.
 
 ---
 
 # Redis Cache
 
-Redis is used as a caching layer for frequently accessed data.
-
-The cache abstraction is represented in the domain through:
+Redis support is isolated under:
 
 ```text
+infrastructure/cache/
+```
+
+The architecture exposes a domain-level cache service:
+
+```text
+domain/service/
+└── RedisCrudService.java
+```
+
+while the concrete implementation lives in infrastructure:
+
+```text
+infrastructure/cache/
+├── CacheConfig.java
+└── RedisCrudServiceImpl.java
+```
+
+This follows the dependency inversion principle:
+
+```text
+Application / Domain
+        │
+        ▼
 RedisCrudService
+        ▲
+        │
+RedisCrudServiceImpl
+        │
+        ▼
+      Redis
 ```
 
-with its infrastructure implementation:
+---
+
+# Kafka Integration
+
+Kafka infrastructure is organized under:
 
 ```text
-RedisCrudServiceImpl
+infrastructure/kafka/
 ```
 
-The separation allows application components to depend on an abstraction rather than directly depending on Redis infrastructure.
+The implementation contains:
 
 ```text
-Application
-     │
-     ▼
-RedisCrudService
-     │
-     ▼
-RedisCrudServiceImpl
-     │
-     ▼
-   Redis
+kafka/
+├── base/
+├── classes/
+├── consumer/
+├── dlq/
+└── producer/
 ```
 
-This can reduce database load and improve response times for frequently accessed resources.
+Consumers are separated by aggregate:
+
+```text
+consumer/
+├── role/
+├── url/
+├── urlAccessRule/
+├── urlRedirectRule/
+├── urlTag/
+└── user/
+```
+
+Each aggregate has its own CDC consumer and DLQ consumer.
+
+Example:
+
+```text
+url/
+├── UrlCdcConsumer.java
+└── UrlCdcConsumerDlq.java
+```
+
+This provides isolation between different event-processing pipelines.
 
 ---
 
 # Dead Letter Queue
 
-The system includes a dedicated **Dead Letter Queue (DLQ)** mechanism for CDC processing failures.
-
-When an event cannot be successfully processed, it can be routed to the dead-letter flow instead of being permanently lost.
+Failed event processing is handled through a dedicated dead-letter mechanism.
 
 ```text
-Kafka
-  │
-  ▼
-CDC Consumer
-  │
-  ├── Success ──────────► MongoDB
-  │
-  └── Failure
-        │
-        ▼
-       DLQ
-        │
-        ▼
-DeadLetterEvent
-        │
-        ▼
-Persisted Failure
-        │
-        ▼
-Retry Job
-        │
-        ▼
-Retry Processing
+kafka/
+├── dlq/
+│   ├── DeadLetterEvent.java
+│   ├── DeadLetterPublisher.java
+│   └── DeadLetterPublisherImpl.java
+│
+└── producer/
+    └── DlqProducer.java
 ```
 
-The system contains dedicated components for:
-
-* Publishing dead-letter events
-* Consuming DLQ messages
-* Persisting failed events
-* Querying dead-letter events
-* Retrying failed events
-* Deleting processed dead-letter events
-
-The application also provides:
+The application also maintains a persistent representation of dead-letter events:
 
 ```text
-DeadLetterRetryJob
+DeadLetterEventModel
+DeadLetterEventEntity
+DeadLetterEventRepository
 ```
 
-for automated retry processing.
+This allows failed messages to be:
+
+* persisted
+* inspected
+* retried
+* deleted
+* queried through the API
 
 ---
 
-# Retry Strategy
+# Retry Processing
 
-Retry behavior is implemented at multiple levels of the application.
-
-CDC processing defines reusable retry-oriented use cases such as:
-
-```text
-AbstractRetryDeadLetterUseCase
-```
-
-and aggregate-specific retry operations such as:
+Retry operations are represented as explicit application use cases:
 
 ```text
 TryRetryUrlUseCase
@@ -392,333 +716,491 @@ TryRetryRoleUseCase
 TryRetryUrlTagUseCase
 TryRetryUrlAccessRuleUseCase
 TryRetryUrlRedirectRuleUseCase
+RetryDeadLetterEventUseCase
 ```
 
-MongoDB-specific transient failures are also translated through:
+A scheduled retry mechanism is also provided:
 
 ```text
-MongoRetryTranslator
-MongoRetryTranslation
+infrastructure/job/
+├── DeadLetterRetryJob.java
+└── SchedulerConfig.java
 ```
 
-This allows infrastructure-level transient failures to be represented through application/domain abstractions.
+This creates a controlled recovery mechanism for transient failures.
 
 ---
 
-# API
+# Security
 
-The Read API exposes REST endpoints for the main queryable resources.
-
-## URL
-
-Supports operations such as:
-
-* Find URL by ID
-* Find URL by short code
-* List URLs
-* Filter URLs
-* Paginate URL results
-* Delete URLs
-
-## Users
-
-Supports:
-
-* Find users
-* Filter users
-* Find user by ID
-* User pagination
-* User deletion
-
-## Roles
-
-Supports:
-
-* Find roles
-* Filter roles
-* Find role by ID
-* Role pagination
-* Role deletion
-
-## URL Tags
-
-Supports:
-
-* Find tags
-* Filter tags
-* Find tag by ID
-* Search by name
-* Search by slug
-* Tag pagination
-* Tag deletion
-
-## URL Access Rules
-
-Supports:
-
-* Find access rules
-* Filter access rules
-* Find rules by URL
-* Find rule by ID
-* Validate rule existence
-* Delete access rules
-
-## URL Redirect Rules
-
-Supports:
-
-* Find redirect rules
-* Filter redirect rules
-* Find rule by ID
-* Delete redirect rules
-
-## Dead Letter Events
-
-Provides operational endpoints for:
-
-* Listing dead-letter events
-* Finding events by ID
-* Persisting events
-* Retrying events
-* Deleting events
-
----
-
-# Pagination and Filtering
-
-The API provides reusable filtering and pagination abstractions.
-
-Examples include:
+Security configuration is isolated under:
 
 ```text
-UrlPageRequestDTO
-UserPageRequestDTO
-RolePageRequestDTO
-UrlTagPageRequestDTO
-UrlAccessRulePageRequestDTO
-UrlRedirectRulePageRequestDTO
-DeadLetterEventPageRequestDTO
+infrastructure/config/security/
 ```
 
-Each resource also defines dedicated filtering and ordering models.
-
-This provides consistent query semantics across the API.
-
----
-
-# Authentication and Security
-
-The application contains a dedicated Spring Security configuration.
-
-The security infrastructure includes:
+The implementation contains:
 
 ```text
-SecurityConfig
-SecurityFilter
-TokenService
-CustomUserDetailsService
-CustomAuthenticationEntryPoint
-CustomAccessDeniedHandler
-UserPrincipal
+SecurityConfig.java
+SecurityFilter.java
+TokenService.java
+CustomUserDetailsService.java
+CustomAccessDeniedHandler.java
+CustomAuthenticationEntryPoint.java
 ```
 
-JWT is used for authentication, with dedicated configuration properties:
+JWT authentication is used to protect API resources.
+
+JWT-specific configuration is centralized through:
 
 ```text
-JwtProperties
+JwtProperties.java
 ```
 
-Controllers can declare JWT-protected operations using:
+The API also contains reusable authorization annotations:
 
 ```text
-@JwtProtected
+JwtProtected.java
 ```
 
-This keeps security concerns separated from the application's core business logic.
-
----
-
-# Rate Limiting
-
-The application contains a reusable annotation-based rate limiting mechanism:
-
-```text
-@RateLimited
-```
-
-implemented through:
-
-```text
-RateLimitAspect
-```
-
-This provides a declarative way to apply rate limits without embedding rate-limiting logic directly inside controllers.
+This keeps authentication and authorization concerns separated from application use cases.
 
 ---
 
 # Idempotency
 
-The Read API also contains an idempotency mechanism based on an annotation and AOP aspect:
+The application provides an idempotency mechanism through a reusable annotation and aspect:
 
 ```text
-@Idempotent
-IdempotencyAspect
+utils/
+└── annotation/
+    └── idempotent/
+        ├── IdempotencyAspect.java
+        └── Idempotent.java
 ```
 
-This provides a reusable cross-cutting mechanism for preventing duplicate processing where idempotent behavior is required.
+This allows idempotency behavior to be applied declaratively without duplicating implementation logic across individual use cases.
+
+---
+
+# Rate Limiting
+
+Rate limiting is implemented as a cross-cutting concern:
+
+```text
+utils/
+└── annotation/
+    └── ratelimit/
+        ├── RateLimitAspect.java
+        └── RateLimited.java
+```
+
+Endpoints or application operations can therefore opt into rate limiting using the corresponding annotation.
 
 ---
 
 # Observability
 
-The application contains infrastructure for collecting execution and application metrics.
-
-The project defines an annotation-based observation mechanism:
+The application contains dedicated metrics infrastructure:
 
 ```text
-@ObservedMetric
+infrastructure/metrics/
+└── MetricsConfig.java
 ```
 
-implemented through:
+and a reusable observed-metric aspect:
 
 ```text
-ObservedMetricAspect
+utils/
+└── metrics/
+    └── observed/
+        ├── ObservedMetric.java
+        └── ObservedMetricAspect.java
 ```
 
-The architecture also contains dedicated metric DTOs and domain models for URL-related metrics.
-
----
-
-# Snowflake IDs
-
-The application contains a Snowflake-based identifier generation mechanism:
-
-```text
-SnowflakeIdGenerator
-SnowflakeConfiguration
-SnowflakeId
-```
-
-Snowflake-style identifiers provide distributed ID generation without requiring a centralized database sequence.
-
-This is particularly useful in distributed architectures where multiple application instances may generate identifiers independently.
-
----
-
-# Base62
-
-The domain also contains a Base62 utility:
-
-```text
-Base62
-```
-
-Base62 encoding is useful for generating compact representations of identifiers and is particularly suitable for URL-shortening use cases.
-
----
-
-# Error Handling
-
-The REST API uses a centralized exception handling mechanism:
-
-```text
-GlobalExceptionHandler
-```
-
-The project also defines structured validation error representations:
-
-```text
-ValidationErrorItem
-ValidationErrorResponse
-```
-
-and a generic result abstraction:
-
-```text
-Result
-```
-
-This helps maintain consistent error and response behavior throughout the application.
+This allows application operations to be instrumented without embedding metrics code directly into business logic.
 
 ---
 
 # Transaction Handling
 
-The infrastructure contains an aspect-based transaction abstraction:
+Transaction behavior is encapsulated through an aspect-based abstraction:
 
 ```text
-ResultTransaction
-ResultTransactionAspect
+infrastructure/tx/
+├── ResultTransaction.java
+└── ResultTransactionAspect.java
 ```
 
-This allows transaction handling to be integrated with the application's result-oriented programming model.
+This keeps transaction management separate from the application logic while allowing use cases to explicitly declare transactional behavior.
+
+---
+
+# Pagination and Filtering
+
+The API provides reusable pagination and filtering abstractions.
+
+Base filtering functionality:
+
+```text
+api/dto/base/
+└── BaseFilter.java
+```
+
+Resource-specific filters include:
+
+```text
+UrlFilter
+UserFilter
+RoleFilter
+UrlTagFilter
+UrlAccessRuleFilter
+UrlRedirectRuleFilter
+DeadLetterEventFilter
+```
+
+Pagination and ordering are also modeled explicitly through classes such as:
+
+```text
+UrlPageRequestDTO
+UrlOrderBy
+UserPageRequestDTO
+UserOrderBy
+```
+
+This provides a consistent query interface across resources.
+
+---
+
+# ID Generation
+
+The project contains a Snowflake-based ID generator:
+
+```text
+domain/utils/
+└── SnowflakeIdGenerator.java
+```
+
+and persistence-specific support:
+
+```text
+infrastructure/persistence/shared/id/
+└── SnowflakeId.java
+```
+
+The architecture therefore supports distributed ID generation without relying exclusively on database-generated identifiers.
+
+---
+
+# Base62 Encoding
+
+The domain utilities contain a Base62 implementation:
+
+```text
+domain/utils/
+└── Base62.java
+```
+
+This is particularly useful for generating compact URL short codes.
+
+The resulting concept can be represented as:
+
+```text
+Numeric ID
+    │
+    ▼
+ Base62
+    │
+    ▼
+Short Code
+```
+
+---
+
+# Result-Based Error Handling
+
+The application provides a reusable `Result` abstraction:
+
+```text
+utils/
+└── result/
+    └── Result.java
+```
+
+This allows application operations to represent successful and failed outcomes without coupling business logic directly to HTTP responses.
+
+HTTP-specific error handling is centralized in:
+
+```text
+api/exception/
+└── GlobalExceptionHandler.java
+```
+
+This creates a clean separation between application failures and their HTTP representation.
+
+---
+
+# Validation
+
+Custom validation is provided under:
+
+```text
+utils/validation/
+```
+
+For example:
+
+```text
+isId/
+├── IsId.java
+└── IsIdValidator.java
+```
+
+Validation therefore remains reusable and independent from individual controllers.
+
+---
+
+# Testing
+
+Testing is treated as a first-class part of the project.
+
+The test structure mirrors the production architecture:
+
+```text
+src/test/java/com/read/api/
+├── api/
+├── application/
+├── cdc/
+├── repository/
+└── ...
+```
+
+---
+
+## API Tests
+
+Controller integration tests cover the main HTTP resources:
+
+```text
+api/controller/
+├── DeadLetterEventControllerTest.java
+├── UrlControllerTest.java
+├── UrlAccessRuleControllerTest.java
+├── UrlRedirectRuleControllerTest.java
+├── UrlTagControllerTest.java
+└── UserControllerTest.java
+```
+
+---
+
+## Application Tests
+
+Use cases are tested individually.
+
+For example:
+
+```text
+application/usecase/services/url/
+├── DeleteUrlByIdUseCaseImplTest.java
+├── FindAllUrlUseCaseImplTest.java
+├── FindUrlByIdUseCaseImplTest.java
+├── FindUrlByShortCodeUseCaseImplTest.java
+├── InsertUrlUseCaseImplTest.java
+└── SaveUrlUseCaseImplTest.java
+```
+
+The same testing strategy is applied to users, roles, tags, access rules, redirect rules and dead-letter events.
+
+---
+
+## CDC Tests
+
+CDC processing has dedicated tests:
+
+```text
+cdc/
+├── base/
+├── role/
+└── user/
+```
+
+and application-level CDC tests:
+
+```text
+application/usecase/cdc/
+```
+
+This allows event-processing behavior to be validated independently from the HTTP layer.
+
+---
+
+## Repository Tests
+
+Persistence implementations have their own tests:
+
+```text
+repository/
+├── DeadLetterEventRepositoryImplTest.java
+├── OutboxEventRepositoryImplTest.java
+├── RoleRepositoryImplTest.java
+├── UrlAccessRuleRepositoryImplTest.java
+├── UrlRedirectRuleRepositoryImplTest.java
+├── UrlRepositoryImplTest.java
+├── UrlTagRepositoryImplTest.java
+└── UserRepositoryImplTest.java
+```
+
+---
+
+# Testcontainers
+
+Integration tests use Testcontainers infrastructure:
+
+```text
+TestcontainersConfiguration.java
+```
+
+This allows tests to execute against real infrastructure components instead of relying exclusively on mocks.
+
+The test environment is configured through:
+
+```text
+src/test/resources/application-test.yaml
+```
+
+---
+
+# API Documentation
+
+The project provides OpenAPI/Swagger documentation.
+
+Swagger-specific configuration is located at:
+
+```text
+infrastructure/config/swagger/
+└── SwaggerConfig.java
+```
+
+Controller documentation is separated from controller implementation:
+
+```text
+UrlController.java
+UrlControllerDocs.java
+```
+
+This keeps API documentation concerns separate from endpoint implementation.
+
+---
+
+# Configuration
+
+Application configuration is centralized in:
+
+```text
+src/main/resources/application.yaml
+```
+
+Infrastructure-specific configuration is further organized through dedicated property classes:
+
+```text
+infrastructure/properties/
+├── CorsProperties.java
+├── JwtProperties.java
+└── KafkaProperties.java
+```
+
+This provides typed configuration instead of scattering configuration access throughout the application.
+
+---
+
+# Logging
+
+Application logging is configured through:
+
+```text
+src/main/resources/logback-spring.xml
+```
+
+Application logs can be stored under:
+
+```text
+logs/
+└── api-spring.log
+```
+
+---
+
+# Docker
+
+The project contains a dedicated Dockerfile:
+
+```text
+Dockerfile
+```
+
+The application can therefore be packaged as a container and executed independently from the local development environment.
 
 ---
 
 # Native Image Support
 
-The project contains configuration for native-image reflection:
+The project contains native-image configuration:
 
 ```text
 src/main/resources/META-INF/native-image/
 └── reflect-config.json
 ```
 
-This indicates that the application is prepared for environments where reflection metadata must be explicitly provided for native compilation.
-
-Native deployment can be particularly useful for:
-
-* Fast startup
-* Reduced memory consumption
-* Containerized workloads
-* Serverless environments
-* Highly scalable services
+This configuration is used to provide reflection metadata required by native-image environments.
 
 ---
 
-# API Documentation
+# Complete Package Structure
 
-The project contains dedicated Swagger/OpenAPI configuration and controller documentation classes.
-
-Examples include:
-
-```text
-SwaggerConfig
-UrlControllerDocs
-UserControllerDocs
-RoleControllerDocs
-UrlTagControllerDocs
-UrlAccessRuleControllerDocs
-UrlRedirectRuleControllerDocs
-DeadLetterEventControllerDocs
-```
-
-This keeps API documentation concerns separate from controller implementation.
-
-Swagger UI customization is also included under:
-
-```text
-src/main/resources/static/swagger-ui/
-```
-
----
-
-# Project Structure
-
-The project is organized into four main architectural areas:
+The high-level production structure can be summarized as:
 
 ```text
 com.read.api
 │
 ├── api
 │   ├── controller
+│   │   ├── deadLetterEvent
+│   │   ├── url
+│   │   ├── urlAccessRule
+│   │   ├── urlRedirectRule
+│   │   ├── urlTag
+│   │   └── user
+│   │
 │   ├── dto
+│   │   ├── base
+│   │   ├── deadLetterEvent
+│   │   ├── metric
+│   │   ├── outbox
+│   │   ├── role
+│   │   ├── tag
+│   │   ├── url
+│   │   ├── urlAccessRule
+│   │   ├── urlRedirectRule
+│   │   └── user
+│   │
 │   └── exception
 │
 ├── application
 │   └── usecase
 │       ├── base
 │       ├── impl
+│       │   ├── cdc
+│       │   ├── deadLetterEvent
+│       │   ├── role
+│       │   ├── url
+│       │   ├── urlAccessRule
+│       │   ├── urlRedirectRule
+│       │   ├── urlTag
+│       │   ├── urlTagLink
+│       │   ├── user
+│       │   └── userRole
+│       │
 │       ├── interfaces
 │       └── mapper
 │
@@ -735,8 +1217,17 @@ com.read.api
 ├── infrastructure
 │   ├── cache
 │   ├── config
+│   │   ├── jackson
+│   │   ├── kafka
+│   │   ├── security
+│   │   └── swagger
 │   ├── job
 │   ├── kafka
+│   │   ├── base
+│   │   ├── classes
+│   │   ├── consumer
+│   │   ├── dlq
+│   │   └── producer
 │   ├── mapper
 │   ├── metrics
 │   ├── mongo
@@ -746,336 +1237,55 @@ com.read.api
 │
 └── utils
     ├── annotation
+    │   ├── idempotent
+    │   └── ratelimit
     ├── metrics
     ├── page
     ├── result
     └── validation
 ```
 
-### API Layer
-
-Responsible for HTTP concerns:
-
-* REST controllers
-* DTOs
-* Request mapping
-* Response mapping
-* API documentation
-* Exception handling
-
-### Application Layer
-
-Responsible for use cases and application orchestration.
-
-```text
-application/usecase
-```
-
-contains explicit interfaces and implementations for operations such as:
-
-* Finding entities
-* Inserting entities
-* Updating entities
-* Deleting entities
-* Processing CDC events
-* Retrying failed events
-
-### Domain Layer
-
-Contains the core concepts used by the application:
-
-* Domain models
-* CDC events
-* Repository abstractions
-* Enums
-* Domain exceptions
-* Utility components
-
-### Infrastructure Layer
-
-Contains external technology integrations:
-
-* MongoDB
-* Redis
-* Kafka
-* Spring Security
-* Scheduling
-* Persistence implementations
-* Metrics
-* Configuration
-
-This separation prevents infrastructure concerns from leaking into the core application logic.
-
----
-
-# Technology Stack
-
-| Technology        | Purpose                                 |
-| ----------------- | --------------------------------------- |
-| Java              | Main programming language               |
-| Spring Boot       | Application framework                   |
-| Spring Security   | Authentication and authorization        |
-| JWT               | Stateless authentication                |
-| Apache Kafka      | Event streaming and CDC event transport |
-| TiCDC             | Change Data Capture                     |
-| MongoDB           | Query-side persistence                  |
-| Redis             | Caching                                 |
-| Maven             | Dependency and build management         |
-| Testcontainers    | Integration testing                     |
-| Swagger / OpenAPI | API documentation                       |
-| Docker            | Containerization                        |
-
----
-
-# Testing
-
-Testing is an important part of the project.
-
-The test suite is organized according to the application architecture.
-
-```text
-src/test/java/com/read/api
-
-├── api
-│   └── controller
-│
-├── application
-│   └── usecase
-│       ├── cdc
-│       └── services
-│
-├── cdc
-│
-├── repository
-│
-└── TestcontainersConfiguration
-```
-
-The project contains tests for:
-
-* REST controllers
-* Application use cases
-* CDC processing
-* Repository implementations
-* URL operations
-* User operations
-* Role operations
-* URL tags
-* URL access rules
-* URL redirect rules
-* Dead-letter event processing
-
-Integration testing is supported through **Testcontainers**.
-
----
-
-# Test Architecture
-
-Reusable test infrastructure is provided through classes such as:
-
-```text
-BaseIntegrationTest
-BaseUseCaseTest
-BaseCdcTest
-BaseRepositoryTest
-TestcontainersConfiguration
-```
-
-This reduces duplicated setup code and allows different layers of the application to be tested consistently.
-
----
-
-# Resilience and Failure Handling
-
-The Read API was designed with asynchronous failure scenarios in mind.
-
-The architecture provides mechanisms for:
-
-* Kafka consumer failures
-* Dead-letter publishing
-* Dead-letter persistence
-* Automated retries
-* MongoDB transient error translation
-* Idempotent processing
-* Centralized exception handling
-* Rate limiting
-
-This is especially important in an event-driven architecture where consumers must be able to recover from temporary failures without losing events.
-
----
-
-# Read Model Consistency
-
-The Read API intentionally uses asynchronous synchronization.
-
-The flow is:
-
-```text
-Write
-  │
-  ▼
-Write Database
-  │
-  ▼
-CDC
-  │
-  ▼
-Kafka
-  │
-  ▼
-Read API
-  │
-  ▼
-MongoDB
-```
-
-Therefore, the read model may temporarily lag behind the write model.
-
-This is an intentional trade-off of the CQRS architecture.
-
-The benefit is that the query side can be optimized independently from the transactional side.
-
----
-
-# Scalability
-
-Because the Read API is separated from the command side, the query infrastructure can be scaled independently.
-
-For example:
-
-```text
-                 Kafka
-                   │
-        ┌──────────┼──────────┐
-        ▼          ▼          ▼
-    Read API   Read API   Read API
-     Instance   Instance   Instance
-        │          │          │
-        └──────────┼──────────┘
-                   ▼
-                MongoDB
-                   │
-                   ▼
-                 Redis
-```
-
-This architecture is particularly suitable for workloads where read traffic significantly exceeds write traffic.
-
-Kafka consumer groups can also distribute event processing across multiple application instances.
-
 ---
 
 # Design Principles
 
-The project follows several software engineering principles:
+The project is structured around several software engineering principles:
 
 ### Separation of Concerns
 
-API, application, domain, and infrastructure responsibilities are kept separate.
+HTTP, application logic, domain logic and infrastructure are isolated.
 
 ### Dependency Inversion
 
-The application depends on abstractions such as repository and service interfaces rather than concrete infrastructure implementations.
+The application depends on abstractions such as repositories and services rather than concrete infrastructure implementations.
+
+### Single Responsibility
+
+Controllers, use cases, repositories, consumers and infrastructure components have clearly defined responsibilities.
 
 ### Explicit Use Cases
 
-Business operations are represented through dedicated use-case interfaces and implementations.
+Business operations are represented by dedicated use-case interfaces and implementations.
 
-### Asynchronous Communication
+### Event-Driven Architecture
 
-CDC events are propagated through Kafka instead of synchronously coupling the Write API and Read API.
+Read models are updated asynchronously through CDC events and Kafka.
 
-### Failure Isolation
+### Resilience
 
-Failed event processing can be isolated through DLQ mechanisms without stopping the entire event-processing pipeline.
-
-### Read Optimization
-
-MongoDB and Redis provide persistence and caching mechanisms optimized for query workloads.
+Failed events can be routed to a dead-letter flow and retried through dedicated mechanisms.
 
 ### Testability
 
-The architecture provides clear boundaries that allow individual components and integrations to be tested independently.
+The architecture allows application, repository, CDC and API components to be tested independently.
 
 ---
 
-# CQRS + CDC vs Traditional CRUD
-
-A traditional architecture might look like:
-
-```text
-Client
-  │
-  ▼
-API
-  │
-  ▼
-Single Database
-```
-
-The architecture used by this project is closer to:
-
-```text
-                    ┌──────────────┐
-                    │   Write API  │
-                    └──────┬───────┘
-                           │
-                           ▼
-                     Write Database
-                           │
-                           ▼
-                          CDC
-                           │
-                           ▼
-                         Kafka
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │   Read API   │
-                    └──────┬───────┘
-                           │
-                           ▼
-                      Read Model
-                           │
-                    ┌──────┴──────┐
-                    ▼             ▼
-                 MongoDB        Redis
-```
-
-This introduces additional infrastructure and eventual consistency, but provides greater flexibility for read-heavy and distributed workloads.
-
----
-
-# Why This Architecture?
-
-The main goal is to explore how a production-oriented distributed application can separate transactional writes from optimized queries.
-
-The project focuses on several real-world backend engineering challenges:
-
-* Distributed data synchronization
-* Change Data Capture
-* Event-driven architectures
-* CQRS
-* Asynchronous processing
-* Read model construction
-* Failure recovery
-* Dead-letter queues
-* Retry mechanisms
-* Caching
-* Horizontal scalability
-* API security
-* Observability
-* Integration testing
-
-Rather than treating the URL shortener as a simple CRUD application, the project uses it as a practical environment for exploring distributed-system design.
-
----
-
-# Running the Application
+# Running the Project
 
 ## Requirements
 
-Make sure the following components are available:
+Recommended environment:
 
 * Java
 * Maven
@@ -1083,32 +1293,13 @@ Make sure the following components are available:
 * MongoDB
 * Redis
 * Apache Kafka
-
-The CDC infrastructure also requires a compatible TiCDC setup.
-
----
-
-## Configuration
-
-Application configuration is located at:
-
-```text
-src/main/resources/application.yaml
-```
-
-Test configuration is located at:
-
-```text
-src/test/resources/application-test.yaml
-```
-
-Environment-specific values should be configured through environment variables or external configuration rather than hard-coded credentials.
+* TiCDC / CDC event source
 
 ---
 
 ## Build
 
-Using Maven Wrapper:
+Using the Maven wrapper:
 
 ```bash
 ./mvnw clean package
@@ -1124,115 +1315,128 @@ mvnw.cmd clean package
 
 ## Run
 
-Using the Maven Wrapper:
-
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Or run the generated JAR:
+---
+
+## Run Tests
 
 ```bash
-java -jar target/*.jar
+./mvnw test
 ```
+
+Integration tests require the infrastructure supported by the Testcontainers configuration.
 
 ---
 
-# Docker
+# Application Responsibilities
 
-The project includes a `Dockerfile` for containerized deployments.
+The Read API is responsible for:
 
-Build the image:
-
-```bash
-docker build -t url-shortener-read-api .
-```
-
-Run the container:
-
-```bash
-docker run --rm url-shortener-read-api
-```
-
-External dependencies such as Kafka, MongoDB, and Redis should be configured according to the deployment environment.
-
----
-
-# API Documentation
-
-After starting the application, Swagger UI can be accessed through the configured application endpoint.
-
-The API documentation is generated using OpenAPI and includes dedicated documentation classes for the application's controllers.
+* serving URL read operations
+* maintaining the read model
+* consuming CDC events
+* synchronizing MongoDB with upstream changes
+* providing Redis-based caching
+* processing asynchronous events
+* handling failed events
+* retrying dead-letter events
+* exposing URL metrics
+* providing authentication and authorization
+* enforcing rate limits
+* supporting idempotent operations
+* exposing paginated and filtered APIs
+* providing API documentation
+* exposing observability hooks
 
 ---
 
-# Repository Organization
+# Why a Dedicated Read API?
 
-This repository represents the **Read API / Query Side** of the URL Shortener system.
+Separating the read model from the transactional write model provides several architectural advantages.
 
-The complete system is composed of independent responsibilities:
+### Independent Scaling
 
-```text
-URL Shortener
-│
-├── Write API
-│   └── Command Side
-│
-├── CDC Pipeline
-│   └── Database → TiCDC → Kafka
-│
-└── Read API
-    └── Query Side
-        ├── Kafka Consumers
-        ├── MongoDB Read Models
-        └── Redis Cache
-```
+Read workloads can be scaled independently from write workloads.
 
-The separation makes it possible to evolve and scale the command and query sides independently.
+### Read Optimization
+
+MongoDB can be modeled specifically around query patterns rather than transactional requirements.
+
+### Reduced Coupling
+
+The Read API does not need to access the write database directly for normal queries.
+
+### Asynchronous Propagation
+
+Changes are propagated through CDC and Kafka rather than synchronous service-to-service communication.
+
+### Specialized Caching
+
+Redis can be optimized specifically for frequently accessed data.
+
+### Fault Isolation
+
+Failures in read-side processing do not necessarily affect the transactional write system.
 
 ---
 
-# Architectural Patterns
+# Architectural Trade-offs
 
-The project applies or explores the following architectural and distributed-system patterns:
+CQRS and event-driven synchronization introduce additional complexity.
+
+The system must handle:
+
+* eventual consistency
+* duplicate events
+* failed events
+* retry processing
+* ordering considerations
+* consumer failures
+* read-model reconstruction
+* cache invalidation
+* operational complexity
+
+The project addresses these concerns through:
+
+* idempotency
+* dead-letter handling
+* retry mechanisms
+* CDC-specific consumers
+* explicit application use cases
+* repository abstractions
+* integration testing
+* observability
+
+---
+
+# Project Goal
+
+The goal of this project is not only to implement a URL shortener.
+
+It serves as a practical exploration of **distributed backend architecture**, particularly:
 
 * CQRS
-* Event-driven architecture
+* Event-Driven Architecture
 * Change Data Capture
-* Read Models
-* Asynchronous messaging
-* Dead Letter Queue
-* Retry processing
-* Repository Pattern
-* Dependency Inversion
-* Layered Architecture
-* Clean Architecture principles
-* Hexagonal Architecture principles
-* AOP for cross-cutting concerns
-* Distributed ID generation
-* Caching
+* Kafka-based asynchronous processing
+* Read-model design
+* MongoDB
+* Redis caching
+* distributed ID generation
+* resilience patterns
+* idempotency
+* rate limiting
+* observability
+* clean architecture
+* integration testing
 
----
-
-# Project Goals
-
-The project was created to explore the engineering challenges involved in building a distributed backend beyond a conventional CRUD architecture.
-
-The main goals are:
-
-1. Separate transactional writes from read-optimized workloads.
-2. Build read models from CDC events.
-3. Process asynchronous events reliably.
-4. Handle event failures without data loss.
-5. Support independent horizontal scaling.
-6. Experiment with MongoDB as a query-oriented persistence layer.
-7. Reduce read latency through Redis caching.
-8. Apply production-oriented security and resilience practices.
-9. Maintain a strong automated testing strategy.
-10. Keep the architecture modular and maintainable.
+The project intentionally favors architectural separation and infrastructure-oriented design over a simple CRUD implementation.
 
 ---
 
 # License
 
-This project is intended primarily as a software engineering and architecture study project.
+This project is intended primarily as a technical and educational project focused on backend engineering, distributed systems and software architecture.
