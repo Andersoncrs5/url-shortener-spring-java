@@ -1,0 +1,85 @@
+pipeline {
+    agent {
+        kubernetes {
+            yamlFile 'k8s/jenkins/setup.yaml'
+            defaultContainer 'maven'
+        }
+    }
+
+    environment {
+        REGISTRY    = "andersoncrms"
+        IMAGE_NAME  = "write-api-url-shortner"
+        IMAGE_TAG   = "${env.BUILD_NUMBER}"
+        DIR_APP     = "demo"
+    }
+
+    stages {
+        stage('Check Branch') {
+            steps {
+                echo "Branch atual: ${env.GIT_BRANCH}"
+                echo "Diretório de trabalho da App: ${DIR_APP}"
+            }
+        }
+
+        stage('1. Build & Test') {           
+            steps {
+                container('maven') {
+                    echo 'Compilando a aplicação Java...'
+                    dir("${DIR_APP}") {
+                        sh 'mvn clean package -DskipTests=false'
+                    }
+                }
+            }
+            post {
+                success {
+                    junit "**/target/surefire-reports/*.xml"
+                }
+            }
+        }
+
+        stage('2. Trivy Filesystem Scan') {
+            steps {
+                container('trivy') {
+                    echo 'Escaneando o código-fonte em busca de vulnerabilidades...'
+                    sh "trivy fs --exit-code 0 --severity HIGH,CRITICAL ${DIR_APP}"
+                }
+            }
+        }
+
+        stage('3. Kaniko Build & Push') {
+             when {
+                expression { env.GIT_BRANCH == 'origin/master' }
+            }
+            steps {
+                container('kaniko') {
+                    echo 'Construindo e enviando a imagem com Kaniko...'
+                    sh """
+                    /kaniko/executor \
+                        --context=dir://${DIR_APP} \
+                        --dockerfile=${DIR_APP}/Dockerfile \
+                        --destination=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                        --destination=${REGISTRY}/${IMAGE_NAME}:latest
+                    """
+                }
+            }
+        }
+
+        stage('4. Trivy Image Scan') {
+            when {
+                expression { env.GIT_BRANCH == 'origin/master' }
+            }
+            steps {
+                container('trivy') {
+                    echo "Escaneando a imagem ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}..."
+                    sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
